@@ -1,5 +1,5 @@
-export interface CreateProductDto{
-    readonly firstName: string;
+export interface UpdateClientDto {
+    readonly firstName?: string;
     readonly lastName: string;
     readonly phone: string;
     readonly email: string;

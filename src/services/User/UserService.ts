@@ -1,13 +1,13 @@
-import {ProductDto} from "../Dto/ProductDto";
 import {Service} from "../Service";
-import {CreateProductDto} from "./dto/CreateProductDto";
-import {PARAM_PRODUCT} from "@/utils/config/config";
+import {CreateUserDto} from "./dto/CreateUserDto";
+import {PARAM_USER} from "@/utils/config/config";
 import {AxiosResponse} from "axios";
-import {UpdateProductDto} from "@/services/Product/dto/UpdateProductDto";
+import {UserDto} from "@/services/Dto/UserDto";
+import {UpdateUserDto} from "@/services/User/dto/UpdateUserDto";
 
 
-export class ProductService extends Service {
-    protected param: string = PARAM_PRODUCT;
+export class UserService extends Service {
+    protected param: string = PARAM_USER;
 
     constructor(otherParam?: string) {
         super();
@@ -16,17 +16,17 @@ export class ProductService extends Service {
         }
     }
 
-    async getAll(): Promise<ProductDto[]> {
+    async getAll(): Promise<UserDto[]> {
         const response: AxiosResponse = await this.apiFetch.get(this.param);
         return response.data;
     }
 
-    async getById(id: number): Promise<ProductDto> {
+    async getById(id: number): Promise<UserDto> {
         const response: AxiosResponse = await this.apiFetch.get(`${this.param}/${id}`);
         return response.data;
     }
 
-    async create(product: CreateProductDto): Promise<ProductDto> {
+    async create(product: CreateUserDto): Promise<UserDto> {
         const response: AxiosResponse = await this.apiFetch.post(this.param, product);
         return response.data;
     }
@@ -34,12 +34,12 @@ export class ProductService extends Service {
     async deleteById(id: number): Promise<boolean> {
         const response: AxiosResponse = await this.apiFetch.delete(`${this.param}/${id}`);
         if (response.status !== 200) {
-            throw new Error('Error deleting product');
+            throw new Error('Error deleting user');
         }
         return true;
     }
 
-    async updateById(id: number, product: UpdateProductDto): Promise<ProductDto> {
+    async updateById(id: number, product: UpdateUserDto): Promise<UserDto> {
         const response: AxiosResponse = await this.apiFetch.put(`${this.param}/${id}`, product);
         return response.data;
     }

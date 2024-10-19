@@ -1,4 +1,5 @@
-export interface CreateProductDto{
+export interface ClientDto{
+    readonly id: number;
     readonly firstName: string;
     readonly lastName: string;
     readonly phone: string;
