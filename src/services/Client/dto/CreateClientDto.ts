@@ -1,9 +1,9 @@
 export interface CreateClientDto {
-    readonly name: string;
-    readonly code: string;
-    readonly price: number;
-    readonly categoryId: number;
-    readonly sizeId: number;
-    readonly stockInventory: number;
-    readonly stockStore: number;
+    readonly firstName: string;
+    readonly lastName: string;
+    readonly phone: string;
+    readonly email: string;
+    readonly address: string;
+    readonly numberDocument: string;
+    readonly typeDocument: string;
 }

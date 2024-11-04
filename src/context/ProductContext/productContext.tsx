@@ -1,3 +1,4 @@
+'use client'
 import React from 'react';
 import {ProductContextType} from "@/@types/product";
 import {ProductDto} from "@/services/Dto/ProductDto";
@@ -103,4 +104,3 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({children}) =>
 };
 
 export default ProductProvider;
-

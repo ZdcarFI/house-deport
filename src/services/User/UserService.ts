@@ -40,7 +40,7 @@ export class UserService extends Service {
     }
 
     async updateById(id: number, product: UpdateUserDto): Promise<UserDto> {
-        const response: AxiosResponse = await this.apiFetch.put(`${this.param}/${id}`, product);
+        const response: AxiosResponse = await this.apiFetch.patch(`${this.param}/${id}`, product);
         return response.data;
     }
 }

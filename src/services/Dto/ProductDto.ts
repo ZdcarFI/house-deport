@@ -1,14 +1,14 @@
-interface CategoryBasicDto{
+export interface CategoryBasicDto{
     id: number;
     name: string;
 }
 
-interface SizeBasicDto{
+export interface SizeBasicDto{
     id: number;
     name: string;
 }
 
-interface ProductWarehouseBasicDto{
+export interface ProductWarehouseBasicDto{
     id: number;
     row: number;
     column: number;
