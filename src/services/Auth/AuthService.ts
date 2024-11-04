@@ -7,15 +7,18 @@ export class AuthService extends Service {
         super();
     }
 
-    async login(email: string, password: string): Promise<UserDto> {
-        const response: AxiosResponse = await this.apiFetch.post('/login', {email, password});
-        return response.data;
-    }
+
 
     async loginUsername(username: string, password: string): Promise<UserDto> {
-        const response: AxiosResponse = await this.apiFetch.post('/login-username', {username, password});
-        return response.data;
+        const response: AxiosResponse = await this.apiFetch.post('/auth/login', { username, password });
+        const user = response.data;
+        
+        // Guardar el usuario en localStorage (incluyendo el rol)
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        return user;
     }
+    
 
     async logout(): Promise<boolean> {
         await this.apiFetch.delete('/logout');

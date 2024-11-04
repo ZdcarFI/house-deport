@@ -2,8 +2,8 @@ import {Service} from "../Service";
 import {CreateSizeDto} from "./dto/CreateSizeDto";
 import {PARAM_SIZE} from "@/utils/config/config";
 import {AxiosResponse} from "axios";
-import {UpdateOrderDto} from "@/services/Order/dto/UpdateOrderDto";
 import {SizeDto} from "@/services/Dto/SizeDto";
+import { UpdateSizeDto } from "./dto/UpdateSizeDto";
 
 
 export class SizeService extends Service {
@@ -18,6 +18,8 @@ export class SizeService extends Service {
 
     async getAll(): Promise<SizeDto[]> {
         const response: AxiosResponse = await this.apiFetch.get(this.param);
+        console.log(response.data);
+        
         return response.data;
     }
 
@@ -39,7 +41,7 @@ export class SizeService extends Service {
         return true;
     }
 
-    async updateById(id: number, product: UpdateOrderDto): Promise<SizeDto> {
+    async updateById(id: number, product: UpdateSizeDto): Promise<SizeDto> {
         const response: AxiosResponse = await this.apiFetch.put(`${this.param}/${id}`, product);
         return response.data;
     }

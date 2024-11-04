@@ -4,5 +4,5 @@ export const PARAM_PRODUCT= "/products";
 export const PARAM_CATEGORY= "/categories";
 export const PARAM_SIZE= "/sizes";
 export const PARAM_WAREHOUSE= "/warehouses";
-export const PARAM_USER= "/users";
+export const PARAM_USER= "/user";
 export const PARAM_ORDER= "/orders";
