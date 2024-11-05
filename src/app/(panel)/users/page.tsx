@@ -1,16 +1,11 @@
 import Users from '@/components/aplication/users/Index';
 import UserProvider from '@/context/UserContext/userContext';
-import React, { ReactNode } from 'react';
+import React from 'react';
 
-interface PageProps {
-  children: ReactNode;
-}
-
-export default function Page({ children }: PageProps) {
-  return (
-    <UserProvider>
-      <Users />
-      {children}
-    </UserProvider>
-  );
+export default function Page() {
+    return (
+        <UserProvider>
+            <Users/>
+        </UserProvider>
+    );
 }

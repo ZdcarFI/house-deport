@@ -1,16 +1,11 @@
 import Products from '@/components/aplication/products/Index';
 import ProductProvider from '@/context/ProductContext/productContext';
-import React, { ReactNode } from 'react';
+import React from 'react';
 
-interface PageProps {
-  children: ReactNode;
-}
-
-export default function Page({ children }: PageProps) {
+export default function Page() {
   return (
     <ProductProvider>
       <Products />
-      {children}
     </ProductProvider>
   );
 }

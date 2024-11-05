@@ -1,16 +1,12 @@
 import Clients from '@/components/aplication/clients/Index';
 import ClientProvider from '@/context/ClientContext/clientContext';
-import React, { ReactNode } from 'react';
+import React from 'react';
 
-interface PageProps {
-  children: ReactNode;
-}
 
-export default function Page({ children }: PageProps) {
-  return (
-    <ClientProvider>
-      <Clients />
-      {children}
-    </ClientProvider>
-  );
+export default function Page() {
+    return (
+        <ClientProvider>
+            <Clients/>
+        </ClientProvider>
+    );
 }

@@ -1,10 +1,12 @@
-import { Layout } from "@/components/ui/layouts/Layout";
+import {Layout} from "@/components/ui/layouts/Layout";
 import "@/styles/globals.css";
+import CategoryProvider from "@/context/CategoryContext/categoryContext";
 
 export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
+                                       children,
+                                   }: {
+    children: React.ReactNode;
 }) {
-  return <Layout>{children}</Layout>;
+    return <Layout>
+        <CategoryProvider>{children}</CategoryProvider> </Layout>;
 }

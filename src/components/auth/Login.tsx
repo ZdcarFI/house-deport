@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import { AuthService } from '@/services/Auth/AuthService';
-import { Button } from '@nextui-org/button';
-import { Input } from '@nextui-org/input';
-import { Card, CardBody, CardHeader } from '@nextui-org/card';
-import { EyeFilledIcon } from '@/components/icons/EyeFilledIcon';
-import { EyeSlashFilledIcon } from '@/components/icons/EyeSlashFilledIcon';
-import { MailIcon, LockIcon } from 'lucide-react';
+import {useState, FormEvent} from 'react';
+import {useRouter} from 'next/navigation';
+import {AuthService} from '@/services/Auth/AuthService';
+import {Button} from '@nextui-org/button';
+import {Input} from '@nextui-org/input';
+import {Card, CardBody, CardHeader} from '@nextui-org/card';
+import {EyeFilledIcon} from '@/components/icons/EyeFilledIcon';
+import {EyeSlashFilledIcon} from '@/components/icons/EyeSlashFilledIcon';
+import {MailIcon, LockIcon} from 'lucide-react';
 
 export default function LoginForm() {
     const [email, setEmail] = useState<string>('');
@@ -32,8 +32,8 @@ export default function LoginForm() {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
-        
-        if (!validateForm()) return; 
+
+        if (!validateForm()) return;
         try {
             const user = await authService.loginUsername(email, password);
             localStorage.setItem('user', JSON.stringify(user));
@@ -59,7 +59,7 @@ export default function LoginForm() {
                         type="text"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        startContent={<MailIcon className="text-default-400" size={16} />}
+                        startContent={<MailIcon className="text-default-400" size={16}/>}
                     />
                     <Input
                         isRequired
@@ -68,13 +68,13 @@ export default function LoginForm() {
                         type={isVisible ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        startContent={<LockIcon className="text-default-400" size={16} />}
+                        startContent={<LockIcon className="text-default-400" size={16}/>}
                         endContent={
                             <button className="focus:outline-none" type="button" onClick={toggleVisibility}>
                                 {isVisible ? (
-                                    <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                                    <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none"/>
                                 ) : (
-                                    <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                                    <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none"/>
                                 )}
                             </button>
                         }

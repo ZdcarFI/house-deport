@@ -1,16 +1,11 @@
 import Sizes from '@/components/aplication/sizes/Index';
 import SizeProvider from '@/context/SizeContext/sizeContext';
-import React, { ReactNode } from 'react';
+import React from 'react';
 
-interface PageProps {
-  children: ReactNode;
-}
-
-export default function Page({ children }: PageProps) {
-  return (
-    <SizeProvider>
-      <Sizes />
-      {children}
-    </SizeProvider>
-  );
+export default function Page() {
+    return (
+        <SizeProvider>
+            <Sizes/>
+        </SizeProvider>
+    );
 }
