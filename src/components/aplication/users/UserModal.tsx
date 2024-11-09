@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal'
 import { Button } from '@nextui-org/button'
 import { Input } from '@nextui-org/input'
 import { UserDto } from '@/services/Dto/UserDto'
 import { CreateUserDto } from '@/services/User/dto/CreateUserDto'
 import { UpdateUserDto } from '@/services/User/dto/UpdateUserDto'
+import {Select, SelectItem} from "@nextui-org/select";
 
 interface UserModalProps {
   isOpen: boolean
@@ -48,6 +49,10 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
+  const handleSelectChange = (name: string) => (value: string) => {
+    setFormData({...formData, [name]: value});
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (user) {
@@ -55,6 +60,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
         firstName: formData.firstName || '',
         lastName: formData.lastName || '',
         password: formData.password || '',
+        gender: formData.gender || '',
       }
       onSubmit(updateData)
     } else {
@@ -64,6 +70,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
         username: formData.username || '',
         email: formData.email || '',
         password: formData.password || '',
+        gender: formData.gender || ''
       }
       onSubmit(createData)
     }
@@ -74,11 +81,11 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
-            {isViewMode ? 'View User' : user ? 'Edit User' : 'Add User'}
+            {isViewMode ? 'View User' : user ? 'Editar Usuario' : 'Agregar Usuario'}
           </ModalHeader>
           <ModalBody>
             <Input
-              label="First Name"
+              label="Nombres"
               name="firstName"
               value={formData.firstName}
               onChange={handleInputChange}
@@ -86,7 +93,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
               isReadOnly={isViewMode}
             />
             <Input
-              label="Last Name"
+              label="Apellidos"
               name="lastName"
               value={formData.lastName}
               onChange={handleInputChange}
@@ -103,9 +110,26 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
                 isReadOnly={isViewMode}
               />
             )}
+            {/*gender*/}
+            {
+              <Select
+                  label="Género"
+                  name="gender"
+                  placeholder="Seleccione un género"
+                  onChange={(e) => handleSelectChange('gender')(e.target.value)}
+              >
+                <SelectItem key="MALE" value="MALE">
+                  Masculino
+                </SelectItem>
+                <SelectItem key="FEMALE" value="FEMALE">
+                  Femenino
+                </SelectItem>
+              </Select>
+            }
+
             {(!user || isViewMode) && (
               <Input
-                label="Email"
+                label="Correo"
                 name="email"
                 type="email"
                 value={formData.email}
@@ -116,7 +140,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
             )}
             {!isViewMode && (
               <Input
-                label="Password"
+                label="Contraseña"
                 name="password"
                 type="password"
                 value={formData.password}
