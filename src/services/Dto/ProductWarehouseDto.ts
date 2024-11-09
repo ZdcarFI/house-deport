@@ -1,10 +1,11 @@
 import { ProductDto, ProductWarehouseBasicDto } from "./ProductDto";
+import { WarehouseDto } from "./WarehouseDto";
 
 export interface ProductWarehouseDto {
 
     readonly id: number;
 
-    readonly warehouse: ProductWarehouseBasicDto;
+    readonly warehouse: WarehouseDto;
 
     readonly product: ProductDto;
 

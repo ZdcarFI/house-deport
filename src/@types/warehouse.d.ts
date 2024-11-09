@@ -1,9 +1,10 @@
+import { WarehouseDto } from "@/services/Dto/WarehouseDto";
 import { CreateWarehouseDto } from "@/services/Warehouse/dto/CreateWarehouseDto";
 import { UpdateWarehouseDto } from "@/services/Warehouse/dto/UpdateWarehouseDto";
-import { WarehouseDto } from "@/services/Dto/ClienDto";
+
 
 export type WarehouseContextType = {
-    warehouses: Product[];
+    warehouses: WarehouseDto[];
     createWarehouse: (Warehouse: CreateWarehouseDto) => Promise<void>;
     updateWarehouse: (id:number, Warehouse: UpdateWarehouseDto) => Promise<void>;
     deleteWarehouse: (id: number) => Promise<void>;

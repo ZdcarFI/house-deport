@@ -3,7 +3,7 @@ import {UpdateProductDto} from "@/services/Product/dto/UpdateProductDto";
 import {ProductDto} from "@/services/Dto/ProductDto";
 
 export type ProductContextType = {
-    products: Product[];
+    products: ProductDto[];
     createProduct: (product: CreateProductDto) => Promise<void>;
     updateProduct: (id:number, product: UpdateProductDto) => Promise<void>;
     deleteProduct: (id: number) => Promise<void>;
