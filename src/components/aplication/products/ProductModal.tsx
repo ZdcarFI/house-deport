@@ -40,7 +40,7 @@ export default function ProductModal({isOpen, onClose, onSubmit, product, isView
                 code: product.code,
                 price: product.price,
                 categoryId: product.category ? product.category.id : 0,
-                sizeId: product.sizes ? product.sizes.id : 0,
+                sizeId: product.size ? product.size.id : 0,
                 stockInventory: product.stockInventory,
                 stockStore: product.stockStore,
             });
@@ -80,46 +80,49 @@ export default function ProductModal({isOpen, onClose, onSubmit, product, isView
             <ModalContent>
                 <form onSubmit={handleSubmit}>
                     <ModalHeader className="flex flex-col gap-1">
-                        {isViewMode ? 'View Product' : product ? 'Edit Product' : 'Add Product'}
+                        {isViewMode ? 'Ver producto' : product ? 'Editar Producto' : 'Agregar Producto'}
                     </ModalHeader>
                     <ModalBody>
                         <Input
-                            label="Name"
+                            label="Nombre del producto"
                             name="name"
                             value={formData.name}
                             onChange={handleInputChange}
                             required
-                            isReadOnly={isViewMode}
+                            isDisabled={isViewMode}
                         />
                         <Input
-                            label="Code"
+                            label="Código del producto"
                             name="code"
                             value={formData.code}
                             onChange={handleInputChange}
                             required
-                            isReadOnly={isViewMode}
+                            isDisabled={isViewMode}
                         />
                         <Input
-                            label="Price"
+                            label="Precio del producto"
                             name="price"
                             type="number"
                             value={formData.price.toString()}
                             onChange={handleInputChange}
                             required
-                            isReadOnly={isViewMode}
+                            isDisabled={isViewMode}
+                          
                         />
                         <Select
-                            label="Categoria"
+                            label="Categoría del producto"
                             name="categoryId"
                             placeholder="Seleccione una categoría"
                             onChange={(e) => handleSelectChange('categoryId')(e.target.value)}
                             selectedKeys={formData.categoryId ? [formData.categoryId.toString()] : []}
+                            isDisabled={isViewMode}
                         >
                             {categories.map((category) => (
                                 <SelectItem key={category.id}>
                                     {category.name}
                                 </SelectItem>
                             ))}
+                            
                         </Select>
                         <Select
                             label="Tamaño"
@@ -136,22 +139,22 @@ export default function ProductModal({isOpen, onClose, onSubmit, product, isView
                             )) || []}
                         </Select>
                         <Input
-                            label="Stock Inventory"
+                            label="Stock en el inventario"
                             name="stockInventory"
                             type="number"
                             value={formData.stockInventory.toString()}
                             onChange={handleInputChange}
                             required
-                            isReadOnly={isViewMode}
+                            isDisabled={isViewMode}
                         />
                         <Input
-                            label="Stock Store"
+                            label="Stock en los almacenes"
                             name="stockStore"
                             type="number"
                             value={formData.stockStore.toString()}
                             onChange={handleInputChange}
                             required
-                            isReadOnly={isViewMode}
+                            isDisabled={isViewMode}
                         />
                     </ModalBody>
                     <ModalFooter>

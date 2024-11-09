@@ -121,9 +121,9 @@ export default function Products() {
           />
         </div>
         <div className="flex flex-row gap-3.5 flex-wrap">
-          <Button color="primary" onPress={handleAdd}>Add Product</Button>
+          <Button color="primary" onPress={handleAdd}>Agregar Producto</Button>
           <Button color="primary" startContent={<ExportIcon />}>
-            Export to CSV
+            Exportar en CSV
           </Button>
         </div>
         <div className="w-full flex flex-col gap-4">

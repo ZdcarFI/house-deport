@@ -16,8 +16,8 @@ interface ProductTableProps {
 export default function ProductTable({ products, onView, onEdit, onDelete }: ProductTableProps) {
 
   const renderCell = (product: ProductDto, columnKey: React.Key): React.ReactNode => {
-    console.log("Column Key:", columnKey); // Shows the current column key
-    console.log("Product Data:", product); // Shows the current product data
+    console.log("Column Key:", columnKey);
+    console.log("Product Data:", product); 
 
     switch (columnKey) {
       case 'actions':
@@ -43,7 +43,7 @@ export default function ProductTable({ products, onView, onEdit, onDelete }: Pro
       case 'category':
         return product.category?.name ?? "N/A";
       case 'size':
-        return product.sizes?.name ?? "N/A";
+        return product.size?.name ?? "N/A";
       case 'warehouse':
         return product.productWarehouse?.name ?? "N/A";
       case 'stockInventory':
@@ -58,15 +58,14 @@ export default function ProductTable({ products, onView, onEdit, onDelete }: Pro
   return (
     <Table aria-label="Products table">
       <TableHeader>
-        <TableColumn key="name">Name</TableColumn>
-        <TableColumn key="code">Code</TableColumn>
-        <TableColumn key="price">Price</TableColumn>
-        <TableColumn key="category">Category</TableColumn>
-        <TableColumn key="size">Size</TableColumn>
-        <TableColumn key="warehouse">Warehouse</TableColumn>
-        <TableColumn key="stockInventory">Stock Inventory</TableColumn>
-        <TableColumn key="stockStore">Stock Store</TableColumn>
-        <TableColumn key="actions">Actions</TableColumn>
+        <TableColumn key="name">Nombre</TableColumn>
+        <TableColumn key="code">Código</TableColumn>
+        <TableColumn key="price">Precio</TableColumn>
+        <TableColumn key="category">Categoria</TableColumn>
+        <TableColumn key="size">Talla</TableColumn>
+        <TableColumn key="stockInventory">Stock en el inventario</TableColumn>
+        <TableColumn key="stockStore">Stock en los almacenes</TableColumn>
+        <TableColumn key="actions">Acciones</TableColumn>
       </TableHeader>
       <TableBody>
         {products.map((product) => (

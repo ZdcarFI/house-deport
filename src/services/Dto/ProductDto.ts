@@ -23,8 +23,7 @@ export interface ProductDto {
     code: string;
     price: number;
     category: CategoryBasicDto;
-    sizes: SizeBasicDto;
-    productWarehouse: ProductWarehouseBasicDto;
+    size: SizeBasicDto;
     stockInventory: number;
     stockStore: number;
 }

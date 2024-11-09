@@ -7,7 +7,7 @@ import { EyeIcon } from '../../icons/table/eye-icon'
 import { CategoryDto } from '@/services/Dto/CategoryDto'
 
 interface SizeTableProps {
-  sizes: SizeDto[]
+  sizes: SizeDto[]  
   onView: (size: SizeDto) => void
   onEdit: (size: SizeDto) => void
   onDelete: (id: number) => void
