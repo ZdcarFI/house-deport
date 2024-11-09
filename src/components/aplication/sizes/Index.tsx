@@ -53,7 +53,7 @@ export default function Sizes() {
     setIsViewMode(true);
     setIsModalOpen(true);
   };
-  
+
   const handleEdit = (size: SizeDto) => {
     setSelectedSize(size);
     setIsViewMode(false);
@@ -132,11 +132,12 @@ export default function Sizes() {
           </Button>
         </div>
         <div className="w-full flex flex-col gap-4">
-          <SizeTable 
-            sizes={sizes} 
-            onEdit={handleEdit} 
-            onDelete={handleDelete} 
-            onView={handleView} 
+          <SizeTable
+            categories={categories}
+            sizes={sizes}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onView={handleView}
           />
           <SizeModal
             isOpen={isModalOpen}

@@ -4,6 +4,7 @@ import {PARAM_CATEGORY} from "@/utils/config/config";
 import {AxiosResponse} from "axios";
 import {UpdateProductDto} from "@/services/Product/dto/UpdateProductDto";
 import {CategoryDto} from "@/services/Dto/CategoryDto";
+import { UpdateCategoryDto } from "./dto/UpdateCategoryDto";
 
 
 export class CategoryService extends Service {
@@ -39,7 +40,7 @@ export class CategoryService extends Service {
         return true;
     }
 
-    async updateById(id: number, product: UpdateProductDto): Promise<CategoryDto> {
+    async updateById(id: number, product: UpdateCategoryDto): Promise<CategoryDto> {
         const response: AxiosResponse = await this.apiFetch.put(`${this.param}/${id}`, product);
         return response.data;
     }

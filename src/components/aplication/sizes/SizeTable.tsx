@@ -4,12 +4,14 @@ import { Tooltip } from '@nextui-org/tooltip'
 import { EditIcon } from '../../icons/table/edit-icon'
 import { DeleteIcon } from '../../icons/table/delete-icon'
 import { EyeIcon } from '../../icons/table/eye-icon'
+import { CategoryDto } from '@/services/Dto/CategoryDto'
 
 interface SizeTableProps {
   sizes: SizeDto[]
   onView: (size: SizeDto) => void
   onEdit: (size: SizeDto) => void
   onDelete: (id: number) => void
+  categories: CategoryDto[]
 }
 
 export default function SizeTable({ sizes, onEdit, onDelete, onView }: SizeTableProps) {

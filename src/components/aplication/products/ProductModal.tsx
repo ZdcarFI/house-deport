@@ -39,8 +39,8 @@ export default function ProductModal({isOpen, onClose, onSubmit, product, isView
                 name: product.name,
                 code: product.code,
                 price: product.price,
-                categoryId: product.category.id,
-                sizeId: product.sizes.id,
+                categoryId: product.category ? product.category.id : 0,
+                sizeId: product.sizes ? product.sizes.id : 0,
                 stockInventory: product.stockInventory,
                 stockStore: product.stockStore,
             });
@@ -56,6 +56,7 @@ export default function ProductModal({isOpen, onClose, onSubmit, product, isView
             });
         }
     }, [product]);
+    
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;

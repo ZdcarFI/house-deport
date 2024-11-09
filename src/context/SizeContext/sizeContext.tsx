@@ -7,6 +7,7 @@ import { AxiosError } from "axios";
 import { CreateSizeDto } from "@/services/Size/dto/CreateSizeDto";
 import { UpdateSizeDto } from "@/services/Size/dto/UpdateSizeDto";
 import { SizeDto } from "@/services/Dto/SizeDto";
+import { CategoryContext } from "../CategoryContext/categoryContext";
 
 export const SizeContext = React.createContext<SizeContextType | null>(null);
 const sizeService = new SizeService();
@@ -14,7 +15,7 @@ const SizeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const [state, dispatch] = React.useReducer(sizeReducer, { sizes: [] } as SizeState);
     const [loading, setLoading] = React.useState<boolean>(false);
     const [error, setError] = React.useState<string>('');
-
+    const categoryContext = React.useContext(CategoryContext);
     React.useEffect(() => {
         const fetchSizes = async () => {
             setLoading(true);
@@ -51,6 +52,9 @@ const SizeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         try {
             const res = await sizeService.create(size);
             dispatch({ type: SizeActionType.ADD_SIZE, payload: res });
+            if (categoryContext) {
+                categoryContext.updateCategoryWithNewSize(size.categoryId, res);
+            }
         } catch (e) {
             handleError(e);
         }

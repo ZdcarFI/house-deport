@@ -14,7 +14,11 @@ interface ProductTableProps {
 }
 
 export default function ProductTable({ products, onView, onEdit, onDelete }: ProductTableProps) {
-  const renderCell = (product: ProductDto, columnKey: React.Key) => {
+
+  const renderCell = (product: ProductDto, columnKey: React.Key): React.ReactNode => {
+    console.log("Column Key:", columnKey); // Shows the current column key
+    console.log("Product Data:", product); // Shows the current product data
+
     switch (columnKey) {
       case 'actions':
         return (
@@ -24,7 +28,7 @@ export default function ProductTable({ products, onView, onEdit, onDelete }: Pro
                 <EyeIcon size={20} fill="#979797" />
               </button>
             </Tooltip>
-            <Tooltip  content="Edit product" color="secondary">
+            <Tooltip content="Edit product" color="secondary">
               <button onClick={() => onEdit(product)}>
                 <EditIcon size={20} fill="#979797" />
               </button>
@@ -37,28 +41,32 @@ export default function ProductTable({ products, onView, onEdit, onDelete }: Pro
           </div>
         );
       case 'category':
-        return product.category.name;
+        return product.category?.name ?? "N/A";
       case 'size':
-        return product.sizes.name;
+        return product.sizes?.name ?? "N/A";
       case 'warehouse':
-        return product.productWarehouse.name;
+        return product.productWarehouse?.name ?? "N/A";
+      case 'stockInventory':
+        return product.stockInventory ?? "N/A";
+      case 'stockStore':
+        return product.stockStore ?? "N/A";
       default:
-        return product[columnKey as keyof ProductDto];
+        return product[columnKey as keyof ProductDto]?.toString() ?? "N/A";
     }
   };
 
   return (
     <Table aria-label="Products table">
       <TableHeader>
-        <TableColumn>Name</TableColumn>
-        <TableColumn>Code</TableColumn>
-        <TableColumn>Price</TableColumn>
-        <TableColumn>Category</TableColumn>
-        <TableColumn>Size</TableColumn>
-        <TableColumn>Warehouse</TableColumn>
-        <TableColumn>Stock Inventory</TableColumn>
-        <TableColumn>Stock Store</TableColumn>
-        <TableColumn>Actions</TableColumn>
+        <TableColumn key="name">Name</TableColumn>
+        <TableColumn key="code">Code</TableColumn>
+        <TableColumn key="price">Price</TableColumn>
+        <TableColumn key="category">Category</TableColumn>
+        <TableColumn key="size">Size</TableColumn>
+        <TableColumn key="warehouse">Warehouse</TableColumn>
+        <TableColumn key="stockInventory">Stock Inventory</TableColumn>
+        <TableColumn key="stockStore">Stock Store</TableColumn>
+        <TableColumn key="actions">Actions</TableColumn>
       </TableHeader>
       <TableBody>
         {products.map((product) => (
