@@ -30,13 +30,21 @@
     "@nextui-org/theme": "^2.2.11",
     "@nextui-org/tooltip": "^2.0.41",
     "@nextui-org/user": "^2.0.34",
+    "@nivo/bar": "^0.87.0",
+    "@nivo/core": "^0.87.0",
+    "@nivo/line": "^0.87.0",
+    "@nivo/pie": "^0.87.0",
     "axios": "^1.7.7",
+    "chart.js": "^4.4.6",
     "framer-motion": "^11.11.9",
     "lucide-react": "^0.452.0",
     "next": "14.2.15",
     "next-themes": "^0.3.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18",
+    "react-iconly": "^2.2.10",
+    "recharts": "^2.13.3"
   },
   "devDependencies": {
     "@types/node": "^20",

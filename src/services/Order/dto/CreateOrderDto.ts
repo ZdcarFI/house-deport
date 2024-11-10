@@ -1,4 +1,4 @@
-interface ProductBasicCreateDto {
+export interface ProductBasicCreateDto {
     readonly id: number;
     readonly quantity: number;
 }

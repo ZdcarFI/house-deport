@@ -3,7 +3,7 @@ import { UpdateOrderDto } from "@/services/Order/dto/UpdateOrderDto";
 import { OrderDto } from "@/services/Dto/ClienDto";
 
 export type OrderContextType = {
-    orders: Product[];
+    orders: OrderDto[];
     createOrder: (Order: CreateOrderDto) => Promise<void>;
     updateOrder: (id:number, Order: UpdateOrderDto) => Promise<void>;
     deleteOrder: (id: number) => Promise<void>;

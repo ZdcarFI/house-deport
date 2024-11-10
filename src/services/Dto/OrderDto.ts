@@ -1,14 +1,14 @@
-import {UserDto} from "@/services/Dto/UserDto";
-import {ClientDto} from "@/services/Dto/ClienDto";
+import { UserDto } from "@/services/Dto/UserDto";
+import { ClientDto } from "@/services/Dto/ClienDto";
 
-interface ProductBasicDto {
+export interface ProductBasicDto {
     readonly id: number;
     readonly name: string;
     readonly code: string;
     readonly price: number;
 }
 
-interface DetailDto {
+export interface DetailDto {
     readonly id: number;
     readonly product: ProductBasicDto;
     readonly quantity: number;
@@ -16,9 +16,12 @@ interface DetailDto {
     readonly total: number;
 }
 
-export interface OrderDto{
+export interface OrderDto {
     readonly id: number;
     readonly numFac: string;
+    readonly status: string,
+    readonly tax?: number
+    readonly discount?: number
     readonly user: UserDto;
     readonly client: ClientDto;
     readonly date: Date;

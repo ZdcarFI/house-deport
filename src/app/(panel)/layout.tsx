@@ -5,6 +5,9 @@ import SizeProvider from "@/context/SizeContext/sizeContext";
 import ProductProvider from "@/context/ProductContext/productContext";
 import WarehouseProvider from "@/context/WareHouseContext/warehouseContext";
 import ProductWarehouseProvider from "@/context/ProductWarehouseContext/productWarehouseContext";
+import OrderProvider from "@/context/OrderContext/orderContext";
+import ClientProvider from "@/context/ClientContext/clientContext";
+import UserProvider from "@/context/UserContext/userContext";
 
 export default function RootLayout({
     children,
@@ -17,9 +20,14 @@ export default function RootLayout({
                 <ProductProvider>
                     <WarehouseProvider>
                         <ProductWarehouseProvider>
-                            {children}
+                            <ClientProvider>
+                                <UserProvider>
+                                    <OrderProvider>
+                                        {children}
+                                    </OrderProvider>
+                                </UserProvider>
+                            </ClientProvider>
                         </ProductWarehouseProvider>
-
                     </WarehouseProvider>
                 </ProductProvider>
             </SizeProvider>

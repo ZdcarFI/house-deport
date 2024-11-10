@@ -1,21 +1,55 @@
-import React from 'react';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@nextui-org/table';
-import { Tooltip } from '@nextui-org/tooltip';
-import { EditIcon } from '../../icons/table/edit-icon';
-import { DeleteIcon } from '../../icons/table/delete-icon';
-import { EyeIcon } from '../../icons/table/eye-icon';
-import { OrderDto } from '@/services/Dto/OrderDto';
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@nextui-org/table'
+import { OrderDto } from '@/services/Dto/OrderDto'
+import { Tooltip } from '@nextui-org/tooltip'
+import { EditIcon } from '../../icons/table/edit-icon'
+import { DeleteIcon } from '../../icons/table/delete-icon'
+import { EyeIcon } from '../../icons/table/eye-icon'
+import { Chip } from "@nextui-org/chip"
 
 interface OrderTableProps {
-  orders: OrderDto[];
-  onView: (order: OrderDto) => void;
-  onEdit: (order: OrderDto) => void;
-  onDelete: (id: number) => void;
+  orders: OrderDto[]
+  onView: (order: OrderDto) => void
+  onEdit: (order: OrderDto) => void
+  onDelete: (id: number) => void
 }
 
-export default function OrderTable({ orders, onView, onEdit, onDelete }: OrderTableProps) {
+export default function OrderTable({ orders, onEdit, onDelete, onView }: OrderTableProps) {
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return "warning"
+      case 'completed':
+        return "success"
+      case 'canceled':
+        return "danger"
+      default:
+        return "default"
+    }
+  }
+
   const renderCell = (order: OrderDto, columnKey: React.Key) => {
     switch (columnKey) {
+      case 'numFac':
+        return order.numFac
+      case 'client':
+        return order.client ? `${order.client.firstName} ${order.client.lastName}` : 'N/A'
+      case 'user':
+        return order.user ? order.user.username : 'N/A'
+      case 'date':
+        return order.date ? new Date(order.date).toLocaleDateString() : 'N/A'
+      case 'total':
+        return order.total ? `$${order.total.toFixed(2)}` : '$0.00'
+      case 'status':
+        return order.status ? (
+          <Chip 
+            color={getStatusColor(order.status)}
+            variant="flat"
+            size="sm"
+            className="capitalize"
+          >
+            {order.status}
+          </Chip>
+        ) : 'N/A'
       case 'actions':
         return (
           <div className="flex items-center gap-4">
@@ -35,34 +69,36 @@ export default function OrderTable({ orders, onView, onEdit, onDelete }: OrderTa
               </button>
             </Tooltip>
           </div>
-        );
-      case 'products':
-        return order.products?.length ?? 0;  
+        )
       default:
-        return order[columnKey as keyof OrderDto];
+        return 'N/A'
     }
-  };
+  }
 
   return (
     <Table aria-label="Orders table">
       <TableHeader>
         <TableColumn>Invoice Number</TableColumn>
-        <TableColumn>Client ID</TableColumn>
-        <TableColumn>User ID</TableColumn>
-        <TableColumn>Number of Products</TableColumn>
+        <TableColumn>Client</TableColumn>
+        <TableColumn>User</TableColumn>
+        <TableColumn>Date</TableColumn>
+        <TableColumn>Total</TableColumn>
+        <TableColumn>Estado</TableColumn>
         <TableColumn>Actions</TableColumn>
       </TableHeader>
       <TableBody>
         {orders.map((order) => (
           <TableRow key={order.id}>
-            <TableCell>{order.numFac}</TableCell>
-            <TableCell>{order.clientId}</TableCell>
-            <TableCell>{order.userId}</TableCell>
-            <TableCell>{renderCell(order, 'products')}</TableCell>
+            <TableCell>{renderCell(order, 'numFac')}</TableCell>
+            <TableCell>{renderCell(order, 'client')}</TableCell>
+            <TableCell>{renderCell(order, 'user')}</TableCell>
+            <TableCell>{renderCell(order, 'date')}</TableCell>
+            <TableCell>{renderCell(order, 'total')}</TableCell>
+            <TableCell>{renderCell(order, 'status')}</TableCell>
             <TableCell>{renderCell(order, 'actions')}</TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
-  );
+  )
 }
