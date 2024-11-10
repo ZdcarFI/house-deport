@@ -10,6 +10,7 @@ import ClientTable from "@/components/aplication/clients/ClientTable";
 import ClientModal from "@/components/aplication/clients/ClientModal";
 import { ClientDto } from "@/services/Dto/ClienDto";
 import { ClientContext } from "@/context/ClientContext/clientContext";
+import ConfirmDialog from "@/components/modal/ConfirmDialog";
 
 export default function Clients() {
   const {
@@ -25,6 +26,8 @@ export default function Clients() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isViewMode, setIsViewMode] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [title, setTitle] = React.useState("");
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
 
   const filteredClients = React.useMemo(() => {
     return clients.filter(client => 
@@ -52,9 +55,9 @@ export default function Clients() {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this client?")) {
-      await deleteClient(id);
-    }
+    await deleteClient(id);
+    setTitle("");
+    setIsConfirmDialogOpen(false);
   };
 
   const handleSubmit = async (formData: ClientDto) => {
@@ -111,7 +114,7 @@ export default function Clients() {
         </div>
         <div className="flex flex-row gap-3.5 flex-wrap">
           <Button color="primary" onPress={handleAdd}>
-            Add Client
+            Agregar Cliente
           </Button>
           <Button color="primary" startContent={<ExportIcon />}>
             Export to CSV
@@ -123,7 +126,12 @@ export default function Clients() {
         <ClientTable
           clients={filteredClients}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={(clientId: number)=>{
+            const selectedClient = clients.find(client => client.id === clientId);
+            if(selectedClient) setSelectedClient(selectedClient);
+            setIsConfirmDialogOpen(true);
+            setTitle("¿Estás seguro de que deseas eliminar este usuario?");
+          }}
           onView={handleView}
         />
         <ClientModal
@@ -132,6 +140,23 @@ export default function Clients() {
           onSubmit={handleSubmit}
           client={selectedClient}
           isViewMode={isViewMode}
+        />
+        <ConfirmDialog
+            title={title}
+            isOpen={isConfirmDialogOpen}
+            onConfirm={() => {
+              if (selectedClient) {
+                handleDelete(selectedClient.id);
+              }
+            }}
+            onClose={() => {
+              setIsConfirmDialogOpen(false);
+              setTitle("");
+            }}
+            onCancel={() => {
+              setIsConfirmDialogOpen(false);
+              setTitle("");
+            }}
         />
       </div>
     </div>

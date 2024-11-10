@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal'
 import { Button } from '@nextui-org/button'
 import { Input } from '@nextui-org/input'
 import { ClientDto } from '@/services/Dto/ClienDto'
+import {Select, SelectItem} from "@nextui-org/select";
 
 interface ClientModalProps {
   isOpen: boolean
@@ -47,6 +48,10 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
+  const handleSelectChange = (name: string) => (value: string) => {
+    setFormData({...formData, [name]: value});
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit(formData)
@@ -61,7 +66,7 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
           </ModalHeader>
           <ModalBody>
             <Input
-              label="First Name"
+              label="Nombres"
               name="firstName"
               value={formData.firstName}
               onChange={handleInputChange}
@@ -69,7 +74,7 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
               isReadOnly={isViewMode}
             />
             <Input
-              label="Last Name"
+              label="Apellidos"
               name="lastName"
               value={formData.lastName}
               onChange={handleInputChange}
@@ -77,7 +82,7 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
               isReadOnly={isViewMode}
             />
             <Input
-              label="Email"
+              label="Correo"
               name="email"
               type="email"
               value={formData.email}
@@ -86,7 +91,7 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
               isReadOnly={isViewMode}
             />
             <Input
-              label="Phone"
+              label="Celular"
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
@@ -94,7 +99,7 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
               isReadOnly={isViewMode}
             />
             <Input
-              label="Address"
+              label="Dirección"
               name="address"
               value={formData.address}
               onChange={handleInputChange}
@@ -102,21 +107,28 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
               isReadOnly={isViewMode}
             />
             <Input
-              label="Document Number"
+              label="Número de Documento"
               name="numberDocument"
               value={formData.numberDocument}
               onChange={handleInputChange}
               required
               isReadOnly={isViewMode}
             />
-            <Input
-              label="Document Type"
-              name="typeDocument"
-              value={formData.typeDocument}
-              onChange={handleInputChange}
-              required
-              isReadOnly={isViewMode}
-            />
+            {
+              <Select
+                  label="Tipo de Documento"
+                  name="typeDocument"
+                  placeholder="Seleccione un tipo de documento"
+                  onChange={(e) => handleSelectChange('typeDocument')(e.target.value)}
+              >
+                <SelectItem key="DNI" value="DNI">
+                  DNI
+                </SelectItem>
+                <SelectItem key="RUC" value="RUC">
+                  RUC
+                </SelectItem>
+              </Select>
+            }
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={onClose}>
