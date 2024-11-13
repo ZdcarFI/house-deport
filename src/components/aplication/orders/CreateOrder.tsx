@@ -9,9 +9,12 @@ import { SizeContext } from '@/context/SizeContext/sizeContext'
 import { CreateOrderDto, ProductBasicCreateDto } from '@/services/Order/dto/CreateOrderDto'
 import { OrderContext } from '@/context/OrderContext/orderContext'
 import { Plus, Minus } from 'lucide-react'
+import {UserDto} from "@/services/Dto/UserDto";
+import {UserContext} from "@/context/UserContext/userContext";
 
 export default function CreateOrderPage() {
     const { products, getProducts, updateProductStock } = React.useContext(ProductContext)!
+    const { user } = React.useContext(UserContext)!
     const { clients } = React.useContext(ClientContext)!
     const { categories } = React.useContext(CategoryContext)!
     const { sizes } = React.useContext(SizeContext)!
@@ -25,7 +28,7 @@ export default function CreateOrderPage() {
     const [orderData, setOrderData] = useState<CreateOrderDto & { status: string, tax: number, discount: number, subtotal: number, paymentType: string }>({
         numFac: '',
         clientId: 0,
-        userId: 0, // Assuming the logged-in user's ID
+        userId: user?.id || 0,
         products: [],
         status: 'pending',
         tax: 0,
@@ -39,7 +42,8 @@ export default function CreateOrderPage() {
     const [enableDiscount, setEnableDiscount] = useState(false)
 
     useEffect(() => {
-        getProducts()
+        getProducts();
+        console.log(user);
     }, [])
 
     useEffect(() => {
@@ -56,6 +60,7 @@ export default function CreateOrderPage() {
     }, [cart, orderData.tax, orderData.discount])
 
     const handleProductDoubleClick = (product: any) => {
+        console.log(product);
         const existingProduct = cart.find(item => item.id === product.id)
         if (existingProduct) {
             if (existingProduct.quantity < product.stockStore) {
@@ -64,7 +69,8 @@ export default function CreateOrderPage() {
                 ))
             }
         } else {
-            setCart([...cart, { id: product.id, quantity: 1 }])
+            setCart([...cart, { id: product.id, quantity: 1, productWarehouseId: product.productWarehouse[0].warehouseId
+            }])
         }
     }
 
@@ -102,6 +108,9 @@ export default function CreateOrderPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        console.log(orderData);
+
         try {
             await createOrder(orderData)
             // Handle successful order creation (e.g., show success message, redirect)
@@ -109,6 +118,10 @@ export default function CreateOrderPage() {
             console.error("Error creating order:", error)
             // Handle error (e.g., show error message)
         }
+    }
+
+    const handleSelectChange = (name: string) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setOrderData(prev => ({ ...prev, [name]: Number(e.target.value) }))
     }
 
     return (
@@ -184,11 +197,14 @@ export default function CreateOrderPage() {
                                 <Select
                                     label="Client"
                                     value={orderData.clientId.toString()}
-                                    onChange={(e) => setOrderData({ ...orderData, clientId: parseInt(e.target.value) })}
+                                    onChange={handleSelectChange('clientId')}
                                     className="mb-2"
                                 >
                                     {clients.map((client) => (
-                                        <SelectItem key={client.id} value={client.id.toString()}>
+                                        <SelectItem
+                                            key={client.id}
+                                            value={client.id.toString()}
+                                            textValue={`${client.firstName} ${client.lastName}`}>
                                             {client.firstName} {client.lastName}
                                         </SelectItem>
                                     ))}
@@ -275,9 +291,10 @@ export default function CreateOrderPage() {
                                         </TableBody>
                                     </Table>
                                 </div>
-                                <div className="mt-4">
-                                    <p>Subtotal: ${subtotal.toFixed(2)}</p>
-                                    <p>Total: ${total.toFixed(2)}</p>
+                                <div className="mt-4 flex flex-col justify-end gap-2 items-end">
+                                    <p>Subtotal: S/.{(total*0.82).toFixed(2)}</p>
+                                    <p>Impuesto S/.{(total*0.18).toFixed(2)}</p>
+                                    <p>Total: S/.{total.toFixed(2)}</p>
                                 </div>
                                 <Button type="submit" color="primary" className="mt-4">
                                     Create Order

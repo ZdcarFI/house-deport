@@ -16,8 +16,12 @@ const UserProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const [state, dispatch] = React.useReducer(userReducer, {users: []} as UserState);
     const [loading, setLoading] = React.useState<boolean>(false);
     const [error, setError] = React.useState<string>('');
+    const [user, setUser] = React.useState<UserDto | null>(null);
 
     React.useEffect(() => {
+
+        setUser(JSON.parse(localStorage.getItem('user') || 'null'));
+
         const fetchUsers = async () => {
             setLoading(true);
             try {
@@ -30,6 +34,7 @@ const UserProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
         };
 
         fetchUsers();
+
     }, []);
 
     const handleError = (e: unknown) => {
@@ -93,7 +98,8 @@ const UserProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
         getUsers,
         loading,
         getUser,
-        error
+        error,
+        user,
     }), [state.users, loading, error]);
 
     return (

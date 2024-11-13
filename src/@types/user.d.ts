@@ -11,4 +11,5 @@ export type UserContextType = {
     getUser: (id: number) => Promise<UserDto>;
     loading: boolean;
     error: string;
+    user: UserDto;
 };

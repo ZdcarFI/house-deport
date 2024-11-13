@@ -132,7 +132,9 @@ export default function Dashboard() {
             <h4 className="font-bold text-large">Top Selling Products</h4>
           </CardHeader>
           <CardBody className="overflow-hidden py-2">
+{/*
             <BarChart products={products} orders={orders} />
+*/}
           </CardBody>
         </Card>
         <Card className="h-[400px]">
