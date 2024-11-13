@@ -4,6 +4,7 @@ export interface ProductBasicCreateDto {
 }
 
 export interface CreateOrderDto {
+
     readonly numFac: string;
     readonly clientId: number;
     readonly userId: number;

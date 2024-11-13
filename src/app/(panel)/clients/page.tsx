@@ -5,8 +5,6 @@ import React from 'react';
 
 export default function Page() {
     return (
-        <ClientProvider>
             <Clients/>
-        </ClientProvider>
     );
 }

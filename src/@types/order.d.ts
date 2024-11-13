@@ -1,6 +1,6 @@
+import { OrderDto } from "@/services/Dto/OrderDto";
 import { CreateOrderDto } from "@/services/Order/dto/CreateOrderDto";
 import { UpdateOrderDto } from "@/services/Order/dto/UpdateOrderDto";
-import { OrderDto } from "@/services/Dto/ClienDto";
 
 export type OrderContextType = {
     orders: OrderDto[];

@@ -39,7 +39,7 @@ export default function Products() {
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sizes.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.size.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.productWarehouse.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [products, searchQuery]);

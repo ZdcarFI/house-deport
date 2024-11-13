@@ -30,7 +30,7 @@ export const SidebarWrapper = () => {
         <div className={Sidebar.Overlay()} onClick={setCollapsed} />
       ) : null}
       <div className={Sidebar({ collapsed })}>
-      
+
         <div className="flex flex-col justify-between h-full">
           <div className={Sidebar.Body()}>
             <SidebarItem
@@ -53,11 +53,15 @@ export const SidebarWrapper = () => {
                 icon={<CustomersIcon />}
                 href="clients"
               />
-              <SidebarItem
-                isActive={pathname === "/orders"}
-                title="Orders"
-                href="orders"
+
+              <CollapseItems
                 icon={<PaymentsIcon />}
+                title="Orders"
+                items={[
+                  { label: "orders", href: "/orders" },
+                  { label: "createOrders", href: "/createOrder" },
+
+                ]}
               />
 
               <CollapseItems
@@ -66,7 +70,7 @@ export const SidebarWrapper = () => {
                 items={[
                   { label: "Warehouses", href: "/warehouses" },
                   { label: "WarehouseProduct", href: "/warehouseProduct" },
-  
+
                 ]}
               />
             </SidebarMenu>
@@ -84,13 +88,17 @@ export const SidebarWrapper = () => {
                 icon={<ProductsIcon />}
                 href="sizes"
               />
-              <SidebarItem
-                isActive={pathname === "/products"}
-                title="Products"
+
+              <CollapseItems
                 icon={<ProductsIcon />}
-                href="products"
+                title="Orders"
+                items={[
+                  { label: "products", href: "/products" },
+                  { label: "createProducts", href: "/createProduct" },
+
+                ]}
               />
-          
+
 
             </SidebarMenu>
 

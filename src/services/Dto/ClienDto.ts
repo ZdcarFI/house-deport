@@ -7,4 +7,5 @@ export interface ClientDto{
     readonly address: string;
     readonly numberDocument: string;
     readonly typeDocument: string;
+    readonly createdAt:string
 }

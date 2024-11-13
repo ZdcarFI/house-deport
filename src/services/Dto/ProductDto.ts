@@ -1,29 +1,25 @@
-export interface CategoryBasicDto{
-    id: number;
-    name: string;
-}
+import { CategoryDto } from "./CategoryDto";
+import { SizeDto } from "./SizeDto";
 
-export interface SizeBasicDto{
-    id: number;
-    name: string;
-}
 
-export interface ProductWarehouseBasicDto{
-    id: number;
-    row: number;
-    column: number;
-    quantity: number;
-    name: string;
-    status: string;
+export interface ProductWarehouseBasicDto {
+    readonly id: number;
+    readonly row: number;
+    readonly column: number;
+    readonly quantity: number;
+    readonly name: string;
+    readonly status: string;
 }
 
 export interface ProductDto {
-    id: number;
-    name: string;
-    code: string;
-    price: number;
-    category: CategoryBasicDto;
-    size: SizeBasicDto;
-    stockInventory: number;
-    stockStore: number;
+    readonly id: number;
+    readonly name: string;
+    readonly code: string;
+    readonly price: number;
+    readonly category: CategoryDto;
+    readonly size: SizeDto;
+    readonly productWarehouse: ProductWarehouseBasicDto;
+    readonly stockInventory: number;
+    readonly stockStore: number;
 }
+

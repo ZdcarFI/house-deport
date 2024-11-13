@@ -147,15 +147,7 @@ export default function ProductModal({isOpen, onClose, onSubmit, product, isView
                             required
                             isDisabled={isViewMode}
                         />
-                        <Input
-                            label="Stock en los almacenes"
-                            name="stockStore"
-                            type="number"
-                            value={formData.stockStore.toString()}
-                            onChange={handleInputChange}
-                            required
-                            isDisabled={isViewMode}
-                        />
+                     
                     </ModalBody>
                     <ModalFooter>
                         <Button color="danger" variant="light" onPress={onClose}>
