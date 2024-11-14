@@ -1,18 +1,19 @@
 "use client";
 
 import React from "react";
-import {Button, Input} from "@nextui-org/react";
+import { Button, Input } from "@nextui-org/react";
 import Link from "next/link";
-import {ExportIcon} from "@/components/icons/accounts/export-icon";
-import {HouseIcon} from "@/components/icons/breadcrumb/house-icon";
-import {UsersIcon} from "@/components/icons/breadcrumb/users-icon";
-import {UserDto} from "@/services/Dto/UserDto";
+import { ExportIcon } from "@/components/icons/accounts/export-icon";
+import { HouseIcon } from "@/components/icons/breadcrumb/house-icon";
+import { UsersIcon } from "@/components/icons/breadcrumb/users-icon";
+import { UserDto } from "@/services/Dto/UserDto";
 import UserTable from "@/components/aplication/users/UserTable";
 import UserModal from "@/components/aplication/users/UserModal";
-import {CreateUserDto} from "@/services/User/dto/CreateUserDto";
-import {UpdateUserDto} from "@/services/User/dto/UpdateUserDto";
-import {UserContext} from "@/context/UserContext/userContext";
+import { CreateUserDto } from "@/services/User/dto/CreateUserDto";
+import { UpdateUserDto } from "@/services/User/dto/UpdateUserDto";
+import { UserContext } from "@/context/UserContext/userContext";
 import ConfirmDialog from "@/components/modal/ConfirmDialog";
+import { SearchIcon } from "lucide-react";
 
 export default function Users() {
     const {
@@ -88,44 +89,47 @@ export default function Users() {
         <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full flex flex-col gap-4">
             <ul className="flex">
                 <li className="flex gap-2">
-                    <HouseIcon/>
+                    <HouseIcon />
                     <Link href={"/"}>
-                        <span>Home</span>
+                        <span>Inicio</span>
                     </Link>
-                    <span> / </span>{" "}
+                    <span>  / </span>{"  "}
                 </li>
 
                 <li className="flex gap-2">
-                    <UsersIcon/>
-                    <span>Users</span>
-                    <span> / </span>{" "}
+                    <UsersIcon />
+                    <span>Usuarios</span>
+                    <span>  / </span>{"  "}
                 </li>
                 <li className="flex gap-2">
-                    <span>List</span>
+                    <span>Lista</span>
                 </li>
             </ul>
-            <h3 className="text-xl font-semibold">All Users</h3>
+            <h3 className="text-xl font-semibold">Todos los usuarios</h3>
 
             <div className="flex justify-between flex-wrap gap-4 items-center">
-                <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
+             
                     <Input
-                        className="w-full md:w-72"
-                        placeholder="Search users..."
+                        className="w-full sm:max-w-[300px]"
+                        placeholder="Buscar usuarios..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        startContent={<SearchIcon className="text-default-400" size={20} />}
                     />
-                </div>
-                <div className="flex flex-row gap-3.5 flex-wrap">
-                    <Button color="primary" onPress={handleAdd}>Agregar Usuario</Button>
-                    <Button color="primary" startContent={<ExportIcon/>}>
-                        Export to CSV
-                    </Button>
-                </div>
+                    <div className="flex gap-3">
+                        <Button color="primary" onPress={handleAdd}>
+                            Agregar Usuario
+                        </Button>
+                        <Button color="secondary" startContent={<ExportIcon />}>
+                            Export to CSV
+                        </Button>
+                    </div>
+              
                 <div className="w-full flex flex-col gap-4">
                     <UserTable
                         users={filteredUsers}
                         onEdit={handleEdit}
-                        onDelete={(userId: number)=>{
+                        onDelete={(userId: number) => {
                             const selectedUser = users.find(user => user.id === userId);
                             setSelectedUser(selectedUser);
                             setIsConfirmDialogOpen(true);

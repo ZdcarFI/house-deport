@@ -8,13 +8,11 @@ import ProductWarehouseProvider from "@/context/ProductWarehouseContext/productW
 import OrderProvider from "@/context/OrderContext/orderContext";
 import ClientProvider from "@/context/ClientContext/clientContext";
 import UserProvider from "@/context/UserContext/userContext";
+import { PropsWithChildren } from "react";
 
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
-    return <Layout>
+// Create a combined provider component to reduce nesting
+function Providers({ children }: PropsWithChildren) {
+    return (
         <CategoryProvider>
             <SizeProvider>
                 <ProductProvider>
@@ -32,5 +30,20 @@ export default function RootLayout({
                 </ProductProvider>
             </SizeProvider>
         </CategoryProvider>
-    </Layout>;
+    )
+}
+
+// Root layout component
+export default function RootLayout({
+    children,
+}: {
+    children: React.ReactNode
+}) {
+    return (
+        <Layout>
+            <Providers>
+                {children}
+            </Providers>
+        </Layout>
+    )
 }
