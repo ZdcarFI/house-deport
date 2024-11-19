@@ -49,12 +49,14 @@ const ClientProvider: React.FC<{ children: React.ReactNode }> = ({children}) => 
         }
     };
 
-    const createClient = async (client: CreateClientDto): Promise<void> => {
+    const createClient = async (client: CreateClientDto): Promise<ClientDto> => {
         try {
             const res = await clientService.create(client);
-            dispatch({type: ClientActionType.ADD_CLIENT, payload: res});
+            dispatch({ type: ClientActionType.ADD_CLIENT, payload: res });
+            return res;
         } catch (e) {
             handleError(e);
+            throw e;
         }
     };
 

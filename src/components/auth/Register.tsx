@@ -4,29 +4,25 @@ import { Button } from '@nextui-org/button';
 import { Card, CardBody, CardHeader } from '@nextui-org/card';
 import { Input } from '@nextui-org/input';
 import { useRouter } from 'next/navigation';
+import {CreateUserDto} from "@/services/User/dto/CreateUserDto";
+import {Select, SelectItem} from "@nextui-org/select";
 
-type RegisterFormData = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    username: string;
-    password: string;
-    confirmPassword: string;
-}
 
 type RegisterFormProps = {
-    onRegister: (data: Omit<RegisterFormData, 'confirmPassword'>) => void;
+    onRegister: (data: CreateUserDto) => void;
 }
 
 export default function RegisterForm({ onRegister }: RegisterFormProps) {
-    const [formData, setFormData] = useState<RegisterFormData>({
+    const [formData, setFormData] = useState<CreateUserDto>({
         firstName: '',
         lastName: '',
         email: '',
         username: '',
         password: '',
-        confirmPassword: '',
+        gender: ''
     });
+
+    const [confirmPassword, setConfirmPassword] = useState<string>('');
 
     const router = useRouter();
 
@@ -36,12 +32,15 @@ export default function RegisterForm({ onRegister }: RegisterFormProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
+        if (formData.password !== confirmPassword) {
             alert("Las contraseñas no coinciden");
             return;
         }
-        const { confirmPassword, ...registrationData } = formData;
-        onRegister(registrationData);
+        onRegister(formData);
+    };
+
+    const handleSelectChange = (name: string) => (value: string) => {
+        setFormData({...formData, [name]: value});
     };
 
     return (
@@ -89,6 +88,19 @@ export default function RegisterForm({ onRegister }: RegisterFormProps) {
                         onChange={handleChange}
                         required
                     />
+                    <Select
+                        label="Género"
+                        name="gender"
+                        placeholder="Seleccione un género"
+                        onChange={(e) => handleSelectChange('gender')(e.target.value)}
+                    >
+                        <SelectItem key="MALE" value="MALE">
+                            Masculino
+                        </SelectItem>
+                        <SelectItem key="FEMALE" value="FEMALE">
+                            Femenino
+                        </SelectItem>
+                    </Select>
                     <Input
                         label="Contraseña"
                         name="password"
@@ -103,8 +115,8 @@ export default function RegisterForm({ onRegister }: RegisterFormProps) {
                         name="confirmPassword"
                         type="password"
                         placeholder="••••••••"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                     />
                     <Button color="primary" type="submit" className="mt-4">

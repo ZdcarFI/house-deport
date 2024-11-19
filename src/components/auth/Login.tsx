@@ -35,8 +35,7 @@ export default function LoginForm() {
 
         if (!validateForm()) return;
         try {
-            const user = await authService.loginUsername(email, password);
-            localStorage.setItem('user', JSON.stringify(user));
+            await authService.login(email, password);
             router.push('/dashboard');
         } catch (err) {
             setError('Error al iniciar sesión. Por favor, verifique sus credenciales.');

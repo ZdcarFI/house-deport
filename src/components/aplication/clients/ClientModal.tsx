@@ -25,7 +25,8 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
     address: '',
     numberDocument: '',
     typeDocument: '',
-  })
+    createdAt: ""
+  });
 
   useEffect(() => {
     if (client) {
@@ -40,6 +41,7 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
         address: '',
         numberDocument: '',
         typeDocument: '',
+        createdAt: ""
       })
     }
   }, [client])
@@ -106,14 +108,6 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
               required
               isReadOnly={isViewMode}
             />
-            <Input
-              label="Número de Documento"
-              name="numberDocument"
-              value={formData.numberDocument}
-              onChange={handleInputChange}
-              required
-              isReadOnly={isViewMode}
-            />
             {
               <Select
                   label="Tipo de Documento"
@@ -129,6 +123,15 @@ export default function ClientModal({ isOpen, onClose, onSubmit, client, isViewM
                 </SelectItem>
               </Select>
             }
+            <Input
+              label="Número de Documento"
+              name="numberDocument"
+              value={formData.numberDocument}
+              onChange={handleInputChange}
+              required
+              isReadOnly={isViewMode}
+            />
+
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={onClose}>

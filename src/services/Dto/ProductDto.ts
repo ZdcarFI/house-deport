@@ -9,6 +9,7 @@ export interface ProductWarehouseBasicDto {
     readonly quantity: number;
     readonly name: string;
     readonly status: string;
+    readonly warehouseId: number;
 }
 
 export interface ProductDto {
@@ -18,7 +19,7 @@ export interface ProductDto {
     readonly price: number;
     readonly category: CategoryDto;
     readonly size: SizeDto;
-    readonly productWarehouse: ProductWarehouseBasicDto;
+    readonly productWarehouse: ProductWarehouseBasicDto[];
     readonly stockInventory: number;
     readonly stockStore: number;
 }
