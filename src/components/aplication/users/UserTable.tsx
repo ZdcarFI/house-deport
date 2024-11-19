@@ -4,6 +4,7 @@ import { Tooltip } from '@nextui-org/tooltip'
 import { EditIcon } from '../../icons/table/edit-icon'
 import { DeleteIcon } from '../../icons/table/delete-icon'
 import { EyeIcon } from '../../icons/table/eye-icon'
+import { Chip } from '@nextui-org/chip'
 
 interface UserTableProps {
   users: UserDto[]
@@ -13,22 +14,56 @@ interface UserTableProps {
 }
 
 export default function UserTable({ users, onEdit, onDelete, onView }: UserTableProps) {
-  const renderCell = (user: UserDto, columnKey: React.Key) => {
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'warning'
+      case 'completed':
+        return 'success'
+      case 'canceled':
+        return 'danger'
+      default:
+        return 'default'
+    }
+  }
+
+  const renderCell = (user: UserDto, columnKey: string) => {
     switch (columnKey) {
+      case 'fullName':
+        return `${user.firstName} ${user.lastName}`
+      case 'username':
+        return user.username
+      case 'email':
+        return user.email
+      case 'status':
+        return (
+          <Chip
+            // color={getStatusColor(user.status)}
+            color={getStatusColor('completed')}
+            variant="flat"
+            size="sm"
+            className="capitalize"
+          >
+            {/* {user.status} */}
+            Activo
+          </Chip>
+        )
+      case 'lastSession':
+        return user.lastSession ? user.lastSession.toLocaleString() : 'No disponible'
       case 'actions':
         return (
-          <div className="flex items-center gap-4 ">
-            <Tooltip content="Details" color="primary">
+          <div className="flex items-center gap-4">
+            <Tooltip content="Detalles" color="primary">
               <button onClick={() => onView(user)}>
                 <EyeIcon size={20} fill="#979797" />
               </button>
             </Tooltip>
-            <Tooltip content="Edit user" color="secondary">
+            <Tooltip content="Editar usuario" color="secondary">
               <button onClick={() => onEdit(user)}>
                 <EditIcon size={20} fill="#979797" />
               </button>
             </Tooltip>
-            <Tooltip content="Delete user" color="danger">
+            <Tooltip content="Eliminar usuario" color="danger">
               <button onClick={() => onDelete(user.id)}>
                 <DeleteIcon size={20} fill="#FF0080" />
               </button>
@@ -36,24 +71,28 @@ export default function UserTable({ users, onEdit, onDelete, onView }: UserTable
           </div>
         )
       default:
-        return user[columnKey as keyof UserDto]
+        return null
     }
   }
 
   return (
     <Table aria-label="Users table">
       <TableHeader>
-        <TableColumn>Name</TableColumn>
-        <TableColumn>Username</TableColumn>
-        <TableColumn>Email</TableColumn>
-        <TableColumn>Actions</TableColumn>
+        <TableColumn key="fullName">Nombre completo</TableColumn>
+        <TableColumn key="username">Nombre de usuario</TableColumn>
+        <TableColumn key="email">Correo</TableColumn>
+        <TableColumn key="status">Estado</TableColumn>
+        <TableColumn key="lastSession">Última sesión</TableColumn>
+        <TableColumn key="actions">Acciones</TableColumn>
       </TableHeader>
       <TableBody>
         {users.map((user) => (
           <TableRow key={user.id}>
-            <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
-            <TableCell>{user.username}</TableCell>
-            <TableCell>{user.email}</TableCell>
+            <TableCell>{renderCell(user, 'fullName')}</TableCell>
+            <TableCell>{renderCell(user, 'username')}</TableCell>
+            <TableCell>{renderCell(user, 'email')}</TableCell>
+            <TableCell>{renderCell(user, 'status')}</TableCell>
+            <TableCell>{renderCell(user, 'lastSession')}</TableCell>
             <TableCell>{renderCell(user, 'actions')}</TableCell>
           </TableRow>
         ))}
