@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
 import { Button, Input } from "@nextui-org/react";
 import Link from "next/link";
 import { ExportIcon } from "@/components/icons/accounts/export-icon";
@@ -11,65 +11,52 @@ import ClientModal from "@/components/aplication/clients/ClientModal";
 import { ClientDto } from "@/services/Dto/ClienDto";
 import { ClientContext } from "@/context/ClientContext/clientContext";
 import ConfirmDialog from "@/components/modal/ConfirmDialog";
+import { ToastContext } from "@/context/ToastContext/ToastContext";
+import { ToastType } from "@/components/Toast/Toast";
 
 export default function Clients() {
   const {
     clients,
     loading,
     error,
-    createClient,
-    updateClient,
-    deleteClient
-  } = React.useContext(ClientContext)!;
+    deleteClient,
+    openModal
+  } = useContext(ClientContext)!;
 
-  const [selectedClient, setSelectedClient] = React.useState<ClientDto | null>(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [isViewMode, setIsViewMode] = React.useState(false);
+  const { showToast } = useContext(ToastContext)!;
+
+
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [title, setTitle] = React.useState("");
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
+  const [selectedClientId, setSelectedClientId] = React.useState<number | null>(null);
 
   const filteredClients = React.useMemo(() => {
-    return clients.filter(client => 
+    return clients.filter(client =>
       `${client.firstName} ${client.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
       client.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [clients, searchQuery]);
 
   const handleAdd = () => {
-    setSelectedClient(null);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(null, false);
   };
 
   const handleView = (client: ClientDto) => {
-    setSelectedClient(client);
-    setIsViewMode(true);
-    setIsModalOpen(true);
+    openModal(client, true);
   };
 
   const handleEdit = (client: ClientDto) => {
-    setSelectedClient(client);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(client, false);
   };
 
   const handleDelete = async (id: number) => {
-    await deleteClient(id);
-    setTitle("");
-    setIsConfirmDialogOpen(false);
-  };
-
-  const handleSubmit = async (formData: ClientDto) => {
     try {
-      if (selectedClient) {
-        await updateClient(selectedClient.id, formData);
-      } else {
-        await createClient(formData);
-      }
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error submitting client data:", error);
+      await deleteClient(id);
+      showToast("Talla eliminada exitosamente", ToastType.SUCCESS);
+      setIsConfirmDialogOpen(false);
+    }
+    catch (error) {
+      showToast("Error:" + error, ToastType.ERROR);
     }
   };
 
@@ -126,38 +113,31 @@ export default function Clients() {
         <ClientTable
           clients={filteredClients}
           onEdit={handleEdit}
-          onDelete={(clientId: number)=>{
-            const selectedClient = clients.find(client => client.id === clientId);
-            if(selectedClient) setSelectedClient(selectedClient);
+          onDelete={(clientId: number) => {
+            setSelectedClientId(clientId);
             setIsConfirmDialogOpen(true);
-            setTitle("¿Estás seguro de que deseas eliminar este usuario?");
           }}
           onView={handleView}
         />
         <ClientModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleSubmit}
-          client={selectedClient}
-          isViewMode={isViewMode}
-        />
-        <ConfirmDialog
-            title={title}
+          showToast={showToast} />
+          <ConfirmDialog
+            title="¿Estás seguro de que deseas eliminar este cliente?"
             isOpen={isConfirmDialogOpen}
             onConfirm={() => {
-              if (selectedClient) {
-                handleDelete(selectedClient.id);
+              if (selectedClientId) {
+                handleDelete(selectedClientId);
               }
             }}
             onClose={() => {
               setIsConfirmDialogOpen(false);
-              setTitle("");
+              setSelectedClientId(null);
             }}
             onCancel={() => {
               setIsConfirmDialogOpen(false);
-              setTitle("");
+              setSelectedClientId(null);
             }}
-        />
+          />
       </div>
     </div>
   );

@@ -2,97 +2,69 @@
 
 import { Button, Input } from "@nextui-org/react";
 import Link from "next/link";
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { ExportIcon } from "@/components/icons/accounts/export-icon";
 import { HouseIcon } from "@/components/icons/breadcrumb/house-icon";
-import { CategoryDto } from "@/services/Dto/CategoryDto";
-import { CategoryService } from "@/services/Category/CategoryService";
+
 import SizeTable from "@/components/aplication/sizes/SizeTable";
 import SizeModal from "@/components/aplication/sizes/SizeModal";
 import { SizeDto } from "@/services/Dto/SizeDto";
+
 import { SizeContext } from "@/context/SizeContext/sizeContext";
-import { CreateSizeDto } from "@/services/Size/dto/CreateSizeDto";
-import { UpdateSizeDto } from "@/services/Size/dto/UpdateSizeDto";
+import { SearchIcon } from 'lucide-react';
+import ConfirmDialog from "@/components/modal/ConfirmDialog";
+import { ToastContext } from "@/context/ToastContext/ToastContext";
+import { ToastType } from "@/components/Toast/Toast";
 
 export default function Sizes() {
-  const [categories, setCategories] = React.useState<CategoryDto[]>([]);
-  const [selectedSize, setSelectedSize] = React.useState<SizeDto | null>(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [isViewMode, setIsViewMode] = React.useState(false);
+  const {
+    sizes,
+    loading,
+    error,
+    deleteSize,
+    openModal
+  } = useContext(SizeContext)!;
 
-  const categoryService = new CategoryService();
-  const sizeContext = useContext(SizeContext);
+  const { showToast } = useContext(ToastContext)!;
 
-  if (!sizeContext) {
-    throw new Error("SizeContext must be used within SizeProvider");
-  }
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
+  const [selectedSizeId, setSelectedSizeId] = React.useState<number | null>(null);
 
-  const { sizes, createSize, updateSize, deleteSize, loading } = sizeContext;
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const fetchedCategories = await categoryService.getAll();
-      setCategories(fetchedCategories);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
+  const filteredSizes = React.useMemo(() => {
+    return sizes.filter(size =>
+      size.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [sizes, searchQuery]);
 
   const handleAdd = () => {
-    setSelectedSize(null);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(null, false);
   };
 
   const handleView = (size: SizeDto) => {
-    setSelectedSize(size);
-    setIsViewMode(true);
-    setIsModalOpen(true);
+    openModal(size, true);
   };
 
   const handleEdit = (size: SizeDto) => {
-    setSelectedSize(size);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(size, false);
   };
 
   const handleDelete = async (id: number) => {
     try {
       await deleteSize(id);
-    } catch (error) {
-      console.error("Error deleting size:", error);
+      showToast("Talla eliminada exitosamente", ToastType.SUCCESS);
+      setIsConfirmDialogOpen(false);
     }
-  };
-
-  const handleSubmit = async (formData: CreateSizeDto | UpdateSizeDto) => {
-    try {
-      if (selectedSize) {
-        await updateSize(selectedSize.id, {
-          name: formData.name,
-          categoryId: formData.categoryId
-        });
-      } else {
-        await createSize(formData as CreateSizeDto);
-      }
-      setIsModalOpen(false);
-      setSelectedSize(null);
-    } catch (error) {
-      console.error("Error submitting size data:", error);
+    catch (error) {
+      showToast("Error:" + error, ToastType.ERROR);
     }
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedSize(null);
-    setIsViewMode(false);
   };
 
   if (loading) {
     return <div>Loading...</div>;
+  }
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
   }
 
   return (
@@ -101,54 +73,66 @@ export default function Sizes() {
         <li className="flex gap-2">
           <HouseIcon />
           <Link href={"/"}>
-            <span>Home</span>
+            <span>Inicio</span>
           </Link>
           <span> / </span>
         </li>
         <li className="flex gap-2">
-          <span>Sizes</span>
+          <span>Tallas</span>
           <span> / </span>
         </li>
         <li className="flex gap-2">
-          <span>List</span>
+          <span>Lista</span>
         </li>
       </ul>
-      <h3 className="text-xl font-semibold">All Sizes</h3>
+      <h3 className="text-xl font-semibold">Todas las tallas</h3>
 
       <div className="flex justify-between flex-wrap gap-4 items-center">
-        <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
-          <Input
-            classNames={{
-              input: "w-full",
-              mainWrapper: "w-full",
-            }}
-            placeholder="Search size"
-          />
-        </div>
+        <Input
+          className="w-full sm:max-w-[300px]"
+          placeholder="Buscar talla..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          startContent={<SearchIcon className="text-default-400" size={20} />}
+        />
         <div className="flex flex-row gap-3.5 flex-wrap">
-          <Button color="primary" onPress={handleAdd}>Add Size</Button>
-          <Button color="primary" startContent={<ExportIcon />}>
-            Export to CSV
+          <Button color="primary" onPress={handleAdd}>Agregar talla</Button>
+          <Button color="secondary" startContent={<ExportIcon />}>
+            Exportar en csv
           </Button>
         </div>
         <div className="w-full flex flex-col gap-4">
           <SizeTable
-            categories={categories}
-            sizes={sizes}
+            sizes={filteredSizes}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={(sizeId: number) => {
+              setSelectedSizeId(sizeId);
+              setIsConfirmDialogOpen(true);
+            }}
             onView={handleView}
           />
           <SizeModal
-            isOpen={isModalOpen}
-            onClose={handleModalClose}
-            onSubmit={handleSubmit}
-            size={selectedSize}
-            isViewMode={isViewMode}
-            categories={categories}
+            showToast={showToast} />
+          <ConfirmDialog
+            title="¿Estás seguro de que deseas eliminar esta talla?"
+            isOpen={isConfirmDialogOpen}
+            onConfirm={() => {
+              if (selectedSizeId) {
+                handleDelete(selectedSizeId);
+              }
+            }}
+            onClose={() => {
+              setIsConfirmDialogOpen(false);
+              setSelectedSizeId(null);
+            }}
+            onCancel={() => {
+              setIsConfirmDialogOpen(false);
+              setSelectedSizeId(null);
+            }}
           />
         </div>
       </div>
     </div>
   );
 }
+

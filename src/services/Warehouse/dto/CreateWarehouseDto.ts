@@ -1,6 +1,7 @@
-export interface CreateWarehouseDto{
+export interface CreateWarehouseDto {
     readonly name: string;
     readonly rowMax: number;
     readonly columnMax: number;
-    readonly status: string;
+    readonly description: string;
+    readonly color: string;
 }

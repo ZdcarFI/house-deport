@@ -41,7 +41,7 @@ export class CategoryService extends Service {
     }
 
     async updateById(id: number, product: UpdateCategoryDto): Promise<CategoryDto> {
-        const response: AxiosResponse = await this.apiFetch.put(`${this.param}/${id}`, product);
+        const response: AxiosResponse = await this.apiFetch.patch(`${this.param}/${id}`, product);
         return response.data;
     }
 }

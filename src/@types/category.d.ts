@@ -13,4 +13,10 @@ export type CategoryContextType = {
     updateCategoryWithNewSize: (categoryId: number, newSize: SizeDto) => void; 
     loading: boolean;
     error: string;
+    category: CategoryDto;
+    isModalOpen: boolean;
+    selectedCategory: CategoryDto | null;
+    isViewMode: boolean;
+    openModal: (category: CategoryDto | null, viewMode: boolean) => void;
+    closeModal: () => void;
 };

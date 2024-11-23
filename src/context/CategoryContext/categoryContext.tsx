@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useCallback, useState, useReducer, useEffect, useMemo } from "react"
 import { CategoryService } from "@/services/Category/CategoryService"
 import { CategoryActionType, CategoryState, categoryReducer } from "./categoryReducer"
 import { CategoryContextType } from "@/@types/category"
@@ -12,15 +12,21 @@ import { SizeDto } from "@/services/Dto/SizeDto"
 
 export const CategoryContext = React.createContext<CategoryContextType | null>(null)
 const categoryService = new CategoryService()
+const categoryInitialState: CategoryDto = {
+    id: 0,
+    name: '',
+    sizes: [],
+};
 
 const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [state, dispatch] = React.useReducer(categoryReducer, { categories: [] } as CategoryState)
-    const [loading, setLoading] = React.useState<boolean>(false)
-    const [error, setError] = React.useState<string>('')
-    const updateCategoryWithNewSize = (categoryId: number, newSize: SizeDto) => {
-        dispatch({ type: CategoryActionType.UPDATE_CATEGORY_SIZE, payload: { categoryId, newSize } })
-    }
-    React.useEffect(() => {
+    const [state, dispatch] = useReducer(categoryReducer, { categories: [] } as CategoryState)
+    const [loading, setLoading] = useState<boolean>(false)
+    const [error, setError] = useState<string>('')
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<CategoryDto | null>(null);
+    const [isViewMode, setIsViewMode] = useState(false);
+
+    useEffect(() => {
         const fetchCategories = async () => {
             setLoading(true)
             try {
@@ -56,6 +62,7 @@ const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children })
         try {
             const res = await categoryService.create(category)
             dispatch({ type: CategoryActionType.ADD_CATEGORY, payload: res })
+            setSelectedCategory(categoryInitialState);
         } catch (e) {
             handleError(e)
         }
@@ -63,12 +70,13 @@ const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children })
 
     const updateCategory = async (id: number, category: UpdateCategoryDto): Promise<void> => {
         try {
-            const res = await categoryService.updateById(id, category)
-            dispatch({ type: CategoryActionType.EDIT_CATEGORY, payload: res })
+            const res = await categoryService.updateById(id, category);
+            dispatch({ type: CategoryActionType.EDIT_CATEGORY, payload: res });
+            setSelectedCategory(null);
         } catch (e) {
-            handleError(e)
+            handleError(e);
         }
-    }
+    };
 
     const getCategory = async (id: number): Promise<CategoryDto> => {
         try {
@@ -88,7 +96,23 @@ const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children })
         }
     }
 
-    const values = React.useMemo(() => ({
+    const updateCategoryWithNewSize = (categoryId: number, newSize: SizeDto) => {
+        dispatch({ type: CategoryActionType.UPDATE_CATEGORY_SIZE, payload: { categoryId, newSize } })
+    }
+
+    const openModal = useCallback((category: CategoryDto | null = null, viewMode: boolean = false) => {
+        setSelectedCategory(category);
+        setIsViewMode(viewMode);
+        setIsModalOpen(true);
+    }, []);
+
+    const closeModal = useCallback(() => {
+        setIsModalOpen(false);
+        setSelectedCategory(null);
+        setIsViewMode(false);
+    }, []);
+
+    const values = useMemo(() => ({
         categories: state.categories,
         createCategory,
         updateCategory,
@@ -97,8 +121,14 @@ const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children })
         loading,
         getCategory,
         error,
-        updateCategoryWithNewSize
-    }), [state.categories, loading, error])
+        updateCategoryWithNewSize,
+        category: categoryInitialState,
+        isModalOpen,
+        selectedCategory,
+        isViewMode,
+        openModal,
+        closeModal,
+    }), [state.categories, loading, error, isModalOpen, selectedCategory, isViewMode, openModal, closeModal])
 
     return (
         <CategoryContext.Provider value={values}>
@@ -108,3 +138,4 @@ const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children })
 }
 
 export default CategoryProvider
+

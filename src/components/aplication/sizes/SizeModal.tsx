@@ -1,95 +1,88 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal'
 import { Button } from '@nextui-org/button'
 import { Input } from '@nextui-org/input'
-import { Select, SelectItem } from '@nextui-org/select'
-import { SizeDto } from '@/services/Dto/SizeDto'
 import { CreateSizeDto } from '@/services/Size/dto/CreateSizeDto'
 import { UpdateSizeDto } from '@/services/Size/dto/UpdateSizeDto'
-import { CategoryDto } from '@/services/Dto/CategoryDto'
+import { SizeContext } from '@/context/SizeContext/sizeContext'
+import { ToastType } from '@/components/Toast/Toast'
 
-interface SizeModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (formData: CreateSizeDto | UpdateSizeDto) => void
-  size: SizeDto | null
-  isViewMode: boolean
-  categories: CategoryDto[]
+interface Props {
+  showToast: (message: string, type: ToastType) => void;
 }
 
-export default function SizeModal({ isOpen, onClose, onSubmit, size, isViewMode, categories }: SizeModalProps) {
-  const [formData, setFormData] = useState<CreateSizeDto | UpdateSizeDto>({
-    name: '',
-    categoryId: categories[0]?.id || 0,
-  })
+export default function SizeModal({ showToast }: Props) {
+  const { isModalOpen, closeModal, selectedSize, isViewMode, createSize, updateSize } = useContext(SizeContext)!;
+  const [formData, setFormData] = useState<CreateSizeDto | UpdateSizeDto>({ name: '' });
 
   useEffect(() => {
-    if (size) {
-      setFormData({
-        name: size.name || '',
-        categoryId: size.categoryId || categories[0]?.id || 0
-      })
+    if (selectedSize) {
+      setFormData({ name: selectedSize.name || '' });
     } else {
-      setFormData({
-        name: '',
-        categoryId: categories[0]?.id || 0
-      })
+      setFormData({ name: '' });
     }
-  }, [size, categories])
+  }, [selectedSize]);
 
   const handleInputChange = (value: string) => {
-    setFormData(prev => ({ ...prev, name: value }))
-  }
+    setFormData(prev => ({ ...prev, name: value }));
+  };
 
-  const handleCategoryChange = (value: string) => {
-    const categoryId = parseInt(value) || categories[0]?.id || 0
-    setFormData(prev => ({ ...prev, categoryId }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
-
-  const categoryIdString = (formData.categoryId || categories[0]?.id || 0).toString()
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (selectedSize) {
+        await updateSize(selectedSize.id, formData as UpdateSizeDto);
+        showToast("Talla actualizada exitosamente", ToastType.SUCCESS);
+      } else {
+        await createSize(formData as CreateSizeDto);
+        showToast("Talla creada exitosamente", ToastType.SUCCESS);
+      }
+      closeModal();
+    } catch (error) {
+      showToast("Error al enviar los datos de la talla:" + error, ToastType.ERROR)
+    }
+  };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={closeModal}
+      scrollBehavior="inside"
+      classNames={{
+        base: "max-w-xl",
+        header: "border-b border-gray-200 dark:border-gray-700",
+        footer: "border-t border-gray-200 dark:border-gray-700",
+      }}
+    >
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
-            {isViewMode ? 'View Size' : size ? 'Edit Size' : 'Add Size'}
+            <h2 className="text-xl font-bold">
+              {isViewMode ? 'Ver talla' : selectedSize ? 'Editar talla' : 'Agregar talla'}
+            </h2>
           </ModalHeader>
           <ModalBody>
             <Input
               label="Name"
               value={formData.name}
               onValueChange={handleInputChange}
-              isReadOnly={isViewMode}
-            />
-            <Select
-              label="Category"
-              selectedKeys={[categoryIdString]}
-              defaultSelectedKeys={[categoryIdString]}
-              onChange={(e) => handleCategoryChange(e.target.value)}
+              placeholder="Escriba el nombre de la talla"
+              isRequired={!isViewMode}
               isDisabled={isViewMode}
-            >
-              {categories.map((category) => (
-                <SelectItem key={category.id.toString()} value={category.id.toString()}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </Select>
+              classNames={{
+                label: "font-semibold",
+              }}
+            />
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose}>
+            <Button color="danger" variant="light" onPress={closeModal}>
               Close
             </Button>
             {!isViewMode && (
               <Button color="primary" type="submit">
-                {size ? 'Update' : 'Create'}
+                {selectedSize ? 'Update' : 'Create'}
               </Button>
             )}
           </ModalFooter>
@@ -98,3 +91,4 @@ export default function SizeModal({ isOpen, onClose, onSubmit, size, isViewMode,
     </Modal>
   )
 }
+

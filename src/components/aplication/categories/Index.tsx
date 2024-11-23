@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { Button, Input } from "@nextui-org/react";
 import Link from "next/link";
 import { ExportIcon } from "@/components/icons/accounts/export-icon";
@@ -12,69 +12,78 @@ import { UpdateCategoryDto } from "@/services/Category/dto/UpdateCategoryDto";
 import CategoryTable from "@/components/aplication/categories/CategoryTable";
 import CategoryModal from "@/components/aplication/categories/CategoryModal";
 import { CategoryContext } from '@/context/CategoryContext/categoryContext';
+import { SizeContext } from '@/context/SizeContext/sizeContext';
+import { SearchIcon } from 'lucide-react';
+import ConfirmDialog from "@/components/modal/ConfirmDialog";
+import { SizeDto } from "@/services/Dto/SizeDto";
+import { ToastContext } from '@/context/ToastContext/ToastContext';
+import { ToastType } from '@/components/Toast/Toast';
 
 export default function Categories() {
-  const { 
-    categories, 
-    loading, 
-    error, 
-    createCategory, 
-    updateCategory, 
-    deleteCategory 
-  } = React.useContext(CategoryContext)!;
+  const {
+    categories,
+    loading,
+    error,
+    deleteCategory,
+    openModal
+  } = useContext(CategoryContext)!;
+  const { showToast } = useContext(ToastContext)!;
 
-  const [selectedCategory, setSelectedCategory] = React.useState<CategoryDto | null>(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [isViewMode, setIsViewMode] = React.useState(false);
+
+
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
+
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<number | null>(null);
 
   const filteredCategories = React.useMemo(() => {
-    return categories.filter(category => 
+    return categories.filter(category =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [categories, searchQuery]);
 
   const handleAdd = () => {
-    setSelectedCategory(null);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(null, false);
   };
 
   const handleView = (category: CategoryDto) => {
-    setSelectedCategory(category);
-    setIsViewMode(true);
-    setIsModalOpen(true);
+    openModal(category, true);
   };
-  
+
   const handleEdit = (category: CategoryDto) => {
-    setSelectedCategory(category);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(category, false);
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
+    try {
       await deleteCategory(id);
+      showToast("Categoria eliminada exitosamente", ToastType.SUCCESS);
+      setIsConfirmDialogOpen(false);
+    }
+    catch (error) {
+      showToast("Error:" + error, ToastType.ERROR);
     }
   };
 
-  const handleSubmit = async (formData: CreateCategoryDto | UpdateCategoryDto) => {
-    try {
-      if (selectedCategory) {
-        await updateCategory(selectedCategory.id, formData as UpdateCategoryDto);
-      } else {
-        await createCategory(formData as CreateCategoryDto);
-      }
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error submitting category data:", error);
-    }
-  };
+
+  // const handleCreateSize = async (formData: { name: string }): Promise<SizeDto> => {
+  //   try {
+  //     const newSize = await createSize(formData);
+  //     if (!newSize) {
+  //       throw new Error("Failed to create size");
+  //     }
+  //     return newSize;
+  //   } catch (error) {
+  //     console.error("Error creating size:", error);
+  //     throw error;
+  //   }
+  // };
+
+
 
   if (loading) {
-    return <div className="flex justify-center items-center h-96">Loading...</div>;
+    return <div>Loading...</div>;
   }
-
   if (error) {
     return <div className="text-red-500 text-center">{error}</div>;
   }
@@ -85,52 +94,68 @@ export default function Categories() {
         <li className="flex gap-2">
           <HouseIcon />
           <Link href={"/"}>
-            <span>Home</span>
+            <span>Inicio</span>
           </Link>
           <span> / </span>{" "}
         </li>
         <li className="flex gap-2">
           <UsersIcon />
-          <span>Categories</span>
+          <span>Categorías</span>
           <span> / </span>{" "}
         </li>
         <li className="flex gap-2">
-          <span>List</span>
+          <span>Lista</span>
         </li>
       </ul>
-      <h3 className="text-xl font-semibold">All Categories</h3>
+      <h3 className="text-xl font-semibold">Todas las Categorías</h3>
 
       <div className="flex justify-between flex-wrap gap-4 items-center">
-        <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
-          <Input
-            className="w-full md:w-72"
-            placeholder="Search categories..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+        <Input
+          className="w-full sm:max-w-[300px]"
+          placeholder="Buscar categoría..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          startContent={<SearchIcon className="text-default-400" size={20} />}
+        />
         <div className="flex flex-row gap-3.5 flex-wrap">
-          <Button color="primary" onPress={handleAdd}>Add Category</Button>
-          <Button color="primary" startContent={<ExportIcon />}>
-            Export to CSV
+          <Button color="primary" onPress={handleAdd}>Agregar Categoría</Button>
+          <Button color="secondary" startContent={<ExportIcon />}>
+            Exportar a CSV
           </Button>
         </div>
         <div className="w-full flex flex-col gap-4">
           <CategoryTable
             categories={filteredCategories}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={(categoryId: number) => {
+              setSelectedCategoryId(categoryId);
+              setIsConfirmDialogOpen(true);
+            }}
             onView={handleView}
           />
           <CategoryModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={handleSubmit}
-            category={selectedCategory}
-            isViewMode={isViewMode}
+            showToast={showToast} />
+          <ConfirmDialog
+            title="¿Estás seguro de que deseas eliminar esta categoria?"
+            isOpen={isConfirmDialogOpen}
+            onConfirm={() => {
+              if (selectedCategoryId) {
+                handleDelete(selectedCategoryId);
+              }
+            }}
+            onClose={() => {
+              setIsConfirmDialogOpen(false);
+              setSelectedCategoryId(null);
+            }}
+            onCancel={() => {
+              setIsConfirmDialogOpen(false);
+              setSelectedCategoryId(null);
+            }}
           />
+         
         </div>
       </div>
     </div>
   );
 }
+

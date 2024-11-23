@@ -1,7 +1,3 @@
-import { SizeDto } from "@/services/Dto/SizeDto";
-import { CreateSizeDto } from "@/services/Size/dto/CreateSizeDto";
-import { UpdateSizeDto } from "@/services/Size/dto/UpdateSizeDto";
-
 
 export type SizeContextType = {
     sizes: SizeDto[];
@@ -12,4 +8,10 @@ export type SizeContextType = {
     getSize: (id: number) => Promise<SizeDto>;
     loading: boolean;
     error: string;
+    size: SizeDto;
+    isModalOpen: boolean;
+    selectedSize: SizeDto | null;
+    isViewMode: boolean;
+    openModal: (size: SizeDto | null, viewMode: boolean) => void;
+    closeModal: () => void;
 };

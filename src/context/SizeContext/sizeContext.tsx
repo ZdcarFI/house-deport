@@ -1,108 +1,133 @@
 "use client"
+
+import React, { createContext, useReducer, useState, useMemo, useEffect, useCallback } from "react";
 import { SizeService } from "@/services/Size/SizeService";
-import React from "react";
 import { SizeActionType, SizeState, sizeReducer } from "./sizeReducer";
 import { SizeContextType } from "@/@types/size";
 import { AxiosError } from "axios";
 import { CreateSizeDto } from "@/services/Size/dto/CreateSizeDto";
 import { UpdateSizeDto } from "@/services/Size/dto/UpdateSizeDto";
 import { SizeDto } from "@/services/Dto/SizeDto";
-import { CategoryContext } from "../CategoryContext/categoryContext";
 
-export const SizeContext = React.createContext<SizeContextType | null>(null);
+export const SizeContext = createContext<SizeContextType | null>(null);
+
 const sizeService = new SizeService();
+const sizeInitialState: SizeDto = {
+  id: 0,
+  name: ''
+};
+
 const SizeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [state, dispatch] = React.useReducer(sizeReducer, { sizes: [] } as SizeState);
-    const [loading, setLoading] = React.useState<boolean>(false);
-    const [error, setError] = React.useState<string>('');
-    const categoryContext = React.useContext(CategoryContext);
-    React.useEffect(() => {
-        const fetchSizes = async () => {
-            setLoading(true);
-            try {
-                await getSizes();
-            } catch (e) {
-                console.error("Error loading sizes:", e);
-            } finally {
-                setLoading(false);
-            }
-        };
+  const [state, dispatch] = useReducer(sizeReducer, { sizes: [] } as SizeState);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<SizeDto | null>(null);
+  const [isViewMode, setIsViewMode] = useState(false);
 
-        fetchSizes();
-    }, []);
-
-    const handleError = (e: unknown) => {
-        if (e instanceof AxiosError) {
-            setError(e.response?.data?.message || e.message);
-        } else {
-            setError((e as Error).message);
-        }
+  useEffect(() => {
+    const fetchSizes = async () => {
+      setLoading(true);
+      try {
+        await getSizes();
+      } catch (e) {
+        console.error("Error loading sizes:", e);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const getSizes = async (): Promise<void> => {
-        try {
-            const sizes = await sizeService.getAll();
-            dispatch({ type: SizeActionType.LOAD_SIZES, payload: sizes });
-        } catch (e) {
-            handleError(e);
-        }
-    };
+    fetchSizes();
+  }, []);
 
-    const createSize = async (size: CreateSizeDto): Promise<void> => {
-        try {
-            const res = await sizeService.create(size);
-            dispatch({ type: SizeActionType.ADD_SIZE, payload: res });
-            if (categoryContext) {
-                categoryContext.updateCategoryWithNewSize(size.categoryId, res);
-            }
-        } catch (e) {
-            handleError(e);
-        }
-    };
+  const handleError = (e: unknown) => {
+    if (e instanceof AxiosError) {
+      setError(e.response?.data?.message || e.message);
+    } else {
+      setError((e as Error).message);
+    }
+  };
 
-    const updateSize = async (id: number, size: UpdateSizeDto): Promise<void> => {
-        try {
-            const res = await sizeService.updateById(id, size);
-            dispatch({ type: SizeActionType.EDIT_SIZE, payload: res });
-        } catch (e) {
-            handleError(e);
-        }
-    };
+  const getSizes = async (): Promise<void> => {
+    try {
+      const sizes = await sizeService.getAll();
+      dispatch({ type: SizeActionType.LOAD_SIZES, payload: sizes });
+    } catch (e) {
+      handleError(e);
+    }
+  };
 
-    const getSize = async (id: number): Promise<SizeDto> => {
-        try {
-            return await sizeService.getById(id);
-        } catch (e) {
-            handleError(e);
-            throw e;
-        }
-    };
+  const createSize = async (size: CreateSizeDto): Promise<void> => {
+    try {
+      const res = await sizeService.create(size);
+      dispatch({ type: SizeActionType.ADD_SIZE, payload: res });
+      setSelectedSize(sizeInitialState);
+    } catch (e) {
+      handleError(e);
+    }
+  };
 
-    const deleteSize = async (id: number): Promise<void> => {
-        try {
-            await sizeService.deleteById(id);
-            dispatch({ type: SizeActionType.REMOVE_SIZE, payload: id });
-        } catch (e) {
-            handleError(e);
-        }
-    };
+  const updateSize = async (id: number, size: UpdateSizeDto): Promise<void> => {
+    try {
+      const res = await sizeService.updateById(id, size);
+      dispatch({ type: SizeActionType.EDIT_SIZE, payload: res });
+      setSelectedSize(sizeInitialState);
+    } catch (e) {
+      handleError(e);
+    }
+  };
 
-    const values = React.useMemo(() => ({
-        sizes: state.sizes,
-        createSize,
-        updateSize,
-        deleteSize,
-        getSizes,
-        loading,
-        getSize,
-        error
-    }), [state.sizes, loading, error]);
+  const getSize = async (id: number): Promise<SizeDto> => {
+    try {
+      return await sizeService.getById(id);
+    } catch (e) {
+      handleError(e);
+      throw e;
+    }
+  };
 
-    return (
-        <SizeContext.Provider value={values}>
-            {children}
-        </SizeContext.Provider>
-    );
+  const deleteSize = async (id: number): Promise<void> => {
+    try {
+      await sizeService.deleteById(id);
+      dispatch({ type: SizeActionType.REMOVE_SIZE, payload: id });
+    } catch (e) {
+      handleError(e);
+    }
+  };
+
+  const openModal = useCallback((size: SizeDto | null = null, viewMode: boolean = false) => {
+    setSelectedSize(size);
+    setIsViewMode(viewMode);
+    setIsModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  const values = useMemo(() => ({
+    sizes: state.sizes,
+    createSize,
+    updateSize,
+    deleteSize,
+    getSizes,
+    loading,
+    getSize,
+    error,
+    size: sizeInitialState,
+    isModalOpen,
+    selectedSize,
+    isViewMode,
+    openModal,
+    closeModal,
+  }), [state.sizes, loading, error, isModalOpen, selectedSize, isViewMode, openModal, closeModal]);
+
+  return (
+    <SizeContext.Provider value={values}>
+      {children}
+    </SizeContext.Provider>
+  );
 };
 
 export default SizeProvider;
+

@@ -1,12 +1,8 @@
 export interface UserDto{
-    id: number,
-    firstName: string,
-    lastName: string,
-    username: string,
-    email: string,
-    gender: string,
-    status: string,
-    lastSession:Date,
-    created: string,
-    updated: string
+    readonly id: number,
+    readonly firstName: string,
+    readonly lastName: string,
+    readonly username: string,
+    readonly email: string,
+    readonly gender: string,
 }

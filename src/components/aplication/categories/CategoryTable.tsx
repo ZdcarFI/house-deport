@@ -39,7 +39,7 @@ export default function CategoryTable({ categories, onView, onEdit, onDelete }: 
       case 'sizes':
         return category.sizes.map(size => size.name).join(', ');
       default:
-        return category[columnKey as keyof CategoryDto];
+        return null
     }
   };
 

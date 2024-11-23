@@ -1,4 +1,4 @@
 export interface CreateSizeDto {
-    name: string;
-    categoryId: number;
+    readonly name: string;
+    
 }

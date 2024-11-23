@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
 import { Button, Input } from "@nextui-org/react";
 import Link from "next/link";
 import { ExportIcon } from "@/components/icons/accounts/export-icon";
@@ -9,27 +9,26 @@ import { UsersIcon } from "@/components/icons/breadcrumb/users-icon";
 import { UserDto } from "@/services/Dto/UserDto";
 import UserTable from "@/components/aplication/users/UserTable";
 import UserModal from "@/components/aplication/users/UserModal";
-import { CreateUserDto } from "@/services/User/dto/CreateUserDto";
-import { UpdateUserDto } from "@/services/User/dto/UpdateUserDto";
+
 import { UserContext } from "@/context/UserContext/userContext";
 import ConfirmDialog from "@/components/modal/ConfirmDialog";
 import { SearchIcon } from "lucide-react";
+import { ToastType } from "@/components/Toast/Toast";
+import { ToastContext } from "@/context/ToastContext/ToastContext";
 
 export default function Users() {
     const {
         users,
         loading,
         error,
-        createUser,
-        updateUser,
-        deleteUser
+        deleteUser,
+        openModal
     } = React.useContext(UserContext)!;
+    const { showToast } = useContext(ToastContext)!;
 
-    const [selectedUser, setSelectedUser] = React.useState<UserDto | null>(null);
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [isViewMode, setIsViewMode] = React.useState(false);
+    const [selectedUserId, setSelectedUserId] = React.useState<number | null>(null);
+
     const [searchQuery, setSearchQuery] = React.useState("");
-    const [title, setTitle] = React.useState("");
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
 
     const filteredUsers = React.useMemo(() => {
@@ -41,39 +40,25 @@ export default function Users() {
     }, [users, searchQuery]);
 
     const handleAdd = () => {
-        setSelectedUser(null);
-        setIsViewMode(false);
-        setIsModalOpen(true);
+        openModal(null, false);
     };
 
     const handleView = (user: UserDto) => {
-        setSelectedUser(user);
-        setIsViewMode(true);
-        setIsModalOpen(true);
+        openModal(user, true);
     };
 
     const handleEdit = (user: UserDto) => {
-        setSelectedUser(user);
-        setIsViewMode(false);
-        setIsModalOpen(true);
+        openModal(user, false);
     };
 
     const handleDelete = async (id: number) => {
-        await deleteUser(id);
-        setTitle("");
-        setIsConfirmDialogOpen(false);
-    };
-
-    const handleSubmit = async (formData: CreateUserDto | UpdateUserDto) => {
         try {
-            if (selectedUser) {
-                await updateUser(selectedUser.id, formData as UpdateUserDto);
-            } else {
-                await createUser(formData as CreateUserDto);
-            }
-            setIsModalOpen(false);
-        } catch (error) {
-            console.error("Error submitting user data:", error);
+            await deleteUser(id);
+            showToast("Usuario eliminado exitosamente", ToastType.SUCCESS);
+            setIsConfirmDialogOpen(false);
+        }
+        catch (error) {
+            showToast("Error:" + error, ToastType.ERROR);
         }
     };
 
@@ -108,57 +93,50 @@ export default function Users() {
             <h3 className="text-xl font-semibold">Todos los usuarios</h3>
 
             <div className="flex justify-between flex-wrap gap-4 items-center">
-             
-                    <Input
-                        className="w-full sm:max-w-[300px]"
-                        placeholder="Buscar usuarios..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        startContent={<SearchIcon className="text-default-400" size={20} />}
-                    />
-                    <div className="flex gap-3">
-                        <Button color="primary" onPress={handleAdd}>
-                            Agregar Usuario
-                        </Button>
-                        <Button color="secondary" startContent={<ExportIcon />}>
-                            Export to CSV
-                        </Button>
-                    </div>
-              
+
+                <Input
+                    className="w-full sm:max-w-[300px]"
+                    placeholder="Buscar usuarios..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    startContent={<SearchIcon className="text-default-400" size={20} />}
+                />
+                <div className="flex gap-3">
+                    <Button color="primary" onPress={handleAdd}>
+                        Agregar Usuario
+                    </Button>
+                    <Button color="secondary" startContent={<ExportIcon />}>
+                        Export to CSV
+                    </Button>
+                </div>
+
                 <div className="w-full flex flex-col gap-4">
                     <UserTable
                         users={filteredUsers}
                         onEdit={handleEdit}
                         onDelete={(userId: number) => {
-                            const selectedUser = users.find(user => user.id === userId);
-                            setSelectedUser(selectedUser);
+                            setSelectedUserId(userId);
                             setIsConfirmDialogOpen(true);
-                            setTitle("¿Estás seguro de que deseas eliminar este usuario?");
                         }}
                         onView={handleView}
                     />
                     <UserModal
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                        onSubmit={handleSubmit}
-                        user={selectedUser}
-                        isViewMode={isViewMode}
-                    />
+                        showToast={showToast} />
                     <ConfirmDialog
-                        title={title}
+                        title="¿Estás seguro de que deseas eliminar este usuario?"
                         isOpen={isConfirmDialogOpen}
                         onConfirm={() => {
-                            if (selectedUser) {
-                                handleDelete(selectedUser.id);
+                            if (selectedUserId) {
+                                handleDelete(selectedUserId);
                             }
                         }}
                         onClose={() => {
                             setIsConfirmDialogOpen(false);
-                            setTitle("");
+                            setSelectedUserId(null);
                         }}
                         onCancel={() => {
                             setIsConfirmDialogOpen(false);
-                            setTitle("");
+                            setSelectedUserId(null);
                         }}
                     />
                 </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal'
 import { Button } from '@nextui-org/button'
 import { Input } from '@nextui-org/input'
@@ -10,16 +10,17 @@ import { EyeSlashFilledIcon } from '@/components/icons/EyeSlashFilledIcon'
 import { UserDto } from '@/services/Dto/UserDto'
 import { CreateUserDto } from '@/services/User/dto/CreateUserDto'
 import { UpdateUserDto } from '@/services/User/dto/UpdateUserDto'
+import { ToastType } from '@/components/Toast/Toast'
+import { UserContext } from '@/context/UserContext/userContext'
 
-interface UserModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (formData: CreateUserDto | UpdateUserDto) => void
-  user: UserDto | null
-  isViewMode: boolean
+interface Props {
+  showToast: (message: string, type: ToastType) => void;
 }
 
-export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode }: UserModalProps) {
+export default function UserModal({ showToast }: Props) {
+  const { isModalOpen, closeModal, selectedUser, isViewMode, createUser, updateUser } = useContext(UserContext)!;
+
+
   const [formData, setFormData] = useState<Partial<CreateUserDto & UpdateUserDto & { confirmPassword: string }>>({
     firstName: '',
     lastName: '',
@@ -33,13 +34,13 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    if (user) {
+    if (selectedUser) {
       setFormData({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        username: user.username,
-        email: user.email,
-        gender: user.gender,
+        firstName: selectedUser.firstName,
+        lastName: selectedUser.lastName,
+        username: selectedUser.username,
+        email: selectedUser.email,
+        gender: selectedUser.gender,
       })
     } else {
       setFormData({
@@ -52,7 +53,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
         gender: '',
       })
     }
-  }, [user])
+  }, [selectedUser])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -62,26 +63,19 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
     setFormData({ ...formData, gender: value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (user) {
-      const updateData: UpdateUserDto = {
-        firstName: formData.firstName || '',
-        lastName: formData.lastName || '',
-        password: formData.password || '',
-        gender: formData.gender || '',
+    try {
+      if (selectedUser) {
+        await updateUser(selectedUser.id, formData as UpdateUserDto);
+        showToast("Usuario actualizado exitosamente", ToastType.SUCCESS);
+      } else {
+        await createUser(formData as CreateUserDto);
+        showToast("Usuario creado exitosamente", ToastType.SUCCESS);
       }
-      onSubmit(updateData)
-    } else {
-      const createData: CreateUserDto = {
-        firstName: formData.firstName || '',
-        lastName: formData.lastName || '',
-        username: formData.username || '',
-        email: formData.email || '',
-        password: formData.password || '',
-        gender: formData.gender || ''
-      }
-      onSubmit(createData)
+      closeModal();
+    } catch (error) {
+      showToast("Error al enviar los datos de la talla:" + error, ToastType.ERROR)
     }
   }
 
@@ -89,8 +83,8 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
 
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
+      isOpen={isModalOpen}
+      onClose={closeModal}
       scrollBehavior="inside"
       classNames={{
         base: "max-w-xl",
@@ -102,7 +96,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
             <h2 className="text-xl font-bold">
-              {isViewMode ? 'Ver usuario' : user ? 'Editar usuario' : 'Agregar Usuario'}
+              {isViewMode ? 'Ver usuario' : selectedUser ? 'Editar usuario' : 'Agregar Usuario'}
             </h2>
           </ModalHeader>
           <ModalBody>
@@ -189,8 +183,8 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
                     type={isVisible ? "text" : "password"}
                     value={formData.password}
                     onChange={handleInputChange}
-                    placeholder={user ? "Escriba la nueva contraseña" : "Escriba la contraseña"}
-                    isRequired={!user}
+                    placeholder={selectedUser ? "Escriba la nueva contraseña" : "Escriba la contraseña"}
+                    isRequired={!selectedUser}
                     classNames={{
                       label: "font-semibold",
                     }}
@@ -208,7 +202,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     placeholder="Verifique la contraseña"
-                    isRequired={!user}
+                    isRequired={!selectedUser}
                     classNames={{
                       label: "font-semibold",
                     }}
@@ -221,12 +215,12 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
                 </>
               )}
 
-              {isViewMode && user && (
+              {isViewMode && selectedUser && (
                 <>
                   <Input
                     label="Fecha de creacion"
                     labelPlacement="outside"
-                    value={new Date(user.created).toLocaleString()}
+                    value={new Date(selectedUser.created).toLocaleString()}
                     isDisabled={isViewMode}
                     className="col-span-2"
                     classNames={{
@@ -236,7 +230,7 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
                   <Input
                     label="Última actualización"
                     labelPlacement="outside"
-                    value={new Date(user.updated).toLocaleString()}
+                    value={new Date(selectedUser.updated).toLocaleString()}
                     isDisabled={isViewMode}
                     className="col-span-2"
                     classNames={{
@@ -248,12 +242,12 @@ export default function UserModal({ isOpen, onClose, onSubmit, user, isViewMode 
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose}>
+            <Button color="danger" variant="light" onPress={closeModal}>
               Close
             </Button>
             {!isViewMode && (
               <Button color="primary" type="submit">
-                {user ? 'Update' : 'Create'}
+                {selectedUser ? 'Update' : 'Create'}
               </Button>
             )}
           </ModalFooter>
