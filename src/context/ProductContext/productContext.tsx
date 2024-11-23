@@ -1,19 +1,33 @@
 "use client"
 
 import React from "react"
-import { ProductService } from "@/services/Product/ProductService"
-import { ProductActionType, ProductState, productReducer } from "./productReducer"
-import { ProductContextType } from "@/@types/product"
-import { AxiosError } from "axios"
-import { CreateProductDto } from "@/services/Product/dto/CreateProductDto"
-import { UpdateProductDto } from "@/services/Product/dto/UpdateProductDto"
-import { ProductDto } from "@/services/Dto/ProductDto"
+import {ProductService} from "@/services/Product/ProductService"
+import {ProductActionType, ProductState, productReducer} from "./productReducer"
+import {ProductContextType} from "@/@types/product"
+import {AxiosError} from "axios"
+import {CreateProductDto} from "@/services/Product/dto/CreateProductDto"
+import {UpdateProductDto} from "@/services/Product/dto/UpdateProductDto"
+import {ProductDto} from "@/services/Dto/ProductDto"
 
 export const ProductContext = React.createContext<ProductContextType | null>(null)
 const productService = new ProductService()
 
-const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [state, dispatch] = React.useReducer(productReducer, { products: [] } as ProductState)
+const productInitialState: ProductDto =
+    {
+        id: 0,
+        name: '',
+        code: '',
+        price: 0,
+        stockInventory: 0,
+        stockStore: 0,
+        size: {id: 0, name: ''},
+        category: {id: 0, name: ''},
+        productWarehouse: []
+    };
+
+
+const ProductProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
+    const [state, dispatch] = React.useReducer(productReducer, {products: []} as ProductState)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [error, setError] = React.useState<string>('')
 
@@ -43,7 +57,7 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     const getProducts = async (): Promise<void> => {
         try {
             const products = await productService.getAll()
-            dispatch({ type: ProductActionType.LOAD_PRODUCTS, payload: products })
+            dispatch({type: ProductActionType.LOAD_PRODUCTS, payload: products})
         } catch (e) {
             handleError(e)
         }
@@ -52,7 +66,7 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     const createProduct = async (product: CreateProductDto): Promise<void> => {
         try {
             const res = await productService.create(product)
-            dispatch({ type: ProductActionType.ADD_PRODUCT, payload: res })
+            dispatch({type: ProductActionType.ADD_PRODUCT, payload: res})
         } catch (e) {
             handleError(e)
         }
@@ -61,7 +75,7 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     const updateProduct = async (id: number, product: UpdateProductDto): Promise<void> => {
         try {
             const res = await productService.updateById(id, product)
-            dispatch({ type: ProductActionType.EDIT_PRODUCT, payload: res })
+            dispatch({type: ProductActionType.EDIT_PRODUCT, payload: res})
         } catch (e) {
             handleError(e)
         }
@@ -79,7 +93,7 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     const deleteProduct = async (id: number): Promise<void> => {
         try {
             await productService.deleteById(id)
-            dispatch({ type: ProductActionType.REMOVE_PRODUCT, payload: id })
+            dispatch({type: ProductActionType.REMOVE_PRODUCT, payload: id})
         } catch (e) {
             handleError(e)
         }
@@ -93,7 +107,8 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         getProducts,
         loading,
         getProduct,
-        error
+        error,
+        productInitial: productInitialState
     }), [state.products, loading, error])
 
     return (

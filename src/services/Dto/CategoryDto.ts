@@ -5,3 +5,8 @@
         readonly name: string;
         readonly sizes: SizeDto[];
     }
+
+    export interface CategoryBasicDto {
+        readonly id: number;
+        readonly name: string;
+    }

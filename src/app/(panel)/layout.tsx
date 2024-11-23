@@ -9,6 +9,7 @@ import OrderProvider from "@/context/OrderContext/orderContext";
 import ClientProvider from "@/context/ClientContext/clientContext";
 import UserProvider from "@/context/UserContext/userContext";
 import { PropsWithChildren } from "react";
+import {ToastProvider} from "@/context/ToastContext/ToastContext";
 
 // Create a combined provider component to reduce nesting
 function Providers({ children }: PropsWithChildren) {
@@ -21,7 +22,7 @@ function Providers({ children }: PropsWithChildren) {
                             <ClientProvider>
                                 <UserProvider>
                                     <OrderProvider>
-                                        {children}
+                                        <ToastProvider>{children}</ToastProvider>
                                     </OrderProvider>
                                 </UserProvider>
                             </ClientProvider>

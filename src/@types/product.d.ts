@@ -11,4 +11,5 @@ export type ProductContextType = {
     getProduct: (id: number) => Promise<ProductDto>;
     loading: boolean;
     error: string;
+    productInitial: ProductDto;
 };

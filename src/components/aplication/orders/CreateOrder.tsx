@@ -1,52 +1,54 @@
 'use client'
 
-import React, {useState, useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import {
-    Input,
-    Select,
-    SelectItem,
+    Autocomplete,
+    AutocompleteItem,
     Button,
     Card,
     CardBody,
     CardHeader,
+    Input,
+    Select,
+    SelectItem,
     Table,
-    TableHeader,
-    TableColumn,
     TableBody,
-    TableRow,
-    TableCell, Autocomplete, AutocompleteItem
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow
 } from "@nextui-org/react";
 import {ProductContext} from '@/context/ProductContext/productContext';
 import {ClientContext} from '@/context/ClientContext/clientContext';
-import {CategoryContext} from '@/context/CategoryContext/categoryContext';
-import {SizeContext} from '@/context/SizeContext/sizeContext';
 import {CreateOrderDto, ProductBasicCreateDto} from '@/services/Order/dto/CreateOrderDto';
 import {OrderContext} from '@/context/OrderContext/orderContext';
-import {Plus, Minus} from 'lucide-react';
+import {Minus, Plus} from 'lucide-react';
 import {UserContext} from "@/context/UserContext/userContext";
 import {CirclePlus} from "@/components/icons/CirclePlus";
 import {ClientDto} from "@/services/Dto/ClienDto";
 import ClientModal from "@/components/aplication/clients/ClientModal";
-import {ProductDto} from "@/services/Dto/ProductDto";
+import {ProductDto, ProductWarehouseBasicDto} from "@/services/Dto/ProductDto";
 import {CheckIcon} from "@/components/icons/CheckIcon";
+import {ToastContext} from "@/context/ToastContext/ToastContext";
+import {ToastType} from "@/components/Toast/Toast";
+import {SizeDto} from "@/services/Dto/SizeDto";
+import {CategoryBasicDto} from "@/services/Dto/CategoryDto";
 
 export default function CreateOrderPage() {
-    const {products, getProducts} = React.useContext(ProductContext)!
+    const {products, getProducts, productInitial} = React.useContext(ProductContext)!
     const {user} = React.useContext(UserContext)!
+    const {
+        showToast
+    } = React.useContext(ToastContext)!
     const {
         clients,
         createClient
     } = React.useContext(ClientContext)!
-    const {categories} = React.useContext(CategoryContext)!
-    const {sizes} = React.useContext(SizeContext)!
     const {createOrder} = React.useContext(OrderContext)!
 
-    const [selectedCategory, setSelectedCategory] = useState('')
-    const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
+    const [selectedProduct, setSelectedProduct] = useState<ProductDto>(productInitial);
     const [quantity, setQuantity] = useState(0);
-    const [selectedSize, setSelectedSize] = useState('')
-    const [searchQuery, setSearchQuery] = useState('')
-    const [filteredProducts, setFilteredProducts] = useState(products)
+    const [location, setLocation] = useState<ProductWarehouseBasicDto | null>(null);
     const [cart, setCart] = useState<ProductBasicCreateDto[]>([])
     const [orderData, setOrderData] = useState<CreateOrderDto & {
         status: string,
@@ -65,10 +67,8 @@ export default function CreateOrderPage() {
         subtotal: 0,
         paymentType: '',
     })
-    const [subtotal, setSubtotal] = useState(0)
+
     const [total, setTotal] = useState(0)
-    const [enableTax, setEnableTax] = useState(false)
-    const [enableDiscount, setEnableDiscount] = useState(false);
     const [selectedClient, setSelectedClient] = React.useState<ClientDto | null>(null);
     const [inputValue, setInputValue] = useState('');
     const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -78,33 +78,10 @@ export default function CreateOrderPage() {
         getProducts();
     }, [])
 
-    useEffect(() => {
-        const filtered = products.filter(product =>
-            (selectedCategory === '' || product.category.id.toString() === selectedCategory) &&
-            (selectedSize === '' || product.size.id.toString() === selectedSize) &&
-            product.name.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        setFilteredProducts(filtered)
-    }, [selectedCategory, selectedSize, searchQuery, products])
 
     useEffect(() => {
         calculateTotals()
     }, [cart, orderData.tax, orderData.discount])
-
-    const handleProductDoubleClick = (product: ProductDto) => {
-        const existingProduct = cart.find(item => item.id === product.id)
-        if (existingProduct) {
-            if (existingProduct.quantity < product.stockStore) {
-                setCart(cart.map(item =>
-                    item.id === product.id ? {...item, quantity: item.quantity + 1} : item
-                ))
-            }
-        } else {
-            setCart([...cart, {
-                id: product.id, quantity: 1, productWarehouseId: product.productWarehouse[0].warehouseId
-            }])
-        }
-    }
 
     const handleQuantityChange = (id: number, change: number) => {
         const product = products.find(p => p.id === id)
@@ -128,13 +105,8 @@ export default function CreateOrderPage() {
             const product = products.find(p => p.id === item.id)
             return sum + (product ? product.price * item.quantity : 0)
         }, 0)
-        setSubtotal(newSubtotal)
 
-        const taxAmount = enableTax ? newSubtotal * (orderData.tax / 100) : 0
-        const discountAmount = enableDiscount ? orderData.discount : 0
-        const newTotal = newSubtotal + taxAmount - discountAmount
-
-        setTotal(newTotal)
+        setTotal(newSubtotal)
         setOrderData(prev => ({...prev, subtotal: newSubtotal, products: cart}))
     }
 
@@ -172,7 +144,7 @@ export default function CreateOrderPage() {
         }
     };
 
-    const onSelectionChange = (id: React.Key | null) => {
+    const onSelectionChangeProduct = (id: React.Key | null) => {
         if (id) {
             const product = products.find(p => p.id === Number(id));
             if (product) {
@@ -182,16 +154,17 @@ export default function CreateOrderPage() {
         } else {
             setInputValue('');
         }
+        setLocation(null);
     };
 
     const addProductToCart = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
-        if (selectedProduct) {
+        if (validateAddProductToCart()) {
             const existingProduct = cart.find(item => item.id === selectedProduct.id)
             if (existingProduct) {
                 if (existingProduct.quantity > 0 && existingProduct.quantity < selectedProduct.stockStore) {
                     setCart(cart.map(item =>
-                        item.id === selectedProduct.id ? {...item, quantity: item.quantity + quantity} : item
+                        item.id === selectedProduct?.id ? {...item, quantity: item.quantity + quantity} : item
                     ))
                 }
             } else {
@@ -201,11 +174,26 @@ export default function CreateOrderPage() {
                     productWarehouseId: selectedProduct.productWarehouse[0].warehouseId
                 }])
             }
+
+            setSelectedProduct(productInitial);
+            setQuantity(0);
+            setInputValue('');
+            setLocation(null);
         }
-        //reset form
-        setSelectedProduct(null)
-        setQuantity(0)
-        setInputValue('')
+    }
+
+    function validateAddProductToCart(): boolean {
+        if (selectedProduct.id === 0) {
+            showToast("Debe seleccionar un producto", ToastType.ERROR);
+            return false;
+        } else if (quantity <= 0) {
+            showToast("La cantidad no puede ser menor o igual a 0", ToastType.ERROR);
+            return false;
+        } else if (location != null && quantity > location.quantity) {
+            showToast("No hay suficiente stock en la ubicación seleccionada", ToastType.ERROR);
+            return false;
+        }
+        return true;
     }
 
 
@@ -371,12 +359,14 @@ export default function CreateOrderPage() {
                                 </div>*/}
                                 <div className="mt-4">
                                     <h3 className="font-semibold">Productos</h3>
+
                                     <Table aria-label="Cart items">
                                         <TableHeader>
                                             <TableColumn>Producto</TableColumn>
                                             <TableColumn>Precio</TableColumn>
                                             <TableColumn>Tamaño</TableColumn>
                                             <TableColumn>Categoria</TableColumn>
+                                            <TableColumn>Ubicación</TableColumn>
                                             <TableColumn>Cantidad</TableColumn>
                                             <TableColumn>Acción</TableColumn>
                                         </TableHeader>
@@ -387,10 +377,10 @@ export default function CreateOrderPage() {
                                                         <Autocomplete
                                                             allowsCustomValue={true}
                                                             defaultItems={products}
-                                                            onSelectionChange={onSelectionChange}
+                                                            onSelectionChange={onSelectionChangeProduct}
                                                             aria-label="Select a product"
-                                                            inputValue={inputValue} // Vincula el estado inputValue
-                                                            onInputChange={(value) => setInputValue(value)} // Actualiza el inputValue mientras se escribe
+                                                            inputValue={inputValue}
+                                                            onInputChange={(value) => setInputValue(value)}
                                                         >
                                                             {products.map((product) => (
                                                                 <AutocompleteItem key={product.id} value={product.id}>
@@ -402,6 +392,35 @@ export default function CreateOrderPage() {
                                                     <TableCell>{selectedProduct?.price}</TableCell>
                                                     <TableCell>{selectedProduct?.size?.name}</TableCell>
                                                     <TableCell>{selectedProduct?.category?.name}</TableCell>
+                                                    <TableCell
+                                                        className="min-w-60">
+                                                        <Select
+                                                            value={location?.id.toString() || ''}
+                                                            onChange={(e) => {
+                                                                const location = selectedProduct?.productWarehouse.find((product) => product.id === parseInt(e.target.value));
+                                                                setLocation(location || null);
+                                                            }}
+                                                            aria-label="Select a product location"
+                                                            isDisabled={selectedProduct.id === 0}
+                                                            required={true}
+                                                        >
+                                                            {selectedProduct?.productWarehouse?.map((product) => (
+                                                                <SelectItem
+                                                                    key={product.id}
+                                                                    value={product.id.toString()}
+                                                                    textValue={`${product.row}-${product.column}`}
+                                                                    color={product.color}
+                                                                >
+                                                                    {product.name}--{product.row}-{product.column}
+                                                                </SelectItem>
+                                                            )) || (
+                                                                <SelectItem key="no-product-warehouse" value=""
+                                                                            textValue="No products available">
+                                                                    No products available
+                                                                </SelectItem>
+                                                            )}
+                                                        </Select>
+                                                    </TableCell>
                                                     <TableCell>
                                                         <Input
                                                             value={quantity.toString()}
@@ -410,7 +429,7 @@ export default function CreateOrderPage() {
                                                             }
                                                             type={"number"}
                                                             className="mb-2"
-                                                            isDisabled={!selectedProduct}
+                                                            isDisabled={selectedProduct.id === 0}
                                                             aria-label="Quantity"
                                                         />
                                                     </TableCell>
@@ -421,7 +440,7 @@ export default function CreateOrderPage() {
                                                             isIconOnly
                                                             color="success"
                                                             aria-label="Like"
-                                                            isDisabled={!selectedProduct}>
+                                                            isDisabled={selectedProduct.id === 0}>
                                                             <CheckIcon color="white"/>
                                                         </Button>
                                                     </TableCell>
@@ -430,12 +449,22 @@ export default function CreateOrderPage() {
                                                     .filter((item) => products.some((p) => p.id === item.id))
                                                     .map((item) => {
                                                         const product = products.find((p) => p.id === item.id);
+                                                        const location = product?.productWarehouse.find((product) => product.id === item.productWarehouseId);
+
                                                         return (
                                                             <TableRow key={item.id}>
                                                                 <TableCell>{product?.name}</TableCell>
                                                                 <TableCell>{product?.price}</TableCell>
                                                                 <TableCell>{product?.size.name}</TableCell>
                                                                 <TableCell>{product?.category.name}</TableCell>
+                                                                <TableCell>
+                                                                    <Button
+                                                                        className="w-full"
+                                                                        color={location?.color}
+                                                                    >
+                                                                        {location?.name}{" "}{location?.row}-{location?.column}
+                                                                    </Button>
+                                                                </TableCell>
                                                                 <TableCell>
                                                                     <div className="flex items-center">
                                                                         <Button
