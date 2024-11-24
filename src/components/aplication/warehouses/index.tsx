@@ -1,165 +1,184 @@
 "use client";
 
-import React from "react";
-import { Button, Input } from "@nextui-org/react";
+import React, { useContext, useMemo } from "react";
+import { Button, Input, Card, CardBody, Skeleton } from "@nextui-org/react";
 import Link from "next/link";
 import { ExportIcon } from "@/components/icons/accounts/export-icon";
 import { HouseIcon } from "@/components/icons/breadcrumb/house-icon";
-
 import { WarehouseDto } from "@/services/Dto/WarehouseDto";
-
-import { CreateWarehouseDto } from "@/services/Warehouse/dto/CreateWarehouseDto";
-import { UpdateWarehouseDto } from "@/services/Warehouse/dto/UpdateWarehouseDto";
-
 import ConfirmDialog from "@/components/modal/ConfirmDialog";
 import { WarehouseContext } from "@/context/WareHouseContext/warehouseContext";
-import { WarehouseIcon } from "lucide-react";
+import { SearchIcon, WarehouseIcon, AlertTriangle } from "lucide-react";
 import WarehouseTable from "./WarehouseTable";
 import WarehouseModal from "./WarehouseModal";
+import { ToastContext } from "@/context/ToastContext/ToastContext";
+import { ToastType } from "@/components/Toast/Toast";
 
 export default function Warehouses() {
     const {
         warehouses,
         loading,
         error,
-        createWarehouse,
-        updateWarehouse,
-        deleteWarehouse
-    } = React.useContext(WarehouseContext)!;
+        deleteWarehouse,
+        openModal
+    } = useContext(WarehouseContext)!;
 
-    const [selectedWarehouse, setSelectedWarehouse] = React.useState<WarehouseDto | null>(null);
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [isViewMode, setIsViewMode] = React.useState(false);
+    const { showToast } = useContext(ToastContext)!;
+
     const [searchQuery, setSearchQuery] = React.useState("");
-    const [title, setTitle] = React.useState("");
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
+    const [selectedWarehouseId, setSelectedWarehouseId] = React.useState<number | null>(null);
 
-    const filteredWarehouses = React.useMemo(() => {
+    const filteredWarehouses = useMemo(() => {
         return warehouses.filter(warehouse =>
             warehouse.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
     }, [warehouses, searchQuery]);
 
-    const handleAdd = () => {
-        setSelectedWarehouse(null);
-        setIsViewMode(false);
-        setIsModalOpen(true);
-    };
+    const handleAdd = () => openModal(null, false);
 
-    const handleView = (warehouse: WarehouseDto) => {
-        setSelectedWarehouse(warehouse);
-        setIsViewMode(true);
-        setIsModalOpen(true);
-    };
+    const handleView = (warehouse: WarehouseDto) => openModal(warehouse, true);
 
-    const handleEdit = (warehouse: WarehouseDto) => {
-        setSelectedWarehouse(warehouse);
-        setIsViewMode(false);
-        setIsModalOpen(true);
-    };
+    const handleEdit = (warehouse: WarehouseDto) => openModal(warehouse, false);
 
     const handleDelete = async (id: number) => {
-        await deleteWarehouse(id);
-        setTitle("");
-        setIsConfirmDialogOpen(false);
-    };
-
-    const handleSubmit = async (formData: CreateWarehouseDto | UpdateWarehouseDto) => {
         try {
-            if (selectedWarehouse) {
-                await updateWarehouse(selectedWarehouse.id, formData as UpdateWarehouseDto);
-            } else {
-                await createWarehouse(formData as CreateWarehouseDto);
-            }
-            setIsModalOpen(false);
-        } catch (error) {
-            console.error("Error submitting warehouse data:", error);
+            await deleteWarehouse(id);
+            showToast("Almacén eliminado exitosamente", ToastType.SUCCESS);
+            setIsConfirmDialogOpen(false);
+        }
+        catch (error) {
+            showToast("Error: " + error, ToastType.ERROR);
         }
     };
 
     if (loading) {
-        return <div className="flex justify-center items-center h-96">Loading...</div>;
+        return (
+            <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full">
+                <div className="space-y-4">
+                    <Skeleton className="h-8 w-48 rounded-lg" />
+                    <div className="flex justify-between">
+                        <Skeleton className="h-10 w-72 rounded-lg" />
+                        <Skeleton className="h-10 w-48 rounded-lg" />
+                    </div>
+                    <Card>
+                        <CardBody className="space-y-3">
+                            {[...Array(5)].map((_, i) => (
+                                <Skeleton key={i} className="h-12 w-full rounded-lg" />
+                            ))}
+                        </CardBody>
+                    </Card>
+                </div>
+            </div>
+        );
     }
 
     if (error) {
-        return <div className="text-red-500 text-center">{error}</div>;
+        return (
+            <Card className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto">
+                <CardBody className="flex flex-col items-center justify-center py-8">
+                    <AlertTriangle className="text-danger h-12 w-12 mb-4" />
+                    <h2 className="text-xl font-bold text-danger">Error al cargar los almacenes</h2>
+                    <p className="text-gray-500 mt-2">{error}</p>
+                    <Button
+                        color="primary"
+                        variant="shadow"
+                        className="mt-4"
+                        onClick={() => window.location.reload()}
+                    >
+                        Reintentar
+                    </Button>
+                </CardBody>
+            </Card>
+        );
     }
 
     return (
         <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full flex flex-col gap-4">
-            <ul className="flex">
-                <li className="flex gap-2">
-                    <HouseIcon />
-                    <Link href={"/"}>
-                        <span>Home</span>
-                    </Link>
-                    <span> / </span>{" "}
-                </li>
+            <Card className="shadow-sm">
+                <CardBody className="space-y-6">
+                    {/* Breadcrumb */}
+                    <ul className="flex">
+                        <li className="flex gap-2">
+                            <HouseIcon />
+                            <Link href={"/"}>
+                                <span>Inicio</span>
+                            </Link>
+                            <span> / </span>
+                        </li>
+                        <li className="flex gap-2">
+                            <span>Almacene</span>
+                            <span> / </span>
+                        </li>
+                        <li className="flex gap-2">
+                            <span>Lista</span>
+                        </li>
+                    </ul>
 
-                <li className="flex gap-2">
-                    <WarehouseIcon />
-                    <span>Warehouses</span>
-                    <span> / </span>{" "}
-                </li>
-                <li className="flex gap-2">
-                    <span>List</span>
-                </li>
-            </ul>
-            <h3 className="text-xl font-semibold">All Warehouses</h3>
+                    {/* Title */}
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-xl font-semibold">Todos los almacenes</h3>
+                       
+                    </div>
 
-            <div className="flex justify-between flex-wrap gap-4 items-center">
-                <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
-                    <Input
-                        className="w-full md:w-72"
-                        placeholder="Search warehouses..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                <div className="flex flex-row gap-3.5 flex-wrap">
-                    <Button color="primary" onPress={handleAdd}>Agregar Almacén</Button>
-                    <Button color="primary" startContent={<ExportIcon />}>
-                        Exportar en CSV
-                    </Button>
-                </div>
-                <div className="w-full flex flex-col gap-4">
-                    <WarehouseTable
-                        warehouses={filteredWarehouses}
-                        onEdit={handleEdit}
-                        onDelete={(warehouseId: number) => {
-                            const selectedWarehouse = warehouses.find(warehouse => warehouse.id === warehouseId);
-                            setSelectedWarehouse(selectedWarehouse);
-                            setIsConfirmDialogOpen(true);
-                            setTitle("Are you sure you want to delete this warehouse?");
-                        }}
-                        onView={handleView}
-                    />
-                    <WarehouseModal
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                        onSubmit={handleSubmit}
-                        warehouse={selectedWarehouse}
-                        isViewMode={isViewMode}
-                    />
-                    <ConfirmDialog
-                        title={title}
-                        isOpen={isConfirmDialogOpen}
-                        onConfirm={() => {
-                            if (selectedWarehouse) {
-                                handleDelete(selectedWarehouse.id);
-                            }
-                        }}
-                        onClose={() => {
-                            setIsConfirmDialogOpen(false);
-                            setTitle("");
-                        }}
-                        onCancel={() => {
-                            setIsConfirmDialogOpen(false);
-                            setTitle("");
-                        }}
-                    />
-                </div>
-            </div>
+                    {/* Actions */}
+                    <div className="flex flex-col sm:flex-row justify-between gap-4">
+                        <Input
+                            className="sm:max-w-[300px]"
+                            placeholder="Buscar almacén..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            startContent={<SearchIcon className="text-default-400" size={20} />}
+                            size="sm"
+                        />
+                        <div className="flex gap-2">
+                            <Button
+                                color="primary"
+                                onPress={handleAdd}
+                                startContent={<WarehouseIcon size={20} />}
+                            >
+                                Agregar Almacén
+                            </Button>
+                            <Button
+                                color="secondary"
+                                variant="flat"
+                                startContent={<ExportIcon />}
+                            >
+                                Exportar CSV
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Table */}
+                    <div className="overflow-hidden rounded-lg border border-default-200">
+                        <WarehouseTable
+                            warehouses={filteredWarehouses}
+                            onEdit={handleEdit}
+                            onDelete={(warehouseId: number) => {
+                                setSelectedWarehouseId(warehouseId);
+                                setIsConfirmDialogOpen(true);
+                            }}
+                        />
+                    </div>
+                </CardBody>
+            </Card>
+
+            {/* Modals */}
+            <WarehouseModal showToast={showToast} />
+
+            <ConfirmDialog
+                title="¿Estás seguro de que deseas eliminar este almacén?"
+                isOpen={isConfirmDialogOpen}
+                onConfirm={() => selectedWarehouseId && handleDelete(selectedWarehouseId)}
+                onClose={() => {
+                    setIsConfirmDialogOpen(false);
+                    setSelectedWarehouseId(null);
+                }}
+                onCancel={() => {
+                    setIsConfirmDialogOpen(false);
+                    setSelectedWarehouseId(null);
+                }}
+            />
         </div>
-    )
+    );
 }

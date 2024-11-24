@@ -1,135 +1,176 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal'
 import { Button } from '@nextui-org/button'
 import { Input } from '@nextui-org/input'
+import { Select, SelectItem } from "@nextui-org/select"
 import { WarehouseDto } from '@/services/Dto/WarehouseDto'
 import { CreateWarehouseDto } from '@/services/Warehouse/dto/CreateWarehouseDto'
 import { UpdateWarehouseDto } from '@/services/Warehouse/dto/UpdateWarehouseDto'
-import { Select, SelectItem } from "@nextui-org/select";
+import { ToastType } from '@/components/Toast/Toast'
+import { WarehouseContext } from '@/context/WareHouseContext/warehouseContext'
+import { warehouseColors } from '@/utils/colors'
 
-interface WarehouseModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (formData: CreateWarehouseDto | UpdateWarehouseDto) => void
-  warehouse: WarehouseDto | null
-  isViewMode: boolean
+interface Props {
+  showToast: (message: string, type: ToastType) => void;
 }
 
-export default function WarehouseModal({ isOpen, onClose, onSubmit, warehouse, isViewMode }: WarehouseModalProps) {
+export default function WarehouseModal({ showToast }: Props) {
+  const { isModalOpen, closeModal, selectedWarehouse, isViewMode, createWarehouse, updateWarehouse } = useContext(WarehouseContext)!;
+  
   const [formData, setFormData] = useState<Partial<CreateWarehouseDto & UpdateWarehouseDto>>({
-    name: '',
+    name: "",
     rowMax: 0,
     columnMax: 0,
-    status: 'available', // Valor predeterminado al crear
+    description: "",
+    color: "",
   })
 
   useEffect(() => {
-    if (warehouse) {
+    if (selectedWarehouse) {
       setFormData({
-        name: warehouse.name,
-        rowMax: warehouse.rowMax,
-        columnMax: warehouse.columnMax,
-        status: warehouse.status,
+        name: selectedWarehouse.name || '',
+        rowMax: selectedWarehouse.rowMax || 0,
+        columnMax: selectedWarehouse.columnMax || 0,
+        description: selectedWarehouse.description || '',
+        color: selectedWarehouse.color || '',
       })
     } else {
       setFormData({
         name: '',
         rowMax: 0,
         columnMax: 0,
-        status: 'available', // Establece 'available' al crear un nuevo almacén
+        description: '',
+        color: '',
       })
     }
-  }, [warehouse])
+  }, [selectedWarehouse])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: name === 'rowMax' || name === 'columnMax' ? parseInt(value, 10) : value })
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'rowMax' || name === 'columnMax' ? parseInt(value) || 0 : value
+    }))
   }
 
-  const handleSelectChange = (value: string) => {
-    setFormData({ ...formData, status: value });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (warehouse) {
-      const updateData: UpdateWarehouseDto = {
-        name: formData.name || '',
-        rowMax: formData.rowMax || 0,
-        columnMax: formData.columnMax || 0,
-        status: formData.status || '',
+    try {
+      if (selectedWarehouse) {
+        await updateWarehouse(selectedWarehouse.id, formData as UpdateWarehouseDto);
+        showToast("Almacén actualizado exitosamente", ToastType.SUCCESS);
+      } else {
+        await createWarehouse(formData as CreateWarehouseDto);
+        showToast("Almacén creado exitosamente", ToastType.SUCCESS);
       }
-      onSubmit(updateData)
-    } else {
-      const createData: CreateWarehouseDto = {
-        name: formData.name || '',
-        rowMax: formData.rowMax || 0,
-        columnMax: formData.columnMax || 0,
-        status: formData.status || '',
-      }
-      onSubmit(createData)
+      closeModal();
+    } catch (error) {
+      showToast("Error al enviar los datos del almacén:" + error, ToastType.ERROR)
     }
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={closeModal}
+      scrollBehavior="inside"
+      classNames={{
+        base: "max-w-xl",
+        header: "border-b border-gray-200 dark:border-gray-700",
+        footer: "border-t border-gray-200 dark:border-gray-700",
+      }}
+    >
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
-            {isViewMode ? 'View Warehouse' : warehouse ? 'Edit Warehouse' : 'Add Warehouse'}
+            {isViewMode ? 'Ver Almacén' : selectedWarehouse ? 'Editar Almacén' : 'Agregar Almacén'}
           </ModalHeader>
           <ModalBody>
             <Input
-              label="Name"
               name="name"
+              label="Nombre"
               value={formData.name}
               onChange={handleInputChange}
-              required
+              placeholder="Escriba el nombre del almacén"
+              isRequired={!isViewMode}
               isDisabled={isViewMode}
+              classNames={{
+                label: "font-semibold",
+              }}
             />
             <Input
-              label="Row Max"
               name="rowMax"
+              label="Filas máximas"
               type="number"
               value={formData.rowMax?.toString()}
               onChange={handleInputChange}
-              required
+              placeholder="Escriba la cantidad de filas máximas"
+              isRequired={!isViewMode}
               isDisabled={isViewMode}
+              classNames={{
+                label: "font-semibold",
+              }}
             />
             <Input
-              label="Column Max"
               name="columnMax"
+              label="Columnas Máximas"
               type="number"
               value={formData.columnMax?.toString()}
               onChange={handleInputChange}
-              required
+              placeholder="Escriba la cantidad de columnas máximas"
+              isRequired={!isViewMode}
               isDisabled={isViewMode}
+              classNames={{
+                label: "font-semibold",
+              }}
             />
+            <Input
+              name="description"
+              label="Descripción"
+              value={formData.description}
+              onChange={handleInputChange}
+              placeholder="Escriba la descripción del almacén"
+              isRequired={!isViewMode}
+              isDisabled={isViewMode}
+              classNames={{
+                label: "font-semibold",
+              }}
+            />
+
             <Select
-              label="Status"
-              name="status"
-              placeholder="Select status"
-              selectedKeys={formData.status ? [formData.status] : []}
-              onChange={(e) => handleSelectChange(e.target.value)}
+              label="Color"
+              selectedKeys={formData.color ? [formData.color] : []}
+              onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+              placeholder="Seleccione un color"
+              isRequired={!isViewMode}
               isDisabled={isViewMode}
             >
-              <SelectItem key="available" value="available">
-                available
-              </SelectItem>
-              <SelectItem key="busy" value="busy">
-                busy
-              </SelectItem>
+              {warehouseColors.map((color) => (
+                <SelectItem
+                  key={color.value}
+                  value={color.value}
+                  textValue={color.label}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: color.value }}
+                    />
+                    {color.label}
+                  </div>
+                </SelectItem>
+              ))}
             </Select>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={onClose}>
-              Close
+            <Button color="danger" variant="light" onPress={closeModal}>
+              Cerrar
             </Button>
             {!isViewMode && (
               <Button color="primary" type="submit">
-                {warehouse ? 'Update' : 'Create'}
+                {selectedWarehouse ? 'Actualizar' : 'Crear'}
               </Button>
             )}
           </ModalFooter>

@@ -100,6 +100,58 @@ export default function CategoryModal({ showToast }: Props) {
     !selectedSizes.some(selected => selected.id === size.id)
   );
 
+
+
+  const renderTableContent = () => {
+    return selectedSizes.map((size) => {
+      const actionCell = !isViewMode ? (
+        <TableCell>
+          <Button
+            isIconOnly
+            color="danger"
+            aria-label="Eliminar talla"
+            onPress={() => handleRemoveSize(size.id)}
+          >
+            <TrashIcon />
+          </Button>
+        </TableCell>
+      ) : (
+        <TableCell>
+          null
+        </TableCell>
+      );
+
+      return (
+        <TableRow key={size.id}>
+          <TableCell>{size.name}</TableCell>
+          {actionCell}
+        </TableRow>
+      );
+    });
+  };
+
+  const renderTable = () => {
+    if (selectedSizes.length === 0 && !isViewMode) return null;
+
+    const columns = [
+      <TableColumn key="name">NOMBRE</TableColumn>
+    ];
+
+    if (!isViewMode) {
+      columns.push(<TableColumn key="actions">ACCIONES</TableColumn>);
+    }
+
+    return (
+      <Table aria-label="Tallas seleccionadas">
+        <TableHeader>
+          {columns}
+        </TableHeader>
+        <TableBody>
+          {renderTableContent()}
+        </TableBody>
+      </Table>
+    );
+  };
   return (
     <>
       <Modal
@@ -158,43 +210,22 @@ export default function CategoryModal({ showToast }: Props) {
                   >
                     <PlusIcon />
                   </Button>
-                  <Button color="primary" onPress={handleAdd}>Agregar talla</Button>
+                  <Button color="primary" onPress={handleAdd}>
+                    Agregar talla
+                  </Button>
                 </div>
               )}
-              {(selectedSizes.length > 0 || isViewMode) && (
-                <Table aria-label="Tallas seleccionadas">
-                  <TableHeader>
-                    <TableColumn>NOMBRE</TableColumn>
-                    {!isViewMode && 
-                    <TableColumn>ACCIONES</TableColumn>}
-                  </TableHeader>
-                  <TableBody>
-                    {selectedSizes.map((size) => (
-                      <TableRow key={size.id}>
-                        <TableCell>{size.name}</TableCell>
-                        {!isViewMode && (
-                          <TableCell>
-                            <Button
-                              isIconOnly
-                              color="danger"
-                              aria-label="Eliminar talla"
-                              onPress={() => handleRemoveSize(size.id)}
-                            >
-                              <TrashIcon />
-                            </Button>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+              {renderTable()}
             </ModalBody>
             <ModalFooter>
-              <Button color="danger" variant="light" onPress={() => {
-                closeModal();
-                resetForm();
-              }}>
+              <Button
+                color="danger"
+                variant="light"
+                onPress={() => {
+                  closeModal();
+                  resetForm();
+                }}
+              >
                 Cerrar
               </Button>
               {!isViewMode && (
@@ -210,4 +241,3 @@ export default function CategoryModal({ showToast }: Props) {
     </>
   );
 }
-

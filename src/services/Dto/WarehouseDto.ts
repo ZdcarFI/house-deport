@@ -14,7 +14,7 @@ export interface WarehouseDto {
     readonly rowMax: number;
     readonly columnMax: number;
     readonly status: string;
-    readonly descripcion: string;
+    readonly description: string;
     readonly color: string;
     readonly spaces: number;
     readonly spacesUsed: number;

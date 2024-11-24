@@ -1,9 +1,9 @@
-import {Service} from "../Service";
-import {CreateWarehouseDto} from "./dto/CreateWarehouseDto";
-import {PARAM_WAREHOUSE} from "@/utils/config/config";
-import {AxiosResponse} from "axios";
-import {WarehouseDto} from "@/services/Dto/WarehouseDto";
-import {UpdateWarehouseDto} from "@/services/Warehouse/dto/UpdateWarehouseDto";
+import { Service } from "../Service";
+import { CreateWarehouseDto } from "./dto/CreateWarehouseDto";
+import { PARAM_WAREHOUSE } from "@/utils/config/config";
+import { AxiosResponse } from "axios";
+import { WarehouseDto } from "@/services/Dto/WarehouseDto";
+import { UpdateWarehouseDto } from "@/services/Warehouse/dto/UpdateWarehouseDto";
 
 
 export class WarehouseService extends Service {
@@ -26,8 +26,8 @@ export class WarehouseService extends Service {
         return response.data;
     }
 
-    async create(product: CreateWarehouseDto): Promise<WarehouseDto> {
-        const response: AxiosResponse = await this.apiFetch.post(this.param, product);
+    async create(id: CreateWarehouseDto): Promise<WarehouseDto> {
+        const response: AxiosResponse = await this.apiFetch.post(this.param, id);
         return response.data;
     }
 
