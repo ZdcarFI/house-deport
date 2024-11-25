@@ -11,76 +11,63 @@ import { UpdateProductDto } from "@/services/Product/dto/UpdateProductDto";
 import ProductTable from "@/components/aplication/products/ProductTable";
 import ProductModal from "@/components/aplication/products/ProductModal";
 import { ProductContext } from '@/context/ProductContext/productContext';
-import { BoxIcon } from 'lucide-react';
+import { BoxIcon, SearchIcon } from 'lucide-react';
 import { ProductContextType } from "@/@types/product";
+import { ToastContext } from '@/context/ToastContext/ToastContext';
+import { ToastType } from '@/components/Toast/Toast';
+import ConfirmDialog from '@/components/modal/ConfirmDialog';
+import CategoryModal from '../categories/CategoryModal';
+import SizeModal from '../sizes/SizeModal';
+import WarehouseModal from '../warehouses/WarehouseModal';
 
 export default function Products() {
-  const { 
-    products, 
-    loading, 
-    error, 
-    createProduct, 
-    updateProduct, 
+  const {
+    products,
+    loading,
+    error,
     deleteProduct,
-    getProducts,
-  } = useContext(ProductContext) as ProductContextType;
+    openModal
+  } = useContext(ProductContext)!;
 
-  const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isViewMode, setIsViewMode] = useState<boolean>(false);
+  const { showToast } = useContext(ToastContext)!;
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
+  const [selectedProductId, setSelectedProductId] = React.useState<number | null>(null);
 
-  useEffect(() => {
-    getProducts();
-  }, []);
 
   const filteredProducts = React.useMemo(() => {
-    return products.filter(product => 
+    return products.filter(product =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.size.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.productWarehouse.name.toLowerCase().includes(searchQuery.toLowerCase())
+      product.size.name.toLowerCase().includes(searchQuery.toLowerCase())
+      // product.productWarehouse.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [products, searchQuery]);
 
   const handleAdd = () => {
-    setSelectedProduct(null);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(null, false);
   };
 
   const handleView = (product: ProductDto) => {
-    setSelectedProduct(product);
-    setIsViewMode(true);
-    setIsModalOpen(true);
+    openModal(product, true);
   };
 
   const handleEdit = (product: ProductDto) => {
-    setSelectedProduct(product);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(product, false);
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
+    try {
       await deleteProduct(id);
+      showToast("producto eliminada exitosamente", ToastType.SUCCESS);
+      setIsConfirmDialogOpen(false);
+    }
+    catch (error) {
+      showToast("Error:" + error, ToastType.ERROR);
     }
   };
 
-  const handleSubmit = async (formData: CreateProductDto | UpdateProductDto) => {
-    try {
-      if (selectedProduct) {
-        await updateProduct(selectedProduct.id, formData as UpdateProductDto);
-      } else {
-        await createProduct(formData as CreateProductDto);
-      }
-      setIsModalOpen(false);
-      getProducts();
-    } catch (error) {
-      console.error("Error submitting product data:", error);
-    }
-  };
 
   if (loading) {
     return <div className="flex justify-center items-center h-96">Loading...</div>;
@@ -102,24 +89,24 @@ export default function Products() {
         </li>
         <li className="flex gap-2">
           <BoxIcon />
-          <span>Products</span>
+          <span>Productos</span>
           <span> / </span>{" "}
         </li>
         <li className="flex gap-2">
-          <span>List</span>
+          <span>Lista</span>
         </li>
       </ul>
-      <h3 className="text-xl font-semibold">All Products</h3>
+      <h3 className="text-xl font-semibold">Todos los productos</h3>
 
       <div className="flex justify-between flex-wrap gap-4 items-center">
-        <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
-          <Input
-            className="w-full md:w-72"
-            placeholder="Search products..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+
+        <Input
+          className="w-full sm:max-w-[300px]"
+          placeholder="Buscar Producto..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          startContent={<SearchIcon className="text-default-400" size={20} />}
+        />
         <div className="flex flex-row gap-3.5 flex-wrap">
           <Button color="primary" onPress={handleAdd}>Agregar Producto</Button>
           <Button color="primary" startContent={<ExportIcon />}>
@@ -130,15 +117,33 @@ export default function Products() {
           <ProductTable
             products={filteredProducts}
             onEdit={handleEdit}
-            onDelete={handleDelete}
+            onDelete={(productId: number) => {
+              setSelectedProductId(productId);
+              setIsConfirmDialogOpen(true);
+            }}
             onView={handleView}
           />
           <ProductModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={handleSubmit}
-            product={selectedProduct}
-            isViewMode={isViewMode}
+            showToast={showToast} />
+          <CategoryModal showToast={showToast} />
+          <SizeModal showToast={showToast} />
+          <WarehouseModal showToast={showToast} />
+          <ConfirmDialog
+            title="¿Estás seguro de que deseas eliminar este producto?"
+            isOpen={isConfirmDialogOpen}
+            onConfirm={() => {
+              if (selectedProductId) {
+                handleDelete(selectedProductId);
+              }
+            }}
+            onClose={() => {
+              setIsConfirmDialogOpen(false);
+              setSelectedProductId(null);
+            }}
+            onCancel={() => {
+              setIsConfirmDialogOpen(false);
+              setSelectedProductId(null);
+            }}
           />
         </div>
       </div>

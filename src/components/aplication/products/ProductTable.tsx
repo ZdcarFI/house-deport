@@ -16,8 +16,7 @@ interface ProductTableProps {
 export default function ProductTable({ products, onView, onEdit, onDelete }: ProductTableProps) {
 
   const renderCell = (product: ProductDto, columnKey: React.Key): React.ReactNode => {
-    console.log("Column Key:", columnKey);
-    console.log("Product Data:", product); 
+
 
     switch (columnKey) {
       case 'actions':
@@ -45,7 +44,7 @@ export default function ProductTable({ products, onView, onEdit, onDelete }: Pro
       case 'size':
         return product.size?.name ?? "N/A";
       case 'warehouse':
-        return product.productWarehouse?.name ?? "N/A";
+        return product.productWarehouse[0]?.name  ?? "N/A";
       case 'stockInventory':
         return product.stockInventory ?? "N/A";
       case 'stockStore':

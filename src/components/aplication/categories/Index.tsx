@@ -66,19 +66,6 @@ export default function Categories() {
   };
 
 
-  // const handleCreateSize = async (formData: { name: string }): Promise<SizeDto> => {
-  //   try {
-  //     const newSize = await createSize(formData);
-  //     if (!newSize) {
-  //       throw new Error("Failed to create size");
-  //     }
-  //     return newSize;
-  //   } catch (error) {
-  //     console.error("Error creating size:", error);
-  //     throw error;
-  //   }
-  // };
-
 
 
   if (loading) {
