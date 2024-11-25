@@ -12,8 +12,7 @@ import { ProductDto } from "@/services/Dto/ProductDto"
 export const ProductContext = React.createContext<ProductContextType | null>(null)
 const productService = new ProductService()
 
-const productInitialState: ProductDto =
-{
+const productInitialState: ProductDto = {
     id: 0,
     name: '',
     code: '',
@@ -25,12 +24,12 @@ const productInitialState: ProductDto =
     productWarehouse: []
 };
 
-
 const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [state, dispatch] = React.useReducer(productReducer, { products: [] } as ProductState)
     const [loading, setLoading] = React.useState<boolean>(false)
     const [error, setError] = React.useState<string>('')
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isStockModalOpen, setIsStockModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<ProductDto | null>(null);
     const [isViewMode, setIsViewMode] = useState(false);
 
@@ -61,7 +60,6 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         try {
             const products = await productService.getAll()
             dispatch({ type: ProductActionType.LOAD_PRODUCTS, payload: products })
-
         } catch (e) {
             handleError(e)
         }
@@ -72,7 +70,6 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
             const res = await productService.create(product)
             dispatch({ type: ProductActionType.ADD_PRODUCT, payload: res })
             setSelectedProduct(productInitialState);
-
         } catch (e) {
             handleError(e)
         }
@@ -83,7 +80,6 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
             const res = await productService.updateById(id, product)
             dispatch({ type: ProductActionType.EDIT_PRODUCT, payload: res })
             setSelectedProduct(productInitialState);
-
         } catch (e) {
             handleError(e)
         }
@@ -107,7 +103,6 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         }
     }
 
-
     const openModal = useCallback((product: ProductDto | null = null, viewMode: boolean = false) => {
         setSelectedProduct(product);
         setIsViewMode(viewMode);
@@ -116,6 +111,15 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
     const closeModal = useCallback(() => {
         setIsModalOpen(false);
+    }, []);
+
+    const openStockModal = useCallback((product: ProductDto) => {
+        setSelectedProduct(product);
+        setIsStockModalOpen(true);
+    }, []);
+
+    const closeStockModal = useCallback(() => {
+        setIsStockModalOpen(false);
     }, []);
 
     const values = React.useMemo(() => ({
@@ -129,11 +133,14 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         error,
         productInitial: productInitialState,
         isModalOpen,
+        isStockModalOpen,
         selectedProduct,
         isViewMode,
         openModal,
         closeModal,
-    }), [state.products, loading, error,isModalOpen, selectedProduct, isViewMode, openModal])
+        openStockModal,
+        closeStockModal,
+    }), [state.products, loading, error, isModalOpen, isStockModalOpen, selectedProduct, isViewMode, openModal, closeModal, openStockModal, closeStockModal])
 
     return (
         <ProductContext.Provider value={values}>
@@ -143,3 +150,4 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 }
 
 export default ProductProvider
+

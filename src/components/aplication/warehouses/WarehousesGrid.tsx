@@ -4,7 +4,7 @@ import { Button } from "@nextui-org/react";
 
 interface WarehouseMatrixProps {
     warehouse: WarehouseDto;
-    onCellClick: (product: any) => void;
+    onCellClick: (product: any | null, row: number, column: number) => void;
 }
 
 const WarehouseMatrix: React.FC<WarehouseMatrixProps> = ({ warehouse, onCellClick }) => {
@@ -25,7 +25,7 @@ const WarehouseMatrix: React.FC<WarehouseMatrixProps> = ({ warehouse, onCellClic
                     <Button
                         key={index}
                         className={`w-12 h-12 rounded-full ${getCellColor(row, col)}`}
-                        onPress={() => product && onCellClick(product)}
+                        onPress={() => onCellClick(product || null, row, col)}
                         isIconOnly
                     />
                 );

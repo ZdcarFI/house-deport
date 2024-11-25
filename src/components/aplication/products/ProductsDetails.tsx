@@ -1,12 +1,18 @@
+import { ProductWarehouseDto } from '@/services/Dto/ProductWarehouseDto';
 import { ProductBasicWithLocationDto } from '@/services/Dto/WarehouseDto';
-import { Card, CardBody, CardHeader, Divider, Chip } from "@nextui-org/react";
-import { DollarSign, Box, Barcode, Database } from "lucide-react";
+import { Card, CardBody, CardHeader, Divider, Chip, Button } from "@nextui-org/react";
+import { DollarSign, Box, Barcode, Database } from 'lucide-react';
 
 interface ProductDetailsProps {
     product: ProductBasicWithLocationDto;
+    onEdit: (productWarehouse: ProductWarehouseDto) => void
+    onDeleteProduct: () => void;
+    productWarehouseSelect: ProductWarehouseDto | null;
 }
 
-const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
+const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDeleteProduct, productWarehouseSelect }) => {
+
+    console.log(productWarehouseSelect)
     return (
         <Card className="max-w-md">
             <CardHeader className="flex flex-col items-start gap-2 px-4 pb-0 pt-4">
@@ -54,9 +60,30 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                         </div>
                     </div>
                 </div>
+                <div className="flex justify-between mt-4">
+                    <Button
+                        color="primary"
+                        onPress={() => {
+                            if (productWarehouseSelect) {
+                                onEdit(productWarehouseSelect); 
+                            }
+                        }}
+                        isDisabled={!productWarehouseSelect}
+                    >
+                        Editar
+                    </Button>
+                    <Button
+                        color="danger"
+                        variant="light"
+                        onPress={onDeleteProduct}
+                    >
+                        Eliminar (Vaciar)
+                    </Button>
+                </div>
             </CardBody>
         </Card>
     );
 };
 
 export default ProductDetails;
+

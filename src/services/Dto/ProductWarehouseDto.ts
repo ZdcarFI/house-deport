@@ -16,4 +16,7 @@ export interface ProductWarehouseDto {
   readonly row: number;
   readonly column: number;
   readonly quantity: number;
+  readonly productId: number;
+  readonly warehouseId: number;
+
 }

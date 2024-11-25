@@ -6,19 +6,19 @@ import Link from "next/link";
 import { ExportIcon } from "@/components/icons/accounts/export-icon";
 import { HouseIcon } from "@/components/icons/breadcrumb/house-icon";
 import { ProductDto } from "@/services/Dto/ProductDto";
-import { CreateProductDto } from "@/services/Product/dto/CreateProductDto";
-import { UpdateProductDto } from "@/services/Product/dto/UpdateProductDto";
+
 import ProductTable from "@/components/aplication/products/ProductTable";
 import ProductModal from "@/components/aplication/products/ProductModal";
 import { ProductContext } from '@/context/ProductContext/productContext';
 import { BoxIcon, SearchIcon } from 'lucide-react';
-import { ProductContextType } from "@/@types/product";
 import { ToastContext } from '@/context/ToastContext/ToastContext';
 import { ToastType } from '@/components/Toast/Toast';
 import ConfirmDialog from '@/components/modal/ConfirmDialog';
 import CategoryModal from '../categories/CategoryModal';
 import SizeModal from '../sizes/SizeModal';
 import WarehouseModal from '../warehouses/WarehouseModal';
+import StockIncrementModal from './StockIncrement';
+import ProductWarehouseModal from '../productWarehouse/productWarehouseModal';
 
 export default function Products() {
   const {
@@ -26,7 +26,8 @@ export default function Products() {
     loading,
     error,
     deleteProduct,
-    openModal
+    openModal,
+    openStockModal
   } = useContext(ProductContext)!;
 
   const { showToast } = useContext(ToastContext)!;
@@ -41,7 +42,6 @@ export default function Products() {
       product.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.size.name.toLowerCase().includes(searchQuery.toLowerCase())
-      // product.productWarehouse.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [products, searchQuery]);
 
@@ -67,7 +67,9 @@ export default function Products() {
       showToast("Error:" + error, ToastType.ERROR);
     }
   };
-
+  const handleIncrementStock = (product: ProductDto) => {
+    openStockModal(product);
+  };
 
   if (loading) {
     return <div className="flex justify-center items-center h-96">Loading...</div>;
@@ -122,12 +124,15 @@ export default function Products() {
               setIsConfirmDialogOpen(true);
             }}
             onView={handleView}
+            onIncrementStock={handleIncrementStock}
+          
           />
-          <ProductModal
-            showToast={showToast} />
+          <ProductModal showToast={showToast} />
           <CategoryModal showToast={showToast} />
           <SizeModal showToast={showToast} />
           <WarehouseModal showToast={showToast} />
+          <StockIncrementModal showToast={showToast} />
+          <ProductWarehouseModal showToast={showToast} />
           <ConfirmDialog
             title="¿Estás seguro de que deseas eliminar este producto?"
             isOpen={isConfirmDialogOpen}

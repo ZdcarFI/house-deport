@@ -6,12 +6,13 @@ import { MoreVertical, Box, Grid } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface WarehouseTableProps {
-  warehouses: WarehouseDto[]
+  warehouses: WarehouseDto[],
+  onView: (warehouse: WarehouseDto) => void
   onEdit: (warehouse: WarehouseDto) => void
   onDelete: (id: number) => void
 }
 
-export default function WarehouseTable({ warehouses, onEdit, onDelete }: WarehouseTableProps) {
+export default function WarehouseTable({ warehouses, onView, onEdit, onDelete }: WarehouseTableProps) {
   const router = useRouter()
 
   const handleView = (warehouse: WarehouseDto) => {
@@ -30,56 +31,57 @@ export default function WarehouseTable({ warehouses, onEdit, onDelete }: Warehou
             isHoverable
             onPress={() => handleView(warehouse)}
           >
-            <CardBody className="p-4">
-              {/* Header with status, name and actions */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Chip
-                    color={warehouse.status === 'available' ? 'success' : 'warning'}
-                    variant="flat"
-                    size="sm"
-                  >
-                    {warehouse.status}
-                  </Chip>
-                  <Chip
-                    className="text-white"
-                    style={{ backgroundColor: warehouse.color }}
-                  >
-                    {warehouse.name}
-                  </Chip>
+            <CardBody className="p-4 relative">
+              <div className="flex items-center justify-between bg-gray-100 p-2 rounded-md">
+                <div
+                  className="flex-grow bg-gray-200 text-white p-2 rounded-md"
+                  style={{
+                    backgroundColor: warehouse.color,
+                    textAlign: "left",
+                  }}
+                >
+                  {warehouse.name}
                 </div>
 
-                <div onClick={(e) => e.stopPropagation()}>                  
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <Button
-                        isIconOnly
-                        variant="light"
-                        size="sm"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu>
-                      <DropdownItem onPress={() => handleView(warehouse)}>
-                        Ver
-                      </DropdownItem>
-                      <DropdownItem onPress={() => onEdit(warehouse)}>
-                        Editar
-                      </DropdownItem>
-                      <DropdownItem
-                        className="text-danger"
-                        color="danger"
-                        onPress={() => onDelete(warehouse.id)}
-                      >
-                        Delete
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </div>
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button
+                      isIconOnly
+                      variant="light"
+                      size="sm"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu>
+                    <DropdownItem onPress={() => onView(warehouse)}>
+                      Ver
+                    </DropdownItem>
+                    <DropdownItem onPress={() => onEdit(warehouse)}>
+                      Editar
+                    </DropdownItem>
+                    <DropdownItem
+                      className="text-danger"
+                      color="danger"
+                      onPress={() => onDelete(warehouse.id)}
+                    >
+                      Delete
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
               </div>
 
-              <div className="space-y-3 mt-4">
+
+              <div className="border-t border-gray-200 my-3"></div>
+
+     
+              {warehouse.description && (
+                <p className="text-small text-default-400 mb-4 line-clamp-2">
+                  {warehouse.description}
+                </p>
+              )}
+
+              <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Box className="h-4 w-4 text-default-400" />
                   <div className="flex gap-2">
@@ -99,13 +101,16 @@ export default function WarehouseTable({ warehouses, onEdit, onDelete }: Warehou
                     </span>
                   </div>
                 </div>
-
-                {warehouse.description && (
-                  <p className="text-small text-default-400 mt-2 line-clamp-2">
-                    {warehouse.description}
-                  </p>
-                )}
               </div>
+
+              <Chip
+                color={warehouse.status === 'available' ? 'success' : 'warning'}
+                variant="flat"
+                size="sm"
+                className="absolute bottom-4 right-4"
+              >
+                {warehouse.status}
+              </Chip>
             </CardBody>
           </Card>
         </div>

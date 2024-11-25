@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
 import { Button, Input } from "@nextui-org/react";
 import Link from "next/link";
 import { ExportIcon } from "@/components/icons/accounts/export-icon";
@@ -12,20 +12,18 @@ import { CreateProductWarehouseDto } from "@/services/ProductWarehouse/dto/Creat
 import { UpdateProductWarehouseDto } from "@/services/ProductWarehouse/dto/UpdateProductWarehouse.dto";
 import ProductWarehouseTable from "./productWarehouseTable";
 import ProductWarehouseModal from "./productWarehouseModal";
-import { BoxIcon } from "lucide-react";
+import { BoxIcon, SearchIcon } from "lucide-react";
+import { ToastContext } from "@/context/ToastContext/ToastContext";
+import { ToastType } from "@/components/Toast/Toast";
 
 export default function ProductWarehouses() {
-  const { productWarehouses, loading, error, createProductWarehouse, updateProductWarehouse, deleteProductWarehouse, getProductWarehouses } = React.useContext(ProductWarehouseContext)!;
-  const [selectedProductWarehouse, setSelectedProductWarehouse] = React.useState<ProductWarehouseDto | null>(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [isViewMode, setIsViewMode] = React.useState(false);
+  const { productWarehouses, loading, error, deleteProductWarehouse, openModal } = React.useContext(ProductWarehouseContext)!;
+  const { showToast } = useContext(ToastContext)!;
+
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [title, setTitle] = React.useState("");
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    getProductWarehouses();
-  }, []);
+  const [selectedProductWarehouseId, setSelectedProductWarehouseId] = React.useState<number | null>(null);
 
 
 
@@ -36,42 +34,30 @@ export default function ProductWarehouses() {
     );
   }, [productWarehouses, searchQuery]);
   console.log("ProductWarehouses:", productWarehouses);
+
   const handleAdd = () => {
-    setSelectedProductWarehouse(null);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(null, false);
   };
 
   const handleView = (productWarehouse: ProductWarehouseDto) => {
-    setSelectedProductWarehouse(productWarehouse);
-    setIsViewMode(true);
-    setIsModalOpen(true);
+    openModal(productWarehouse, true);
   };
 
   const handleEdit = (productWarehouse: ProductWarehouseDto) => {
-    setSelectedProductWarehouse(productWarehouse);
-    setIsViewMode(false);
-    setIsModalOpen(true);
+    openModal(productWarehouse, false);
   };
 
   const handleDelete = async (id: number) => {
-    await deleteProductWarehouse(id);
-    setTitle("");
-    setIsConfirmDialogOpen(false);
-  };
-
-  const handleSubmit = async (formData: CreateProductWarehouseDto | UpdateProductWarehouseDto) => {
     try {
-      if (selectedProductWarehouse) {
-        await updateProductWarehouse(selectedProductWarehouse.id, formData as UpdateProductWarehouseDto);
-      } else {
-        await createProductWarehouse(formData as CreateProductWarehouseDto);
-      }
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error submitting product warehouse data:", error);
+      await deleteProductWarehouse(id);
+      showToast("Producto - Warehouse eliminada exitosamente", ToastType.SUCCESS);
+      setIsConfirmDialogOpen(false);
+    }
+    catch (error) {
+      showToast("Error:" + error, ToastType.ERROR);
     }
   };
+
 
   if (loading) {
     return <div className="flex justify-center items-center h-96">Loading...</div>;
@@ -93,25 +79,24 @@ export default function ProductWarehouses() {
         </li>
         <li className="flex gap-2">
           <BoxIcon />
-          <span>Product Warehouses</span>
+          <span>Producto en el Almacen</span>
           <span> / </span>{" "}
         </li>
         <li className="flex gap-2">
-          <span>List</span>
+          <span>Lista</span>
         </li>
       </ul>
-      <h3 className="text-xl font-semibold">All Product Warehouses</h3>
+      <h3 className="text-xl font-semibold">Todos los productos y su almacen</h3>
       <div className="flex justify-between flex-wrap gap-4 items-center">
-        <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
-          <Input
-            className="w-full md:w-72"
-            placeholder="Search product warehouses..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+        <Input
+          className="w-full sm:max-w-[300px]"
+          placeholder="Buscar producto en el almacen..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          startContent={<SearchIcon className="text-default-400" size={20} />}
+        />
         <div className="flex flex-row gap-3.5 flex-wrap">
-          <Button color="primary" onPress={handleAdd}>Add Product Warehouse</Button>
+          <Button color="primary" onPress={handleAdd}>Enviar Producto al almacen</Button>
           <Button color="primary" startContent={<ExportIcon />}>
             Export to CSV
           </Button>
@@ -124,38 +109,30 @@ export default function ProductWarehouses() {
               productWarehouses={filteredProductWarehouses}
               onEdit={handleEdit}
               onDelete={(productWarehouseId: number) => {
-                const selectedPW = productWarehouses.find(pw => pw.id === productWarehouseId);
-                if (selectedPW) {
-                  setSelectedProductWarehouse(selectedPW);
-                  setIsConfirmDialogOpen(true);
-                  setTitle("Are you sure you want to delete this product warehouse?");
-                }
+                setSelectedProductWarehouseId(productWarehouseId);
+                setIsConfirmDialogOpen(true);
               }}
               onView={handleView}
             />
           )}
           <ProductWarehouseModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={handleSubmit}
-            productWarehouse={selectedProductWarehouse}
-            isViewMode={isViewMode}
-          />
+            showToast={showToast} />
+   
           <ConfirmDialog
-            title={title}
+            title="¿Estás seguro de que quitar el producto del almacen?"
             isOpen={isConfirmDialogOpen}
             onConfirm={() => {
-              if (selectedProductWarehouse) {
-                handleDelete(selectedProductWarehouse.id);
+              if (selectedProductWarehouseId) {
+                handleDelete(selectedProductWarehouseId);
               }
             }}
             onClose={() => {
               setIsConfirmDialogOpen(false);
-              setTitle("");
+              setSelectedProductWarehouseId(null);
             }}
             onCancel={() => {
               setIsConfirmDialogOpen(false);
-              setTitle("");
+              setSelectedProductWarehouseId(null);
             }}
           />
         </div>

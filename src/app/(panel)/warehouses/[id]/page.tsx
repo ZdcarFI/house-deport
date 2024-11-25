@@ -8,38 +8,135 @@ import { WarehouseDto } from "@/services/Dto/WarehouseDto";
 import { Card, CardBody, CardHeader, Chip, Button, Progress, Skeleton } from "@nextui-org/react";
 import WarehouseMatrix from "@/components/aplication/warehouses/WarehousesGrid";
 import ProductDetails from "@/components/aplication/products/ProductsDetails";
-import { ArrowLeft, Box, CheckCircle, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Box, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ProductWarehouseContext } from "@/context/ProductWarehouseContext/productWarehouseContext";
+import { ToastContext } from "@/context/ToastContext/ToastContext";
+import { ToastType } from "@/components/Toast/Toast";
+import ProductWarehouseModal from "@/components/aplication/productWarehouse/productWarehouseModal";
+import ConfirmDialog from "@/components/modal/ConfirmDialog";
+import { ProductWarehouseDto } from "@/services/Dto/ProductWarehouseDto";
 
 const WarehouseDetails = () => {
     const { id } = useParams();
     const { getWarehouse, loading, error } = useContext(WarehouseContext)!;
+    const {
+        openModal,
+        deleteProductWarehouse,
+        productWarehouses,
+        getProductWarehouse
+    } = useContext(ProductWarehouseContext)!;
+    const { showToast } = useContext(ToastContext)!;
     const [warehouse, setWarehouse] = useState<WarehouseDto | null>(null);
     const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
-    
+    const [selectedCell, setSelectedCell] = useState<{ row: number, column: number } | null>(null);
+    const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+    const [selectedProductWarehouseId, setSelectedProductWarehouseId] = useState<number | null>(null);
+    const [selectedProductWarehouseSelect, setSelectedProductWarehouseSelect] = useState<any | null>(null);
+
+    const [matrixKey, setMatrixKey] = useState(0);
+
     useEffect(() => {
         if (!id) return;
-        
-        const fetchWarehouse = async () => {
+
+        const fetchWarehouseData = async () => {
             try {
                 const warehouseData = await getWarehouse(Number(id));
                 setWarehouse(warehouseData);
+                await getProductWarehouse(Number(id));
             } catch (e) {
                 console.error("Error fetching warehouse:", e);
             }
         };
-        
-        fetchWarehouse();
-    }, [id, getWarehouse]);
+
+        fetchWarehouseData();
+    }, [id, getWarehouse, getProductWarehouse]);
+
+    const handleCellClick = (product: any | null, row: number, column: number) => {
+        if (product) {
+            const productWarehouse = productWarehouses.find(pw =>
+                pw.product.id === product.id &&
+                pw.warehouse.id === Number(id) &&
+                pw.row === row &&
+                pw.column === column
+            );
+
+            if (productWarehouse) {
+                setSelectedProduct(product);
+                setSelectedCell({ row, column });
+                setSelectedProductWarehouseId(productWarehouse.id);
+
+                const productWarehouseSelect = {
+                    id: productWarehouse.id,
+                    productId: product.id,
+                    warehouseId: Number(id),
+                    row: row,
+                    column: column,
+                    quantity: productWarehouse.quantity,
+                };
+
+                setSelectedProductWarehouseSelect(productWarehouseSelect);
+            } else {
+                console.error("ProductWarehouse not found");
+                showToast("Producto en el warehouse no encontrado", ToastType.ERROR);
+            }
+        } else {
+            setSelectedProduct(null);
+            setSelectedCell({ row, column });
+            setSelectedProductWarehouseId(null);
+            setSelectedProductWarehouseSelect(null);
+        }
+    };
+
+    const handleAddProduct = () => {
+        if (warehouse && selectedCell) {
+            openModal(null, false, {
+                warehouseId: warehouse.id,
+                row: selectedCell.row,
+                column: selectedCell.column,
+                onSuccess: () => {
+                    // Trigger matrix refresh
+                    setMatrixKey(prev => prev + 1);
+                }
+            });
+        }
+    };
+
+    const handleEdit = (productWarehouse: ProductWarehouseDto) => {
+        openModal(productWarehouse, false, {
+            onSuccess: () => {
+                // Trigger matrix refresh
+                setMatrixKey(prev => prev + 1);
+            }
+        });
+    };
+
+    const handleDeleteProduct = async () => {
+        if (selectedProductWarehouseId) {
+            try {
+                await deleteProductWarehouse(selectedProductWarehouseId);
+                showToast("Producto - Warehouse eliminada exitosamente", ToastType.SUCCESS);
+                setIsConfirmDialogOpen(false);
+                setSelectedProduct(null);
+                setSelectedProductWarehouseId(null);
+                setSelectedProductWarehouseSelect(null);
+
+                // Trigger matrix refresh
+                setMatrixKey(prev => prev + 1);
+            } catch (error) {
+                showToast("Error: " + error, ToastType.ERROR);
+            }
+        }
+    };
 
     if (loading) {
         return (
             <div className="container mx-auto px-4 py-8 space-y-4">
-                <Skeleton className="h-8 w-40 rounded-lg"/>
+                <Skeleton className="h-8 w-40 rounded-lg" />
                 <Card>
                     <CardBody className="space-y-3">
-                        <Skeleton className="h-6 w-3/4 rounded-lg"/>
-                        <Skeleton className="h-4 w-1/2 rounded-lg"/>
-                        <Skeleton className="h-4 w-1/3 rounded-lg"/>
+                        <Skeleton className="h-6 w-3/4 rounded-lg" />
+                        <Skeleton className="h-4 w-1/2 rounded-lg" />
+                        <Skeleton className="h-4 w-1/3 rounded-lg" />
                     </CardBody>
                 </Card>
             </div>
@@ -50,7 +147,7 @@ const WarehouseDetails = () => {
         return (
             <Card className="container mx-auto px-4 py-8">
                 <CardBody className="flex items-center justify-center text-center">
-                    <AlertTriangle className="text-danger h-12 w-12 mb-4"/>
+                    <AlertTriangle className="text-danger h-12 w-12 mb-4" />
                     <h2 className="text-xl font-bold">Error al cargar los datos</h2>
                     <p className="text-gray-500">{error}</p>
                     <Link href="/warehouses">
@@ -67,7 +164,7 @@ const WarehouseDetails = () => {
         return (
             <Card className="container mx-auto px-4 py-8">
                 <CardBody className="flex items-center justify-center text-center">
-                    <Box className="text-warning h-12 w-12 mb-4"/>
+                    <Box className="text-warning h-12 w-12 mb-4" />
                     <h2 className="text-xl font-bold">Almacén no encontrado</h2>
                     <p className="text-gray-500">No se encontró información del almacén solicitado.</p>
                     <Link href="/warehouses">
@@ -89,7 +186,7 @@ const WarehouseDetails = () => {
                     <Button
                         color="primary"
                         variant="light"
-                        startContent={<ArrowLeft size={20}/>}
+                        startContent={<ArrowLeft size={20} />}
                     >
                         Volver a Almacenes
                     </Button>
@@ -97,7 +194,7 @@ const WarehouseDetails = () => {
                 <Chip
                     color={warehouse.status === 'available' ? 'success' : 'warning'}
                     variant="flat"
-                    startContent={warehouse.status === 'available' ? <CheckCircle size={16}/> : <AlertTriangle size={16}/>}
+                    startContent={warehouse.status === 'available' ? <CheckCircle size={16} /> : <AlertTriangle size={16} />}
                 >
                     {warehouse.status === 'available' ? 'Disponible' : 'Ocupado'}
                 </Chip>
@@ -107,9 +204,6 @@ const WarehouseDetails = () => {
                 <CardHeader className="flex flex-col gap-2">
                     <div className="flex justify-between items-center w-full">
                         <h1 className="text-2xl font-bold">{warehouse.name}</h1>
-                        {/* <Button color="primary" variant="flat">
-                            Editar Almacén
-                        </Button> */}
                     </div>
                     <p className="text-gray-500">{warehouse.description}</p>
                 </CardHeader>
@@ -121,7 +215,7 @@ const WarehouseDetails = () => {
                                 {warehouse.spacesUsed} de {warehouse.spaces}
                             </span>
                         </div>
-                        <Progress 
+                        <Progress
                             value={usagePercentage}
                             color={usagePercentage > 90 ? "danger" : usagePercentage > 70 ? "warning" : "success"}
                             className="h-2"
@@ -133,13 +227,14 @@ const WarehouseDetails = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <h2 className="text-xl font-semibold">Matriz del Almacén</h2>
+                        <h2 className="text-xl font-semibold">Espacios del almacen</h2>
                     </CardHeader>
                     <CardBody>
                         <div className="overflow-auto">
                             <WarehouseMatrix
+                                key={matrixKey} // Add key to force re-render
                                 warehouse={warehouse}
-                                onCellClick={setSelectedProduct}
+                                onCellClick={handleCellClick}
                             />
                         </div>
                         <div className="mt-4 flex flex-wrap gap-2">
@@ -157,13 +252,30 @@ const WarehouseDetails = () => {
                                 <h2 className="text-xl font-semibold">Detalles del Producto</h2>
                             </CardHeader>
                             <CardBody>
-                                <ProductDetails product={selectedProduct} />
+                                <ProductDetails
+                                    product={selectedProduct}
+                                    onEdit={handleEdit}
+                                    onDeleteProduct={() => setIsConfirmDialogOpen(true)}
+                                    productWarehouseSelect={selectedProductWarehouseSelect}
+                                />
+                            </CardBody>
+                        </Card>
+                    ) : selectedCell ? (
+                        <Card>
+                            <CardBody className="flex flex-col items-center justify-center text-center p-8">
+                                <Box className="text-gray-400 h-12 w-12 mb-4" />
+                                <p className="text-gray-500 mb-4">
+                                    Celda seleccionada: Fila {selectedCell.row}, Columna {selectedCell.column}
+                                </p>
+                                <Button color="primary" onPress={handleAddProduct}>
+                                    Agregar Producto
+                                </Button>
                             </CardBody>
                         </Card>
                     ) : (
                         <Card>
                             <CardBody className="flex items-center justify-center text-center p-8">
-                                <Box className="text-gray-400 h-12 w-12 mb-4"/>
+                                <Box className="text-gray-400 h-12 w-12 mb-4" />
                                 <p className="text-gray-500">
                                     Selecciona una ubicación para ver los detalles del producto
                                 </p>
@@ -172,8 +284,25 @@ const WarehouseDetails = () => {
                     )}
                 </div>
             </div>
+            <ProductWarehouseModal
+                showToast={showToast}
+            />
+            <ConfirmDialog
+                title="¿Estás seguro de que quieres quitar el producto del almacen?"
+                isOpen={isConfirmDialogOpen}
+                onConfirm={handleDeleteProduct}
+                onClose={() => {
+                    setIsConfirmDialogOpen(false);
+                    setSelectedProductWarehouseId(null);
+                }}
+                onCancel={() => {
+                    setIsConfirmDialogOpen(false);
+                    setSelectedProductWarehouseId(null);
+                }}
+            />
         </div>
     );
 };
 
 export default WarehouseDetails;
+

@@ -13,7 +13,6 @@ import { CategoryContext } from "@/context/CategoryContext/categoryContext";
 import { ToastType } from '@/components/Toast/Toast';
 import { ProductContext } from '@/context/ProductContext/productContext';
 import { WarehouseContext } from '@/context/WareHouseContext/warehouseContext';
-import { WarehouseDto } from '@/services/Dto/WarehouseDto';
 import { Archive, Edit, Eye, Package, Plus, Trash2 } from 'lucide-react';
 import { Badge, Divider } from '@nextui-org/react';
 
@@ -55,16 +54,17 @@ export default function ProductModal({ showToast }: Props) {
 
     useEffect(() => {
         if (selectedProduct) {
-            setFormData({
+            const mappedData: UpdateProductDto = {
                 name: selectedProduct.name,
                 code: selectedProduct.code,
                 price: selectedProduct.price,
-                categoryId: selectedProduct.category ? selectedProduct.category.id : 0,
-                sizeId: selectedProduct.size ? selectedProduct.size.id : 0,
+                categoryId: selectedProduct.category?.id || 0,
+                sizeId: selectedProduct.size?.id || 0,
                 stockInventory: selectedProduct.stockInventory,
                 stockStore: selectedProduct.stockStore,
-                location: selectedProduct.productWarehouse || [],
-            });
+                location: selectedProduct.productWarehouse || [], // Map productWarehouse to location
+            };
+            setFormData(mappedData);
         } else {
             setFormData({
                 name: '',
@@ -136,7 +136,7 @@ export default function ProductModal({ showToast }: Props) {
                 location: [...formData.location, newLocation]
             });
 
-            // Limpiar el formulario de ubicación
+
             setCurrentLocation({
                 row: 0,
                 column: 0,
@@ -166,20 +166,37 @@ export default function ProductModal({ showToast }: Props) {
             </SelectItem>
         ));
     };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const dataToSend = {
+                ...formData,
+                price: formData.price ? parseFloat(formData.price.toString()) : 0 // Ensure price is a number
+            };
+
             if (selectedProduct) {
-                await updateProduct(selectedProduct.id, formData as UpdateProductDto);
+                // When updating, only send editable fields while preserving the original structure
+                const updateData: UpdateProductDto = {
+                    ...dataToSend,
+                    name: dataToSend.name,
+                    code: dataToSend.code,
+                    categoryId: dataToSend.categoryId,
+                    sizeId: dataToSend.sizeId,
+                    // Preserve the original values for non-editable fields
+                    stockInventory: selectedProduct.stockInventory,
+                    stockStore: selectedProduct.stockStore,
+                    location: selectedProduct.productWarehouse || [],
+                };
+                await updateProduct(selectedProduct.id, updateData);
                 showToast("Producto actualizado exitosamente", ToastType.SUCCESS);
             } else {
+                // When creating, send all fields
                 await createProduct(formData as CreateProductDto);
                 showToast("Producto creado exitosamente", ToastType.SUCCESS);
             }
             closeModal();
         } catch (error) {
-            showToast("Error al enviar los datos del Producto:" + error, ToastType.ERROR)
+            showToast("Error al enviar los datos del Producto:" + error, ToastType.ERROR);
         }
     };
 
@@ -339,126 +356,131 @@ export default function ProductModal({ showToast }: Props) {
                                 </div>
 
                                 {/* Columna derecha - Ubicaciones en almacén */}
-                                <div className="overflow-y-auto pr-4">
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2">
-                                            <Archive className="w-5 h-5" />
-                                            <h3 className="text-lg font-semibold">Ubicaciones en Almacén</h3>
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <Select
-                                                label="Almacén"
-                                                placeholder="Seleccione un almacén"
-                                                value={selectedWarehouse}
-                                                onChange={handleWarehouseChange}
-                                                isDisabled={isViewMode}
-                                                variant="bordered"
-                                                className="flex-1"
-                                            >
-                                                {warehouses.map((warehouse) => (
-                                                    <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
-                                                        {warehouse.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
-                                            <Button
-                                                color="primary"
-                                                onPress={handleAdd}
-                                                className="self-end"
-                                                isDisabled={isViewMode}
-                                            >
-                                                Agregar Almacén
-                                            </Button>
-                                        </div>
-
-                                        {/* Grid de inputs */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <Input
-                                                label="Fila"
-                                                name="row"
-                                                type="number"
-                                                value={currentLocation.row?.toString()}
-                                                onChange={handleLocationInputChange}
-                                                isDisabled={isViewMode}
-                                                variant="bordered"
-                                                className="w-full"
-                                            />
-
-                                            <Input
-                                                label="Columna"
-                                                name="column"
-                                                type="number"
-                                                value={currentLocation.column?.toString()}
-                                                onChange={handleLocationInputChange}
-                                                isDisabled={isViewMode}
-                                                variant="bordered"
-                                                className="w-full"
-                                            />
-
-                                            <Input
-                                                label="Cantidad"
-                                                name="quantity"
-                                                type="number"
-                                                value={currentLocation.quantity?.toString()}
-                                                onChange={handleLocationInputChange}
-                                                isDisabled={isViewMode}
-                                                variant="bordered"
-                                                className="col-span-2"
-                                            />
-                                        </div>
-
-                                        {!isViewMode && (
-                                            <Button
-                                                color="primary"
-                                                onPress={addLocation}
-                                                startContent={<Plus className="w-4 h-4" />}
-                                                className="w-full"
-                                            >
-                                                Agregar Ubicación
-                                            </Button>
-                                        )}
-
-                                        {/* Lista de ubicaciones */}
-                                        {formData.location.length > 0 && (
-                                            <div className="space-y-3 mt-4">
-                                                <h4 className="text-medium font-semibold">Ubicaciones agregadas:</h4>
-                                                <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                                                    {formData.location.map((loc, index) => (
-                                                        <Card key={index} className="bg-default-50">
-                                                            <CardBody className="py-2">
-                                                                <div className="flex justify-between items-center">
-                                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                                        <Badge color="primary" variant="flat">
-                                                                            {warehouses.find(w => w.id === loc.warehouseId)?.name}
-                                                                        </Badge>
-                                                                        <span className="text-small">
-                                                                            Fila: {loc.row}, Columna: {loc.column}
-                                                                        </span>
-                                                                        <Badge color="secondary" variant="flat">
-                                                                            Cantidad: {loc.quantity}
-                                                                        </Badge>
-                                                                    </div>
-                                                                    {!isViewMode && (
-                                                                        <Button
-                                                                            isIconOnly
-                                                                            color="danger"
-                                                                            variant="light"
-                                                                            size="sm"
-                                                                            onPress={() => removeLocation(index)}
-                                                                        >
-                                                                            <Trash2 className="w-4 h-4" />
-                                                                        </Button>
-                                                                    )}
-                                                                </div>
-                                                            </CardBody>
-                                                        </Card>
-                                                    ))}
-                                                </div>
+                                {!selectedProduct && (
+                                    <div className="overflow-y-auto pr-4">
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2">
+                                                <Archive className="w-5 h-5" />
+                                                <h3 className="text-lg font-semibold">Ubicaciones en Almacén</h3>
                                             </div>
-                                        )}
+                                            {!isViewMode && (
+                                                <div className="flex gap-2">
+                                                    <Select
+                                                        label="Almacén"
+                                                        placeholder="Seleccione un almacén"
+                                                        value={selectedWarehouse}
+                                                        onChange={handleWarehouseChange}
+                                                        isDisabled={isViewMode}
+                                                        variant="bordered"
+                                                        className="flex-1"
+                                                    >
+                                                        {warehouses.map((warehouse) => (
+                                                            <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
+                                                                {warehouse.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </Select>
+                                                    <Button
+                                                        color="primary"
+                                                        onPress={handleAdd}
+                                                        className="self-end"
+                                                        isDisabled={isViewMode}
+                                                    >
+                                                        Agregar Almacén
+                                                    </Button>
+                                                </div>
+                                            )}
+                                            {/* Grid de inputs */}
+                                            {!isViewMode && (
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <Input
+                                                        label="Fila"
+                                                        name="row"
+                                                        type="number"
+                                                        value={currentLocation.row?.toString()}
+                                                        onChange={handleLocationInputChange}
+                                                        isDisabled={isViewMode}
+                                                        variant="bordered"
+                                                        className="w-full"
+                                                    />
+
+                                                    <Input
+                                                        label="Columna"
+                                                        name="column"
+                                                        type="number"
+                                                        value={currentLocation.column?.toString()}
+                                                        onChange={handleLocationInputChange}
+                                                        isDisabled={isViewMode}
+                                                        variant="bordered"
+                                                        className="w-full"
+                                                    />
+
+                                                    <Input
+                                                        label="Cantidad"
+                                                        name="quantity"
+                                                        type="number"
+                                                        value={currentLocation.quantity?.toString()}
+                                                        onChange={handleLocationInputChange}
+                                                        isDisabled={isViewMode}
+                                                        variant="bordered"
+                                                        className="col-span-2"
+                                                    />
+                                                </div>
+                                            )}
+                                            {!isViewMode && (
+                                                <Button
+                                                    color="primary"
+                                                    onPress={addLocation}
+                                                    startContent={<Plus className="w-4 h-4" />}
+                                                    className="w-full"
+                                                >
+                                                    Agregar Ubicación
+                                                </Button>
+                                            )}
+
+                                            {/* Lista de ubicaciones */}
+                                            {formData.location.length > 0 && (
+                                                <div className="space-y-3 mt-4">
+                                                    <h4 className="text-medium font-semibold">Ubicaciones agregadas:</h4>
+                                                    <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                                                        {formData.location.map((loc, index) => (
+                                                            <Card key={index} className="bg-default-50">
+                                                                <CardBody className="py-2">
+                                                                    <div className="flex justify-between items-center">
+                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                            <Badge color="primary" variant="flat">
+                                                                                {warehouses.find(w => w.id === loc.warehouseId)?.name}
+                                                                            </Badge>
+                                                                            <span className="text-small">
+                                                                                Fila: {loc.row}, Columna: {loc.column}
+                                                                            </span>
+                                                                            <Badge color="secondary" variant="flat">
+                                                                                Cantidad: {loc.quantity}
+                                                                            </Badge>
+                                                                        </div>
+                                                                        {!isViewMode && (
+                                                                            <Button
+                                                                                isIconOnly
+                                                                                color="danger"
+                                                                                variant="light"
+                                                                                size="sm"
+                                                                                onPress={() => removeLocation(index)}
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </Button>
+                                                                        )}
+                                                                    </div>
+                                                                </CardBody>
+                                                            </Card>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                )
+                                }
+
                             </div>
                         </ModalBody>
 

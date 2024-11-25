@@ -3,11 +3,10 @@ export interface UpdateProductDto {
     readonly code?: string;
     readonly price?: number;
     readonly categoryId?: number;
-    readonly sizeId: number;
+    readonly sizeId?: number;
     readonly stockInventory?: number;
     readonly stockStore?: number;
     readonly location: LocationDto[];
-  
 }
 
 

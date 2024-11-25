@@ -1,23 +1,26 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@nextui-org/table';
 import { Tooltip } from '@nextui-org/tooltip';
+import { Button } from '@nextui-org/button';
 import { EditIcon } from '../../icons/table/edit-icon';
 import { DeleteIcon } from '../../icons/table/delete-icon';
 import { EyeIcon } from '../../icons/table/eye-icon';
+import { PlusCircle, Warehouse } from 'lucide-react';
 import { ProductDto } from '@/services/Dto/ProductDto';
+import { ProductWarehouseContext } from '@/context/ProductWarehouseContext/productWarehouseContext';
 
 interface ProductTableProps {
   products: ProductDto[];
   onView: (product: ProductDto) => void;
   onEdit: (product: ProductDto) => void;
   onDelete: (id: number) => void;
+  onIncrementStock: (product: ProductDto) => void;
 }
 
-export default function ProductTable({ products, onView, onEdit, onDelete }: ProductTableProps) {
+export default function ProductTable({ products, onView, onEdit, onDelete, onIncrementStock }: ProductTableProps) {
+  const { openModal } = useContext(ProductWarehouseContext)!;
 
   const renderCell = (product: ProductDto, columnKey: React.Key): React.ReactNode => {
-
-
     switch (columnKey) {
       case 'actions':
         return (
@@ -37,6 +40,16 @@ export default function ProductTable({ products, onView, onEdit, onDelete }: Pro
                 <DeleteIcon size={20} fill="#FF0080" />
               </button>
             </Tooltip>
+            <Tooltip content="Incrementar Stock" color="success">
+              <Button color="success" onClick={() => onIncrementStock(product)}>
+                <PlusCircle size={20} />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Enviar producto al almacen" color="warning">
+              <Button color="warning" onClick={() => openModal(null, false, product)}>
+                <Warehouse size={20} />
+              </Button>
+            </Tooltip>
           </div>
         );
       case 'category':
@@ -44,7 +57,7 @@ export default function ProductTable({ products, onView, onEdit, onDelete }: Pro
       case 'size':
         return product.size?.name ?? "N/A";
       case 'warehouse':
-        return product.productWarehouse[0]?.name  ?? "N/A";
+        return product.productWarehouse[0]?.name ?? "N/A";
       case 'stockInventory':
         return product.stockInventory ?? "N/A";
       case 'stockStore':
@@ -76,3 +89,4 @@ export default function ProductTable({ products, onView, onEdit, onDelete }: Pro
     </Table>
   );
 }
+

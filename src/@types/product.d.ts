@@ -17,4 +17,7 @@ export type ProductContextType = {
     isViewMode: boolean;
     openModal: (Product: ProductDto | null, viewMode: boolean) => void;
     closeModal: () => void;
+    isStockModalOpen: boolean;
+    openStockModal: (product: ProductDto) => void;
+    closeStockModal: () => void;
 };

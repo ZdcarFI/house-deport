@@ -37,7 +37,7 @@ export default function Warehouses() {
 
     const handleAdd = () => openModal(null, false);
 
-    const handleView = (warehouse: WarehouseDto) => openModal(warehouse, true);
+    const onView = (warehouse: WarehouseDto) => openModal(warehouse, true);
 
     const handleEdit = (warehouse: WarehouseDto) => openModal(warehouse, false);
 
@@ -158,6 +158,7 @@ export default function Warehouses() {
                                 setSelectedWarehouseId(warehouseId);
                                 setIsConfirmDialogOpen(true);
                             }}
+                            onView={onView}
                         />
                     </div>
                 </CardBody>

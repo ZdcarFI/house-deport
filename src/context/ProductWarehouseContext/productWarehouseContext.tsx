@@ -1,23 +1,55 @@
 "use client"
 
-import React from 'react';
-import {ProductWarehouseContextType} from "@/@types/productWarehouse";
-import {ProductWarehouseDto} from "@/services/Dto/ProductWarehouseDto";
+import React, { useCallback, useState } from 'react';
+import { ProductWarehouseContextType } from "@/@types/productWarehouse";
+import { ProductWarehouseDto } from "@/services/Dto/ProductWarehouseDto";
 
-import {AxiosError} from "axios";
+import { AxiosError } from "axios";
 
-import { ProductWarehouseActionType, ProductWarehouseState, productWarehouseReducer} from './productWarehouseReducer';
+import { ProductWarehouseActionType, ProductWarehouseState, productWarehouseReducer } from './productWarehouseReducer';
 import { ProductWarehouseService } from '@/services/ProductWarehouse/ProductWarehouseService';
 import { CreateProductWarehouseDto } from '@/services/ProductWarehouse/dto/CreateProductWarehouse.dto';
 import { UpdateProductWarehouseDto } from '@/services/ProductWarehouse/dto/UpdateProductWarehouse.dto';
+import { ProductDto } from '@/services/Dto/ProductDto';
+import { WarehouseDto } from '@/services/Dto/WarehouseDto';
 
 export const ProductWarehouseContext = React.createContext<ProductWarehouseContextType | null>(null);
 const productWarehouseService = new ProductWarehouseService();
 
-const ProductWarehouseProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
-  const [state, dispatch] = React.useReducer(productWarehouseReducer, {productWarehouses: []} as ProductWarehouseState);
+const productWarehouseInitialState: ProductWarehouseDto = {
+  id: 0,
+  warehouse: {
+    id: 0,
+    name: "",
+    rowMax: 0,
+    columnMax: 0,
+    status: "",
+  },
+  product: {
+    id: 0,
+    name: '',
+    code: '',
+    price: 0,
+
+  },
+  row: 0,
+  column: 0,
+  quantity: 0,
+   productId: 0,
+   warehouseId: 0,
+
+};
+
+const ProductWarehouseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [state, dispatch] = React.useReducer(productWarehouseReducer, { productWarehouses: [] } as ProductWarehouseState);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProductWarehouse, setSelectedProductWarehouse] = useState<ProductWarehouseDto | null>(null);
+  const [isViewMode, setIsViewMode] = useState(false);
+
+  const [initialData, setInitialData] = useState<ProductDto | WarehouseDto | null>(null);
+
 
   React.useEffect(() => {
     const fetchProductWarehouses = async () => {
@@ -45,7 +77,7 @@ const ProductWarehouseProvider: React.FC<{ children: React.ReactNode }> = ({chil
   const getProductWarehouses = async (): Promise<void> => {
     try {
       const productWarehouses = await productWarehouseService.getAll();
-      dispatch({type: ProductWarehouseActionType.LOAD_PRODUCT_WAREHOUSES, payload: productWarehouses});
+      dispatch({ type: ProductWarehouseActionType.LOAD_PRODUCT_WAREHOUSES, payload: productWarehouses });
     } catch (e) {
       handleError(e);
     }
@@ -54,7 +86,8 @@ const ProductWarehouseProvider: React.FC<{ children: React.ReactNode }> = ({chil
   const createProductWarehouse = async (productWarehouse: CreateProductWarehouseDto): Promise<void> => {
     try {
       const res = await productWarehouseService.create(productWarehouse);
-      dispatch({type: ProductWarehouseActionType.ADD_PRODUCT_WAREHOUSE, payload: res});
+      dispatch({ type: ProductWarehouseActionType.ADD_PRODUCT_WAREHOUSE, payload: res });
+      setSelectedProductWarehouse(productWarehouseInitialState);
     } catch (e) {
       handleError(e);
     }
@@ -63,7 +96,8 @@ const ProductWarehouseProvider: React.FC<{ children: React.ReactNode }> = ({chil
   const updateProductWarehouse = async (id: number, productWarehouse: UpdateProductWarehouseDto): Promise<void> => {
     try {
       const res = await productWarehouseService.updateById(id, productWarehouse);
-      dispatch({type: ProductWarehouseActionType.EDIT_PRODUCT_WAREHOUSE, payload: res});
+      dispatch({ type: ProductWarehouseActionType.EDIT_PRODUCT_WAREHOUSE, payload: res });
+      setSelectedProductWarehouse(productWarehouseInitialState);
     } catch (e) {
       handleError(e);
     }
@@ -81,11 +115,25 @@ const ProductWarehouseProvider: React.FC<{ children: React.ReactNode }> = ({chil
   const deleteProductWarehouse = async (id: number): Promise<void> => {
     try {
       await productWarehouseService.deleteById(id);
-      dispatch({type: ProductWarehouseActionType.REMOVE_PRODUCT_WAREHOUSE, payload: id});
+      dispatch({ type: ProductWarehouseActionType.REMOVE_PRODUCT_WAREHOUSE, payload: id });
     } catch (e) {
       handleError(e);
     }
   };
+
+  const openModal = useCallback((productWarehouse: ProductWarehouseDto | null, viewMode: boolean, data?: ProductDto | WarehouseDto | null) => {
+    setSelectedProductWarehouse(productWarehouse);
+    setIsViewMode(viewMode);
+    setInitialData(data || null);
+    setIsModalOpen(true);
+}, []);
+
+const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedProductWarehouse(null);
+    setIsViewMode(false);
+    setInitialData(null);
+}, []);
 
   const values = React.useMemo(() => ({
     productWarehouses: state.productWarehouses,
@@ -95,8 +143,15 @@ const ProductWarehouseProvider: React.FC<{ children: React.ReactNode }> = ({chil
     getProductWarehouses,
     loading,
     getProductWarehouse,
-    error
-  }), [state.productWarehouses, loading, error]);
+    error,
+    productWarehouse: productWarehouseInitialState,
+    isModalOpen,
+    selectedProductWarehouse,
+    isViewMode,
+    initialData,
+    openModal,
+    closeModal,
+  }), [state.productWarehouses, loading,    initialData,,error, isModalOpen, selectedProductWarehouse, isViewMode, openModal, closeModal]);
 
   return (
     <ProductWarehouseContext.Provider value={values}>
