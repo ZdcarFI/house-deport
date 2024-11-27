@@ -121,6 +121,7 @@ const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =
         loading,
         getClient,
         error,
+        errorClient: error,
         client: clientInitialState,
         isModalOpen,
         selectedClient,

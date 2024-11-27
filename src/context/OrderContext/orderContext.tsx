@@ -1,17 +1,17 @@
 "use client"
-import { OrderService } from "@/services/Order/OrderService";
+import {OrderService} from "@/services/Order/OrderService";
 import React from "react";
-import { OrderActionType, OrderState, orderReducer } from "./orderReducer";
-import { OrderContextType } from "@/@types/order";
-import { AxiosError } from "axios";
-import { CreateOrderDto } from "@/services/Order/dto/CreateOrderDto";
-import { UpdateOrderDto } from "@/services/Order/dto/UpdateOrderDto";
-import { OrderDto } from "@/services/Dto/OrderDto";
+import {OrderActionType, OrderState, orderReducer} from "./orderReducer";
+import {OrderContextType} from "@/@types/order";
+import {AxiosError} from "axios";
+import {CreateOrderDto} from "@/services/Order/dto/CreateOrderDto";
+import {UpdateOrderDto} from "@/services/Order/dto/UpdateOrderDto";
+import {OrderDto} from "@/services/Dto/OrderDto";
 
 export const OrderContext = React.createContext<OrderContextType | null>(null);
 const orderService = new OrderService();
-const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [state, dispatch] = React.useReducer(orderReducer, { orders: [] } as OrderState);
+const OrderProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
+    const [state, dispatch] = React.useReducer(orderReducer, {orders: []} as OrderState);
     const [loading, setLoading] = React.useState<boolean>(false);
     const [error, setError] = React.useState<string>('');
 
@@ -41,7 +41,7 @@ const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const getOrders = async (): Promise<void> => {
         try {
             const orders = await orderService.getAll();
-            dispatch({ type: OrderActionType.LOAD_ORDERS, payload: orders });
+            dispatch({type: OrderActionType.LOAD_ORDERS, payload: orders});
         } catch (e) {
             handleError(e);
         }
@@ -50,7 +50,7 @@ const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const createOrder = async (order: CreateOrderDto): Promise<void> => {
         try {
             const res = await orderService.create(order);
-            dispatch({ type: OrderActionType.ADD_ORDER, payload: res });
+            dispatch({type: OrderActionType.ADD_ORDER, payload: res});
         } catch (e) {
             handleError(e);
         }
@@ -59,7 +59,7 @@ const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const updateOrder = async (id: number, order: UpdateOrderDto): Promise<void> => {
         try {
             const res = await orderService.updateById(id, order);
-            dispatch({ type: OrderActionType.EDIT_ORDER, payload: res });
+            dispatch({type: OrderActionType.EDIT_ORDER, payload: res});
         } catch (e) {
             handleError(e);
         }
@@ -77,7 +77,7 @@ const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const deleteOrder = async (id: number): Promise<void> => {
         try {
             await orderService.deleteById(id);
-            dispatch({ type: OrderActionType.REMOVE_ORDER, payload: id });
+            dispatch({type: OrderActionType.REMOVE_ORDER, payload: id});
         } catch (e) {
             handleError(e);
         }
@@ -91,7 +91,7 @@ const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         getOrders,
         loading,
         getOrder,
-        error
+        errorOrder: error
     }), [state.orders, loading, error]);
 
     return (

@@ -10,5 +10,5 @@ export type OrderContextType = {
     getOrders: () => Promise<void>;
     getOrder: (id: number) => Promise<OrderDto>;
     loading: boolean;
-    error: string;
+    errorOrder: string;
 };

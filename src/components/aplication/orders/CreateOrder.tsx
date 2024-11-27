@@ -27,29 +27,50 @@ import {UserContext} from "@/context/UserContext/userContext";
 import {CirclePlus} from "@/components/icons/CirclePlus";
 import {ClientDto} from "@/services/Dto/ClienDto";
 import ClientModal from "@/components/aplication/clients/ClientModal";
-import {ProductDto, ProductWarehouseBasicDto} from "@/services/Dto/ProductDto";
 import {CheckIcon} from "@/components/icons/CheckIcon";
 import {ToastContext} from "@/context/ToastContext/ToastContext";
 import {ToastType} from "@/components/Toast/Toast";
-import {SizeDto} from "@/services/Dto/SizeDto";
-import {CategoryBasicDto} from "@/services/Dto/CategoryDto";
+import {DataCartDto} from "@/components/aplication/orders/dto/DataCartDto";
+
+
+const initialCart: DataCartDto = {
+    id: 0,
+    name: '',
+    price: 0,
+    size: {
+        id: 0,
+        name: ''
+    },
+    category: {
+        id: 0,
+        name: ''
+    },
+    location: {
+        id: 0,
+        row: 0,
+        column: 0,
+        color: '',
+        quantity: 0
+    },
+    productWarehouses: [],
+    quantity: 0
+}
 
 export default function CreateOrderPage() {
-    const {products, getProducts, productInitial} = React.useContext(ProductContext)!
+    const {products} = React.useContext(ProductContext)!
     const {user} = React.useContext(UserContext)!
     const {
         showToast
     } = React.useContext(ToastContext)!
     const {
         clients,
-        createClient
+        createClient,
     } = React.useContext(ClientContext)!
-    const {createOrder} = React.useContext(OrderContext)!
+    const {createOrder, errorOrder} = React.useContext(OrderContext)!
 
-    const [selectedProduct, setSelectedProduct] = useState<ProductDto>(productInitial);
-    const [quantity, setQuantity] = useState(0);
-    const [location, setLocation] = useState<ProductWarehouseBasicDto | null>(null);
-    const [cart, setCart] = useState<ProductBasicCreateDto[]>([])
+    const [cart, setCart] = useState<ProductBasicCreateDto[]>([]);
+    const [dataCart, setDataCart] = useState<DataCartDto[]>([]);
+    const [newCart, setNewCart] = useState<DataCartDto>(initialCart);
     const [orderData, setOrderData] = useState<CreateOrderDto & {
         status: string,
         tax: number,
@@ -70,14 +91,8 @@ export default function CreateOrderPage() {
 
     const [total, setTotal] = useState(0)
     const [selectedClient, setSelectedClient] = React.useState<ClientDto | null>(null);
-    const [inputValue, setInputValue] = useState('');
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [isViewMode, setIsViewMode] = React.useState(false);
-
-    useEffect(() => {
-        getProducts();
-    }, [])
-
 
     useEffect(() => {
         calculateTotals()
@@ -111,17 +126,23 @@ export default function CreateOrderPage() {
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
+        e.preventDefault();
         console.log(orderData);
-
-        try {
+        if (orderData.numFac === '') {
+            showToast("Debe ingresar un número de factura", ToastType.WARNING);
+        } else if (orderData.clientId === 0) {
+            showToast("Debe seleccionar un cliente", ToastType.WARNING);
+        } else if (orderData.paymentType === '') {
+            showToast("Debe seleccionar un tipo de pago", ToastType.WARNING);
+        } else if (orderData.products) {
+            showToast("Debe agregar productos", ToastType.WARNING);
+        } else if (orderData.userId === 0) {
+            showToast("Usuario no existe", ToastType.ERROR);
+        } else {
             await createOrder(orderData)
-            // Handle successful order creation (e.g., show success message, redirect)
-        } catch (error) {
-            console.error("Error creating order:", error)
-            // Handle error (e.g., show error message)
+            showToast(errorOrder, ToastType.ERROR);
         }
+
     }
 
     const handleSelectChange = (name: string) => (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -135,62 +156,61 @@ export default function CreateOrderPage() {
     };
 
     const handleSubmitClient = async (formData: ClientDto) => {
-        try {
-            const newClient = await createClient(formData);
-            setOrderData({...orderData, clientId: newClient.id});
-            setIsModalOpen(false);
-        } catch (error) {
-            console.error("Error submitting client data:", error);
-        }
+        const newClient = await createClient(formData);
+        setOrderData({...orderData, clientId: newClient.id});
+        setIsModalOpen(false);
     };
 
     const onSelectionChangeProduct = (id: React.Key | null) => {
         if (id) {
             const product = products.find(p => p.id === Number(id));
             if (product) {
-                setSelectedProduct(product);
-                setInputValue(product.name);
+                setNewCart({
+                    ...newCart, id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    size: product.size,
+                    category: product.category,
+                    productWarehouses: product.productWarehouse
+                });
             }
-        } else {
-            setInputValue('');
         }
-        setLocation(null);
     };
 
     const addProductToCart = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
         if (validateAddProductToCart()) {
-            const existingProduct = cart.find(item => item.id === selectedProduct.id)
-            if (existingProduct) {
-                if (existingProduct.quantity > 0 && existingProduct.quantity < selectedProduct.stockStore) {
-                    setCart(cart.map(item =>
-                        item.id === selectedProduct?.id ? {...item, quantity: item.quantity + quantity} : item
-                    ))
-                }
+            const existingDataCart = dataCart.find(item => item.id === newCart.id)
+            if (existingDataCart) {
+                setDataCart(dataCart.map(item =>
+                    item.id === newCart.id ? {...item, quantity: item.quantity + newCart.quantity} : item
+                ));
             } else {
-                setCart([...cart, {
-                    id: selectedProduct.id,
-                    quantity: quantity,
-                    productWarehouseId: selectedProduct.productWarehouse[0].warehouseId
-                }])
+                setDataCart([
+                    ...dataCart,
+                    {
+                        id: newCart.id,
+                        name: newCart.name,
+                        price: newCart.price,
+                        size: newCart.size,
+                        category: newCart.category,
+                        location: newCart.location,
+                        productWarehouses: newCart.productWarehouses,
+                        quantity: newCart.quantity
+                    }
+                ])
             }
 
-            setSelectedProduct(productInitial);
-            setQuantity(0);
-            setInputValue('');
-            setLocation(null);
+            setNewCart(initialCart);
         }
     }
 
     function validateAddProductToCart(): boolean {
-        if (selectedProduct.id === 0) {
-            showToast("Debe seleccionar un producto", ToastType.ERROR);
+        if (newCart.id === 0) {
+            showToast("Debe seleccionar un producto", ToastType.WARNING);
             return false;
-        } else if (quantity <= 0) {
-            showToast("La cantidad no puede ser menor o igual a 0", ToastType.ERROR);
-            return false;
-        } else if (location != null && quantity > location.quantity) {
-            showToast("No hay suficiente stock en la ubicación seleccionada", ToastType.ERROR);
+        } else if (newCart.location.id == 0) {
+            showToast("Debe seleccionar la ubicación", ToastType.WARNING);
             return false;
         }
         return true;
@@ -313,9 +333,9 @@ export default function CreateOrderPage() {
                                             className="mb-2"
                                             aria-label="Select a payment type"
                                         >
-                                            <SelectItem key="cash" value="cash">Efectivo</SelectItem>
-                                            <SelectItem key="transfers" value="transfers">Transferencias</SelectItem>
-                                            <SelectItem key="yape" value="yape">Yape</SelectItem>
+                                            <SelectItem key="YAPE" value="yape">Yape</SelectItem>
+                                            <SelectItem key="CASH" value="cash">Efectivo</SelectItem>
+                                            <SelectItem key="TRANSFERS" value="transfers">Transferencias</SelectItem>
                                         </Select>
                                     </div>
                                 </div>
@@ -379,8 +399,11 @@ export default function CreateOrderPage() {
                                                             defaultItems={products}
                                                             onSelectionChange={onSelectionChangeProduct}
                                                             aria-label="Select a product"
-                                                            inputValue={inputValue}
-                                                            onInputChange={(value) => setInputValue(value)}
+                                                            inputValue={newCart.name}
+                                                            onInputChange={(value) => setNewCart({
+                                                                ...newCart,
+                                                                name: value
+                                                            })}
                                                         >
                                                             {products.map((product) => (
                                                                 <AutocompleteItem key={product.id} value={product.id}>
@@ -389,47 +412,61 @@ export default function CreateOrderPage() {
                                                             ))}
                                                         </Autocomplete>
                                                     </TableCell>
-                                                    <TableCell>{selectedProduct?.price}</TableCell>
-                                                    <TableCell>{selectedProduct?.size?.name}</TableCell>
-                                                    <TableCell>{selectedProduct?.category?.name}</TableCell>
+                                                    <TableCell>{newCart.price === 0 ? '' : newCart.price}</TableCell>
+                                                    <TableCell>{newCart.size.name}</TableCell>
+                                                    <TableCell>{newCart.category.name}</TableCell>
                                                     <TableCell
                                                         className="min-w-60">
                                                         <Select
-                                                            value={location?.id.toString() || ''}
+                                                            value={newCart?.location.id.toString()}
                                                             onChange={(e) => {
-                                                                const location = selectedProduct?.productWarehouse.find((product) => product.id === parseInt(e.target.value));
-                                                                setLocation(location || null);
+                                                                const productWarehouse = newCart.productWarehouses.find((productWarehouse) => productWarehouse.id === parseInt(e.target.value));
+                                                                if (productWarehouse) {
+                                                                    setNewCart({
+                                                                        ...newCart,
+                                                                        location: {
+                                                                            id: productWarehouse.id,
+                                                                            row: productWarehouse.row,
+                                                                            column: productWarehouse.column,
+                                                                            color: productWarehouse.color,
+                                                                            quantity: productWarehouse.quantity
+                                                                        }
+                                                                    })
+                                                                }
                                                             }}
                                                             aria-label="Select a product location"
-                                                            isDisabled={selectedProduct.id === 0}
-                                                            required={true}
+                                                            isDisabled={newCart.id === 0}
                                                         >
-                                                            {selectedProduct?.productWarehouse?.map((product) => (
+                                                            {newCart.productWarehouses.map((productWarehouse) => (
                                                                 <SelectItem
-                                                                    key={product.id}
-                                                                    value={product.id.toString()}
-                                                                    textValue={`${product.row}-${product.column}`}
-                                                                    color={product.color}
+                                                                    key={productWarehouse.id}
+                                                                    value={productWarehouse.id.toString()}
+                                                                    textValue={`${productWarehouse.row}-${productWarehouse.column}`}
+                                                                    color={productWarehouse.color}
                                                                 >
-                                                                    {product.name}--{product.row}-{product.column}
+                                                                    {productWarehouse.name}{" "}{productWarehouse.row}-{productWarehouse.column}
                                                                 </SelectItem>
-                                                            )) || (
-                                                                <SelectItem key="no-product-warehouse" value=""
-                                                                            textValue="No products available">
-                                                                    No products available
-                                                                </SelectItem>
-                                                            )}
+                                                            ))}
                                                         </Select>
                                                     </TableCell>
                                                     <TableCell>
                                                         <Input
-                                                            value={quantity.toString()}
+                                                            value={newCart.quantity.toString()}
                                                             onChange={
-                                                                (e) => setQuantity(parseInt(e.target.value))
+                                                                (e) => {
+                                                                    if (newCart.location.quantity > 0 && parseInt(e.target.value) <= newCart.location.quantity) {
+                                                                        setNewCart({
+                                                                            ...newCart,
+                                                                            quantity: parseInt(e.target.value)
+                                                                        })
+                                                                    } else {
+                                                                        showToast(`No hay suficiente stock en la ubicación seleccionada, max(${newCart.location.quantity})`, ToastType.WARNING);
+                                                                    }
+                                                                }
                                                             }
                                                             type={"number"}
                                                             className="mb-2"
-                                                            isDisabled={selectedProduct.id === 0}
+                                                            isDisabled={newCart.location.id === 0}
                                                             aria-label="Quantity"
                                                         />
                                                     </TableCell>
@@ -440,7 +477,7 @@ export default function CreateOrderPage() {
                                                             isIconOnly
                                                             color="success"
                                                             aria-label="Like"
-                                                            isDisabled={selectedProduct.id === 0}>
+                                                            isDisabled={newCart.id === 0}>
                                                             <CheckIcon color="white"/>
                                                         </Button>
                                                     </TableCell>

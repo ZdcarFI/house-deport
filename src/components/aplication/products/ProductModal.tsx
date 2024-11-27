@@ -15,6 +15,10 @@ import { ProductContext } from '@/context/ProductContext/productContext';
 import { WarehouseContext } from '@/context/WareHouseContext/warehouseContext';
 import { Archive, Edit, Eye, Package, Plus, Trash2 } from 'lucide-react';
 import { Badge, Divider } from '@nextui-org/react';
+import {Table, TableBody, TableCell, TableHeader, TableRow} from "@nextui-org/table";
+import {Image} from "@nextui-org/image";
+import {Tooltip} from "@nextui-org/tooltip";
+import SeatSelection from "@/components/Seat/SeatSelection";
 
 interface Props {
     showToast: (message: string, type: ToastType) => void;
@@ -365,6 +369,104 @@ export default function ProductModal({ showToast }: Props) {
                 </Button>
             </div>
             <div className="grid grid-cols-2 gap-4">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colSpan={5}>
+                                <img src="imgs/screen.png" alt=""/>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+                            <span>A</span>
+                        </td>
+                        <td className="w-10 h-10 bg-transparent">
+                            <span></span>
+                        </td>
+                        <td>
+                            <Tooltip content="A1">
+                                <Button isIconOnly color="warning" variant="faded" aria-label="Take a photo">
+
+                                </Button>
+                            </Tooltip>
+                        </td>
+                        <td>
+                            <Tooltip content="A2">
+                                <Button isIconOnly color="warning" variant="faded" aria-label="Take a photo">
+
+                                </Button>
+                            </Tooltip>
+                        </td>
+                        <td>
+                            <Tooltip content="A3">
+                                <Button isIconOnly color="warning" variant="faded" aria-label="Take a photo">
+
+                                </Button>
+                            </Tooltip>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span>B</span>
+                        </td>
+                        <td className="w-10 h-10 bg-transparent">
+                            <span></span>
+                        </td>
+                        <td>
+                            <Tooltip content="B1">
+                                <Button isIconOnly color="warning" variant="faded" aria-label="Take a photo">
+
+                                </Button>
+                            </Tooltip>
+                        </td>
+                        <td>
+                            <Tooltip content="B2">
+                                <Button isIconOnly color="warning" variant="faded" aria-label="Take a photo">
+
+                                </Button>
+                            </Tooltip>
+                        </td>
+                        <td>
+                            <Tooltip content="B3">
+                                <Button isIconOnly color="warning" variant="faded" aria-label="Take a photo">
+
+                                </Button>
+                            </Tooltip>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span>C</span>
+                        </td>
+                        <td className="w-10 h-10 bg-transparent">
+                            <span ></span>
+                        </td>
+                        <td>
+                            <Tooltip content="C1">
+                                <Button isIconOnly color="warning" variant="faded" aria-label="Take a photo">
+
+                                </Button>
+                            </Tooltip>
+                        </td>
+                        <td>
+                            <Tooltip content="C2">
+                                <Button isIconOnly color="warning" variant="faded" aria-label="Take a photo">
+
+                                </Button>
+                            </Tooltip>
+                        </td>
+                        <td>
+                            <Tooltip content="C3">
+                                <Button isIconOnly color="warning" variant="faded" aria-label="Take a photo">
+
+                                </Button>
+                            </Tooltip>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
                 <Input
                     label="Fila"
                     name="row"
