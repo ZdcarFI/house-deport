@@ -6,7 +6,6 @@ import { Button } from '@nextui-org/button';
 import { Input } from '@nextui-org/input';
 import { Select, SelectItem } from '@nextui-org/select';
 import { Card, CardBody } from "@nextui-org/card";
-
 import { CreateProductDto, LocationDto } from '@/services/Product/dto/CreateProductDto';
 import { UpdateProductDto } from '@/services/Product/dto/UpdateProductDto';
 import { CategoryContext } from "@/context/CategoryContext/categoryContext";
@@ -15,17 +14,23 @@ import { ProductContext } from '@/context/ProductContext/productContext';
 import { WarehouseContext } from '@/context/WareHouseContext/warehouseContext';
 import { Archive, Edit, Eye, Package, Plus, Trash2 } from 'lucide-react';
 import { Badge, Divider } from '@nextui-org/react';
-import {Table, TableBody, TableCell, TableHeader, TableRow} from "@nextui-org/table";
-import {Image} from "@nextui-org/image";
-import {Tooltip} from "@nextui-org/tooltip";
-import SeatSelection from "@/components/Seat/SeatSelection";
+import WarehouseSelector from '../warehouses/WarehouseSelector';
 
 interface Props {
     showToast: (message: string, type: ToastType) => void;
 }
 
+interface FormErrors {
+    name?: string;
+    code?: string;
+    category?: string;
+    size?: string;
+    location?: string;
+}
+
 export default function ProductModal({ showToast }: Props) {
-    const { isModalOpen, closeModal, selectedProduct, isViewMode, createProduct, updateProduct } = useContext(ProductContext)!;
+    const { isModalOpen, closeModal, selectedProduct, isViewMode, createProduct, updateProduct, products } = useContext(ProductContext)!;
+    let isWarehouseDisabled = false;
     const [formData, setFormData] = useState<CreateProductDto & {
         stockStore: number,
         stockInventory: number,
@@ -40,6 +45,8 @@ export default function ProductModal({ showToast }: Props) {
         stockStore: 0,
     });
 
+    const [errors, setErrors] = useState<FormErrors>({});
+
     const {
         categories,
         openModal: ModalCategory
@@ -47,17 +54,36 @@ export default function ProductModal({ showToast }: Props) {
 
     const {
         warehouses,
-        openModal: ModalWarehouse
     } = useContext(WarehouseContext)!;
 
-    // Estado para el manejo de ubicaciones
-    const [selectedWarehouse, setSelectedWarehouse] = useState<string>('');
     const [currentLocation, setCurrentLocation] = useState<Partial<LocationDto>>({
         row: 0,
         column: 0,
         quantity: 0,
         warehouseId: 0
     });
+
+    const numberToLetter = (num: number) => {
+        return String.fromCharCode(65 + num - 1);
+    };
+
+    const handleLocationSelect = (warehouseId: number, row: number, column: number) => {
+        // Reset to initial state first
+        setCurrentLocation({
+            warehouseId: 0,
+            row: 0,
+            column: 0,
+            quantity: 0
+        });
+
+        // Then set new values
+        setCurrentLocation({
+            warehouseId,
+            row,
+            column,
+            quantity: 0
+        });
+    };
 
     useEffect(() => {
         if (selectedProduct) {
@@ -84,18 +110,89 @@ export default function ProductModal({ showToast }: Props) {
                 location: [],
             });
         }
+        setErrors({});
     }, [selectedProduct]);
+
+    const checkDuplicateProduct = () => {
+        const duplicate = products.find(p =>
+            p.name.toLowerCase() === formData.name.toLowerCase() &&
+            p.code.toLowerCase() === formData.code.toLowerCase() &&
+            p.category.id === formData.categoryId &&
+            p.size.id === formData.sizeId &&
+            (!selectedProduct || p.id !== selectedProduct.id)
+        );
+
+        if (duplicate) {
+            setErrors(prev => ({
+                ...prev,
+                name: 'Ya existe un producto con el mismo nombre, código, categoría y talla',
+                code: 'Ya existe un producto con el mismo nombre, código, categoría y talla',
+                category: 'Ya existe un producto con el mismo nombre, código, categoría y talla',
+                size: 'Ya existe un producto con el mismo nombre, código, categoría y talla'
+            }));
+            return false;
+        }
+
+        setErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors.name;
+            delete newErrors.code;
+            delete newErrors.category;
+            delete newErrors.size;
+            return newErrors;
+        });
+        return true;
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData({
+        const newFormData = {
             ...formData,
             [name]: name === 'price' || name === 'stockInventory' || name === 'stockStore' ? parseFloat(value) : value
-        });
+        };
+        setFormData(newFormData);
+
+        // Check for duplicates when relevant fields change
+        if (['name', 'code'].includes(name)) {
+            setTimeout(() => checkDuplicateProduct(), 0);
+        }
     };
 
     const handleSelectChange = (name: string) => (value: string) => {
-        setFormData({ ...formData, [name]: parseInt(value, 10) });
+        const newFormData = { ...formData, [name]: parseInt(value, 10) };
+        setFormData(newFormData);
+
+        // Check for duplicates when category or size changes
+        if (['categoryId', 'sizeId'].includes(name)) {
+            const updatedFormData = { ...formData, [name]: parseInt(value, 10) };
+            const duplicate = products.find(p =>
+                p.name.toLowerCase() === updatedFormData.name.toLowerCase() &&
+                p.code.toLowerCase() === updatedFormData.code.toLowerCase() &&
+                (name === 'categoryId' ? parseInt(value, 10) : updatedFormData.categoryId) === p.category.id &&
+                (name === 'sizeId' ? parseInt(value, 10) : updatedFormData.sizeId) === p.size.id &&
+                (!selectedProduct || p.id !== selectedProduct.id)
+            );
+
+            if (duplicate) {
+                showToast("Ya existe un producto con estas características", ToastType.ERROR);
+                setErrors(prev => ({
+                    ...prev,
+                    name: 'Ya existe un producto con el mismo nombre, código, categoría y talla',
+                    code: 'Ya existe un producto con el mismo nombre, código, categoría y talla',
+                    category: 'Ya existe un producto con el mismo nombre, código, categoría y talla',
+                    size: 'Ya existe un producto con el mismo nombre, código, categoría y talla'
+                }));
+            } else {
+                setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.name;
+                    delete newErrors.code;
+                    delete newErrors.category;
+                    delete newErrors.size;
+                    return newErrors;
+                });
+            }
+        }
     };
 
     const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,19 +203,18 @@ export default function ProductModal({ showToast }: Props) {
         });
     };
 
-    const handleWarehouseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const warehouseId = parseInt(e.target.value, 10);
-        setSelectedWarehouse(e.target.value);
-        setCurrentLocation({
-            ...currentLocation,
-            warehouseId
-        });
-    };
 
     const addLocation = () => {
         if (currentLocation.warehouseId && currentLocation.row !== undefined &&
             currentLocation.column !== undefined && currentLocation.quantity !== undefined) {
 
+            // Validate quantity is greater than 0
+            if (currentLocation.quantity <= 0) {
+                showToast("La cantidad debe ser mayor a 0", ToastType.ERROR);
+                return;
+            }
+
+            // Check if location is already occupied in current session
             const isLocationOccupied = formData.location.some(loc =>
                 loc.warehouseId === currentLocation.warehouseId &&
                 loc.row === currentLocation.row &&
@@ -126,7 +222,7 @@ export default function ProductModal({ showToast }: Props) {
             );
 
             if (isLocationOccupied) {
-                showToast("Esta ubicación ya está ocupada", ToastType.ERROR);
+                showToast("Esta ubicación ya sera ocupada por el producto, escoga otra ubicación", ToastType.ERROR);
                 return;
             }
 
@@ -142,6 +238,7 @@ export default function ProductModal({ showToast }: Props) {
                 location: [...formData.location, newLocation]
             });
 
+            // Reset location fields after adding
             setCurrentLocation({
                 row: 0,
                 column: 0,
@@ -150,7 +247,6 @@ export default function ProductModal({ showToast }: Props) {
             });
         }
     };
-
     const removeLocation = (index: number) => {
         const newLocations = formData.location.filter((_, i) => i !== index);
         setFormData({
@@ -173,6 +269,8 @@ export default function ProductModal({ showToast }: Props) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+
         try {
             const dataToSend = {
                 ...formData,
@@ -195,7 +293,6 @@ export default function ProductModal({ showToast }: Props) {
             } else {
                 const createData: CreateProductDto = {
                     ...formData,
-                
                 };
                 await createProduct(createData);
                 showToast("Producto creado exitosamente", ToastType.SUCCESS);
@@ -219,10 +316,6 @@ export default function ProductModal({ showToast }: Props) {
         }
     };
 
-    const handleAdd = () => {
-        ModalWarehouse(null, false);
-    }
-
     const renderBasicInfo = () => (
         <div className="space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -238,6 +331,8 @@ export default function ProductModal({ showToast }: Props) {
                     variant="bordered"
                     isRequired
                     isDisabled={isViewMode}
+                    errorMessage={errors.name}
+                    isInvalid={!!errors.name}
                 />
                 <Input
                     label="Código del producto"
@@ -247,6 +342,8 @@ export default function ProductModal({ showToast }: Props) {
                     variant="bordered"
                     isRequired
                     isDisabled={isViewMode}
+                    errorMessage={errors.code}
+                    isInvalid={!!errors.code}
                 />
                 <Input
                     label="Precio del producto"
@@ -254,7 +351,7 @@ export default function ProductModal({ showToast }: Props) {
                     type="number"
                     startContent={
                         <div className="pointer-events-none flex items-center">
-                            <span className="text-default-400 text-small">$</span>
+                            <span className="text-default-400 text-small">S/. </span>
                         </div>
                     }
                     value={formData.price ? formData.price.toString() : ''}
@@ -279,6 +376,8 @@ export default function ProductModal({ showToast }: Props) {
                     selectedKeys={formData.categoryId ? [formData.categoryId.toString()] : []}
                     isDisabled={isViewMode}
                     variant="bordered"
+                    errorMessage={errors.category}
+                    isInvalid={!!errors.category}
                 >
                     {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id.toString()}>
@@ -294,6 +393,8 @@ export default function ProductModal({ showToast }: Props) {
                     selectedKeys={formData.sizeId ? [formData.sizeId.toString()] : []}
                     onChange={(e) => handleSelectChange('sizeId')(e.target.value)}
                     isDisabled={!formData.categoryId || isViewMode}
+                    errorMessage={errors.size}
+                    isInvalid={!!errors.size}
                 >
                     {getSizeOptions()}
                 </Select>
@@ -343,31 +444,13 @@ export default function ProductModal({ showToast }: Props) {
         <div className="space-y-4">
             <div className="flex items-center gap-2">
                 <Archive className="w-5 h-5" />
-                <h3 className="text-lg font-semibold">Ubicaciones en Almacén</h3>
+                <h3 className="text-lg font-semibold">Ubicaciones en Almacén
+                    <span className='font-extralight text-xs'>{'  '}Esto lo puede hacer o mas adelante</span>
+                </h3>
             </div>
-            <div className="flex gap-2">
-                <Select
-                    label="Almacén"
-                    placeholder="Seleccione un almacén"
-                    value={selectedWarehouse}
-                    onChange={handleWarehouseChange}
-                    variant="bordered"
-                    className="flex-1"
-                >
-                    {warehouses.map((warehouse) => (
-                        <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
-                            {warehouse.name}
-                        </SelectItem>
-                    ))}
-                </Select>
-                <Button
-                    color="primary"
-                    onPress={handleAdd}
-                    className="self-end"
-                >
-                    Agregar Almacén
-                </Button>
-            </div>
+            <WarehouseSelector
+                onLocationSelect={handleLocationSelect}
+                isWarehouseDisabled={isWarehouseDisabled} />
             <div className="grid grid-cols-2 gap-4">
                 <table>
                     <thead>
@@ -470,11 +553,12 @@ export default function ProductModal({ showToast }: Props) {
                 <Input
                     label="Fila"
                     name="row"
-                    type="number"
-                    value={currentLocation.row?.toString()}
+                    type="text"
+                    value={currentLocation.row ? numberToLetter(currentLocation.row) : ''}
                     onChange={handleLocationInputChange}
                     variant="bordered"
                     className="w-full"
+                    isDisabled
                 />
                 <Input
                     label="Columna"
@@ -484,6 +568,7 @@ export default function ProductModal({ showToast }: Props) {
                     onChange={handleLocationInputChange}
                     variant="bordered"
                     className="w-full"
+                    isDisabled
                 />
                 <Input
                     label="Cantidad"
@@ -516,7 +601,7 @@ export default function ProductModal({ showToast }: Props) {
                                                 {warehouses.find(w => w.id === loc.warehouseId)?.name}
                                             </Badge>
                                             <span className="text-small">
-                                                Fila: {loc.row}, Columna: {loc.column}
+                                                Fila: {numberToLetter(loc.row)}, Columna: {loc.column}
                                             </span>
                                             <Badge color="secondary" variant="flat">
                                                 Cantidad: {loc.quantity}
@@ -593,7 +678,7 @@ export default function ProductModal({ showToast }: Props) {
                                                                     {warehouses.find(w => w.id === loc.warehouseId)?.name}
                                                                 </Badge>
                                                                 <span className="text-small">
-                                                                    Fila: {loc.row}, Columna: {loc.column}
+                                                                    Fila: {numberToLetter(loc.row)}, Columna: {loc.column}
                                                                 </span>
                                                                 <Badge color="secondary" variant="flat">
                                                                     Cantidad: {loc.quantity}

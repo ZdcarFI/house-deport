@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Button, Input } from "@nextui-org/react";
 import Link from "next/link";
 import { ExportIcon } from "@/components/icons/accounts/export-icon";
@@ -25,7 +25,11 @@ export default function ProductWarehouses() {
 
   const [selectedProductWarehouseId, setSelectedProductWarehouseId] = React.useState<number | null>(null);
 
-
+  useEffect(() => {
+    if (error) {
+      showToast(error, ToastType.ERROR);
+    }
+  }, [error, showToast]);
 
   const filteredProductWarehouses = React.useMemo(() => {
     return productWarehouses.filter(pw =>
@@ -58,14 +62,15 @@ export default function ProductWarehouses() {
     }
   };
 
-
+  // Show loading state without blocking the UI
   if (loading) {
-    return <div className="flex justify-center items-center h-96">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
-  }
 
   return (
     <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full flex flex-col gap-4">
@@ -117,7 +122,7 @@ export default function ProductWarehouses() {
           )}
           <ProductWarehouseModal
             showToast={showToast} />
-   
+
           <ConfirmDialog
             title="¿Estás seguro de que quitar el producto del almacen?"
             isOpen={isConfirmDialogOpen}

@@ -86,7 +86,9 @@ const WarehouseDetails = () => {
             setSelectedProductWarehouseSelect(null);
         }
     };
-
+    const numberToLetter = (num: number) => {
+        return String.fromCharCode(65 + num - 1);
+    };
     const handleAddProduct = () => {
         if (warehouse && selectedCell) {
             openModal(null, false, {
@@ -232,15 +234,15 @@ const WarehouseDetails = () => {
                     <CardBody>
                         <div className="overflow-auto">
                             <WarehouseMatrix
-                                key={matrixKey} // Add key to force re-render
+                                key={matrixKey}
                                 warehouse={warehouse}
                                 onCellClick={handleCellClick}
                             />
                         </div>
                         <div className="mt-4 flex flex-wrap gap-2">
                             <Chip variant="flat" color="primary">Vacío</Chip>
-                            <Chip variant="flat" color="success">Ocupado</Chip>
-                            <Chip variant="flat" color="danger">Stock Bajo</Chip>
+                            <Chip variant="flat" color="danger">Ocupado</Chip>
+
                         </div>
                     </CardBody>
                 </Card>
@@ -265,7 +267,7 @@ const WarehouseDetails = () => {
                             <CardBody className="flex flex-col items-center justify-center text-center p-8">
                                 <Box className="text-gray-400 h-12 w-12 mb-4" />
                                 <p className="text-gray-500 mb-4">
-                                    Celda seleccionada: Fila {selectedCell.row}, Columna {selectedCell.column}
+                                    Celda seleccionada: Fila {numberToLetter(selectedCell.row)}, Columna {selectedCell.column}
                                 </p>
                                 <Button color="primary" onPress={handleAddProduct}>
                                     Agregar Producto
