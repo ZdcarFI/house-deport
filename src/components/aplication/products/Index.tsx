@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ExportIcon } from "@/components/icons/accounts/export-icon";
 import { HouseIcon } from "@/components/icons/breadcrumb/house-icon";
 import { ProductDto } from "@/services/Dto/ProductDto";
-
 import ProductTable from "@/components/aplication/products/ProductTable";
 import ProductModal from "@/components/aplication/products/ProductModal";
 import { ProductContext } from '@/context/ProductContext/productContext';
@@ -35,13 +34,19 @@ export default function Products() {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
   const [selectedProductId, setSelectedProductId] = React.useState<number | null>(null);
 
+  
+  useEffect(() => {
+    if (error) {
+      showToast(error, ToastType.ERROR);
+    }
+  }, [error, showToast]);
 
   const filteredProducts = React.useMemo(() => {
     return products.filter(product =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.size.name.toLowerCase().includes(searchQuery.toLowerCase())
+      product.category?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.size?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [products, searchQuery]);
 
@@ -60,23 +65,24 @@ export default function Products() {
   const handleDelete = async (id: number) => {
     try {
       await deleteProduct(id);
-      showToast("producto eliminada exitosamente", ToastType.SUCCESS);
+      showToast("Producto eliminado exitosamente", ToastType.SUCCESS);
       setIsConfirmDialogOpen(false);
-    }
-    catch (error) {
-      showToast("Error:" + error, ToastType.ERROR);
+    } catch (error) {
+      showToast("Error al eliminar el producto: " + error, ToastType.ERROR);
     }
   };
+
   const handleIncrementStock = (product: ProductDto) => {
     openStockModal(product);
   };
 
+  // Show loading state without blocking the UI
   if (loading) {
-    return <div className="flex justify-center items-center h-96">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
@@ -101,7 +107,6 @@ export default function Products() {
       <h3 className="text-xl font-semibold">Todos los productos</h3>
 
       <div className="flex justify-between flex-wrap gap-4 items-center">
-
         <Input
           className="w-full sm:max-w-[300px]"
           placeholder="Buscar Producto..."
@@ -125,7 +130,6 @@ export default function Products() {
             }}
             onView={handleView}
             onIncrementStock={handleIncrementStock}
-          
           />
           <ProductModal showToast={showToast} />
           <CategoryModal showToast={showToast} />
@@ -155,3 +159,4 @@ export default function Products() {
     </div>
   );
 }
+

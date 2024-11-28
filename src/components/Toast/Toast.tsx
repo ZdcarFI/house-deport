@@ -60,7 +60,7 @@ export default function Toast({ message , type}: ToastProps) {
     };
 
     return (
-        <div className="w-4/5 max-w-full fixed top-4 right-4 transform z-50">
+        <div className="w-4/5 max-w-full fixed top-4 right-4 transform z-[60]">
             <Button
                 startContent={returnIcon(type)}
                 className={`bg-${type}-100 w-full flex justify-start items-center`}

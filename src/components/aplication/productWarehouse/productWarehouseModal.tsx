@@ -4,7 +4,6 @@ import React, { useState, useEffect, useContext } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal'
 import { Button } from '@nextui-org/button'
 import { Input } from '@nextui-org/input'
-import { ProductWarehouseDto } from '@/services/Dto/ProductWarehouseDto'
 import { Select, SelectItem } from "@nextui-org/select";
 import { CreateProductWarehouseDto } from '@/services/ProductWarehouse/dto/CreateProductWarehouse.dto'
 import { UpdateProductWarehouseDto } from '@/services/ProductWarehouse/dto/UpdateProductWarehouse.dto'
@@ -14,9 +13,19 @@ import { ToastType } from '@/components/Toast/Toast'
 import { ProductWarehouseContext } from '@/context/ProductWarehouseContext/productWarehouseContext'
 import { ProductDto } from '@/services/Dto/ProductDto'
 import { WarehouseDto } from '@/services/Dto/WarehouseDto'
+import { Card, CardBody } from '@nextui-org/card'
+import WarehouseSelector from '../warehouses/WarehouseSelector'
 
 interface Props {
   showToast: (message: string, type: ToastType) => void;
+}
+
+interface ProductSearchState {
+  searchByCode: boolean;
+  code: string;
+  name: string;
+  selectedCategoryId: number | null;
+  selectedSizeId: number | null;
 }
 
 interface FormErrors {
@@ -56,7 +65,12 @@ export default function ProductWarehouseModal({ showToast }: Props) {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isProductDisabled, setIsProductDisabled] = useState(false);
+  const [isWarehouseDisabled, setIsWarehouseDisabled] = useState(false);
+
   useEffect(() => {
+    let productDisabled = false;
+    let warehouseDisabled = false;
     if (selectedProductWarehouse) {
       setFormData({
         productId: selectedProductWarehouse.product?.id || selectedProductWarehouse.productId,
@@ -65,6 +79,8 @@ export default function ProductWarehouseModal({ showToast }: Props) {
         row: selectedProductWarehouse.row,
         column: selectedProductWarehouse.column,
       });
+      productDisabled = true;
+      warehouseDisabled = true;
     } else if (initialData) {
       if ('code' in initialData) {
         // It's a ProductDto
@@ -72,6 +88,7 @@ export default function ProductWarehouseModal({ showToast }: Props) {
           ...prevState,
           productId: (initialData as ProductDto).id,
         }));
+        productDisabled = true;
       } else if ('rowMax' in initialData) {
         // It's a WarehouseDto
         setFormData(prevState => ({
@@ -86,6 +103,7 @@ export default function ProductWarehouseModal({ showToast }: Props) {
           row: (initialData as { warehouseId: number, row: number, column: number }).row,
           column: (initialData as { warehouseId: number, row: number, column: number }).column,
         }));
+        warehouseDisabled = true;
       }
     } else {
       setFormData({
@@ -96,6 +114,10 @@ export default function ProductWarehouseModal({ showToast }: Props) {
         column: 0,
       });
     }
+
+    // Set product disabled state
+    setIsProductDisabled(productDisabled);
+    setIsWarehouseDisabled(warehouseDisabled)
     setErrors({});
   }, [selectedProductWarehouse, initialData]);
 
@@ -204,6 +226,266 @@ export default function ProductWarehouseModal({ showToast }: Props) {
     validateField(name, numValue);
   };
 
+  const handleLocationSelect = (warehouseId: number, row: number, column: number) => {
+    const selectedWarehouse = warehouses.find(w => w.id === warehouseId);
+
+    // Check if location is already occupied
+    const isLocationOccupied = productWarehouses.find(pw =>
+      pw.warehouse.id === warehouseId &&
+      pw.row === row &&
+      pw.column === column &&
+      (!selectedProductWarehouse || pw.id !== selectedProductWarehouse.id)
+    );
+
+    if (isLocationOccupied) {
+      showToast(`Esta ubicación ya está ocupada por el producto: ${isLocationOccupied.product.name}`, ToastType.ERROR);
+      return;
+    }
+
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      warehouseId,
+      row,
+      column,
+      maxRow: selectedWarehouse ? selectedWarehouse.rowMax : 0,
+      maxColumn: selectedWarehouse ? selectedWarehouse.columnMax : 0
+    }));
+  };
+  const numberToLetter = (num: number) => {
+    return String.fromCharCode(65 + num - 1);
+  };
+  const getSelectedProduct = () => {
+    return products.find(p => p.id === formData.productId);
+  };
+
+  const [searchState, setSearchState] = useState<ProductSearchState>({
+    searchByCode: true,
+    code: '',
+    name: '',
+    selectedCategoryId: null,
+    selectedSizeId: null
+  });
+
+  const [filteredProducts, setFilteredProducts] = useState<ProductDto[]>([]);
+
+  // Function to handle code search
+  const handleCodeSearch = (code: string) => {
+    if (code.length > 10) {
+      showToast("El código no puede tener más de 10 caracteres", ToastType.WARNING);
+      return;
+    }
+
+    setSearchState(prev => ({ ...prev, code }));
+
+    const product = products.find(p =>
+      p.code.toLowerCase() === code.toLowerCase()
+    );
+
+    if (product) {
+      setFormData(prev => ({
+        ...prev,
+        productId: product.id,
+        maxQuantity: product.stockInventory
+      }));
+      setFilteredProducts([product]);
+    } else if (code.length === 10) {
+      setFilteredProducts([]);
+      showToast("No se encontraron coincidencias con ningún producto", ToastType.ERROR);
+    }
+  };
+
+  // Function to handle name search
+  const handleNameSearch = (name: string) => {
+    setSearchState(prev => ({ ...prev, name, selectedCategoryId: null, selectedSizeId: null }));
+
+    const filtered = products.filter(p =>
+      p.name.toLowerCase().includes(name.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  };
+
+  // Function to handle category selection
+  const handleCategorySelect = (categoryId: number) => {
+    setSearchState(prev => ({
+      ...prev,
+      selectedCategoryId: categoryId,
+      selectedSizeId: null // Reset size when category changes
+    }));
+
+    const filtered = filteredProducts.filter(p =>
+      p.category?.id === categoryId
+    );
+    setFilteredProducts(filtered);
+  };
+
+  // Function to handle size selection
+  const handleSizeSelect = (sizeId: number) => {
+    setSearchState(prev => ({ ...prev, selectedSizeId: sizeId }));
+
+    const filtered = filteredProducts.filter(p =>
+      p.size?.id === sizeId
+    );
+    setFilteredProducts(filtered);
+
+    if (filtered.length === 1) {
+      setFormData(prev => ({
+        ...prev,
+        productId: filtered[0].id,
+        maxQuantity: filtered[0].stockInventory
+      }));
+    }
+  };
+
+  // Get available categories based on filtered products
+  const getAvailableCategories = () => {
+    const categories = new Set(
+      filteredProducts.map(p => p.category).filter(Boolean)
+    );
+    return Array.from(categories);
+  };
+
+  // Get available sizes based on selected category
+  const getAvailableSizes = () => {
+    if (!searchState.selectedCategoryId) return [];
+    const sizes = new Set(
+      filteredProducts
+        .filter(p => p.category?.id === searchState.selectedCategoryId)
+        .map(p => p.size)
+        .filter(Boolean)
+    );
+    return Array.from(sizes);
+  };
+
+  const renderProductSearch = () => (
+    <Card className="p-4">
+      <CardBody className="space-y-4">
+
+        {!isViewMode && !isProductDisabled && (
+          <>
+            <div className="flex gap-4 mb-4">
+              <Button
+                color={searchState.searchByCode ? "primary" : "default"}
+                onClick={() => setSearchState(prev => ({ ...prev, searchByCode: true }))}
+              >
+                Buscar por código
+              </Button>
+              <Button
+                color={!searchState.searchByCode ? "primary" : "default"}
+                onClick={() => setSearchState(prev => ({ ...prev, searchByCode: false }))}
+              >
+                Buscar por filtros
+              </Button>
+            </div>
+
+            {searchState.searchByCode ? (
+              <Input
+                label="Código del producto"
+                value={searchState.code}
+                onChange={(e) => handleCodeSearch(e.target.value)}
+                maxLength={10}
+                placeholder="Ingrese el código del producto"
+              />
+            ) : (
+              <div className="space-y-4">
+                <Input
+                  label="Nombre del producto"
+                  value={searchState.name}
+                  onChange={(e) => handleNameSearch(e.target.value)}
+                  placeholder="Buscar por nombre"
+                />
+
+                {searchState.name && (
+                  <Select
+                    label="Categoría"
+                    placeholder="Seleccione una categoría"
+                    selectedKeys={searchState.selectedCategoryId ? [searchState.selectedCategoryId.toString()] : []}
+                    onChange={(e) => handleCategorySelect(parseInt(e.target.value))}
+                  >
+                    {getAvailableCategories().map((category) => (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                )}
+
+                {searchState.selectedCategoryId && (
+                  <Select
+                    label="Talla"
+                    placeholder="Seleccione una talla"
+                    selectedKeys={searchState.selectedSizeId ? [searchState.selectedSizeId.toString()] : []}
+                    onChange={(e) => handleSizeSelect(parseInt(e.target.value))}
+                  >
+                    {getAvailableSizes().map((size) => (
+                      <SelectItem key={size.id} value={size.id.toString()}>
+                        {size.name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+
+
+        {getSelectedProduct() && (
+          <div className="mt-4 space-y-4">
+            <span className='font-bold text-blue-600'>Datos del producto:</span>
+            <Input
+              label="Nombre"
+              value={getSelectedProduct()?.name || ''}
+              isDisabled
+            />
+            <Input
+              label="Código"
+              value={getSelectedProduct()?.code || ''}
+              isDisabled
+            />
+            <div className="grid grid-cols-2 gap-x-4">
+
+              <Input
+                label="Categoría"
+                value={getSelectedProduct()?.category?.name || ''}
+                isDisabled
+              />
+              <Input
+                label="Talla"
+                value={getSelectedProduct()?.size?.name || ''}
+                isDisabled
+              />
+            </div>
+
+            <Input
+              label="Precio"
+              value={getSelectedProduct()?.price?.toString() || ''}
+              startContent={
+                <div className="pointer-events-none flex items-center">
+                  <span className="text-default-400 text-small">S/.</span>
+                </div>
+              }
+              isDisabled
+            />
+          </div>
+        )}
+
+        {formData.productId > 0 && (
+          <Input
+            label="Cantidad a enviar"
+            name="quantity"
+            type="number"
+            value={formData.quantity?.toString()}
+            onChange={handleInputChange}
+            required
+            errorMessage={errors.quantity}
+            isInvalid={!!errors.quantity}
+          />
+        )}
+      </CardBody>
+    </Card>
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -240,100 +522,59 @@ export default function ProductWarehouseModal({ showToast }: Props) {
 
   return (
     <Modal
+      size='full'
       isOpen={isModalOpen}
       onClose={closeModal}
       scrollBehavior="inside"
       classNames={{
-        base: "max-w-xl",
-        header: "border-b border-gray-200 dark:border-gray-700",
-        footer: "border-t border-gray-200 dark:border-gray-700",
+        base: "h-screen rounded-l-lg rounded-r-none w-2/3 m-0",
+        header: "border-b border-divider",
+        footer: "border-t border-divider",
+        body: "py-6"
       }}
     >
       <ModalContent>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="h-screen flex flex-col">
           <ModalHeader className="flex flex-col gap-1">
             {isViewMode ? 'Ver producto en el almacen' : selectedProductWarehouse ? 'Editar Producto y almacen' : 'Agregar producto en el almacen'}
           </ModalHeader>
-          <ModalBody>
-            <Select
-              label="Producto"
-              name="productId"
-              placeholder="Selecciona un producto"
-              selectedKeys={formData.productId ? [formData.productId.toString()] : []}
-              onChange={(e) => handleSelectChange('productId')(e.target.value)}
-              isDisabled={isViewMode}
-            >
-              {products.map((product) => (
-                <SelectItem key={product.id} value={product.id.toString()}>
-                  {product.name}
-                </SelectItem>
-              ))}
-            </Select>
-
-
-
-            <Input
-              label="Cantidad"
-              name="quantity"
-              type="number"
-              value={formData.quantity?.toString()}
-              onChange={handleInputChange}
-              required
-              isReadOnly={isViewMode}
-              errorMessage={errors.quantity}
-              isInvalid={!!errors.quantity}
-            />
-            <Select
-              label="Almacen"
-              name="warehouseId"
-              placeholder="Selecciona un almacen"
-              selectedKeys={formData.warehouseId ? [formData.warehouseId.toString()] : []}
-              onChange={(e) => handleSelectChange('warehouseId')(e.target.value)}
-              isDisabled={isViewMode}
-            >
-              {warehouses.map((warehouse) => (
-                <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
-                  {warehouse.name}
-                </SelectItem>
-              ))}
-            </Select>
-            <Input
-              label="Fila"
-              name="row"
-              type="number"
-              value={formData.row?.toString()}
-              onChange={handleInputChange}
-              required
-              isReadOnly={isViewMode}
-              errorMessage={errors.row}
-              isInvalid={!!errors.row}
-            />
-
-            <Input
-              label="Columna"
-              name="column"
-              type="number"
-              value={formData.column?.toString()}
-              onChange={handleInputChange}
-              required
-              isReadOnly={isViewMode}
-              errorMessage={errors.column}
-              isInvalid={!!errors.column}
-            />
-
-            {errors.location && (
-              <div className="text-red-500 text-sm mt-2">
-                {errors.location}
+          <ModalBody className='flex-grow overflow-hidden'>
+            <div className="h-full grid grid-cols-2 gap-6">
+              <div className="overflow-y-auto pr-4 space-y-6">
+                {renderProductSearch()}
               </div>
-            )}
+              <div className="overflow-y-auto pr-4">
+                <Card className="p-4">
+                  <CardBody className="space-y-4">
+                    <WarehouseSelector
+                      onLocationSelect={handleLocationSelect}
+                      isWarehouseDisabled={isWarehouseDisabled}
+                    />
+
+                    {formData.row > 0 && formData.column > 0 && (
+                      <div className="mt-4 p-4 bg-default-100 rounded-lg">
+                        <h4 className="font-semibold mb-2">Ubicación donde se enviara:</h4>
+                        <p>Fila: {numberToLetter(formData.row)}, Columna: {formData.column}</p>
+                      </div>
+                    )}
+
+                    {errors.location && (
+                      <div className="text-red-500 text-sm mt-2">
+                        {errors.location}
+                      </div>
+                    )}
+                  </CardBody>
+                </Card>
+              </div>
+            </div>
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={closeModal}>
-              Close
+              Cerrar
             </Button>
             {!isViewMode && (
               <Button color="primary" type="submit">
-                {selectedProductWarehouse ? 'Update' : 'Create'}
+                {selectedProductWarehouse ? 'Actualizar' : 'Crear'}
               </Button>
             )}
           </ModalFooter>
