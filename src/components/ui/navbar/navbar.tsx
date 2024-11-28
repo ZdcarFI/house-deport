@@ -23,7 +23,7 @@ export const NavbarWrapper = ({children}: Props) => {
         <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
             <Navbar
                 isBordered
-                className="w-full"
+                className="w-full items-end min-w-full"
                 classNames={{
                     wrapper: "w-full max-w-full",
                 }}
@@ -31,7 +31,7 @@ export const NavbarWrapper = ({children}: Props) => {
                 <NavbarContent className="md:hidden">
                     <BurguerButton/>
                 </NavbarContent>
-                <NavbarContent className="w-full max-md:hidden">
+                {/*<NavbarContent className="w-full max-md:hidden">
                     <Input
                         startContent={<SearchIcon/>}
                         isClearable
@@ -42,12 +42,11 @@ export const NavbarWrapper = ({children}: Props) => {
                         }}
                         placeholder="Search..."
                     />
-                </NavbarContent>
+                </NavbarContent>*/}
                 <NavbarContent
                     justify="end"
-                    className="w-fit data-[justify=end]:flex-grow-0"
+                    className="min-w-full data-[justify=end]:flex-grow-0"
                 >
-
                     <NotificationsDropdown/>
 
                     <div className="max-md:hidden">
@@ -64,9 +63,7 @@ export const NavbarWrapper = ({children}: Props) => {
                         endContent={<MoonIcon/>}
                     />
 
-                    <NavbarContent>
-                        <UserDropdown/>
-                    </NavbarContent>
+                    <UserDropdown/>
                 </NavbarContent>
             </Navbar>
             {children}

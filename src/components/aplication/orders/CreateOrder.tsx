@@ -25,7 +25,6 @@ import {OrderContext} from '@/context/OrderContext/orderContext';
 import {Minus, Plus} from 'lucide-react';
 import {UserContext} from "@/context/UserContext/userContext";
 import {CirclePlus} from "@/components/icons/CirclePlus";
-import {ClientDto} from "@/services/Dto/ClienDto";
 import ClientModal from "@/components/aplication/clients/ClientModal";
 import {CheckIcon} from "@/components/icons/CheckIcon";
 import {ToastContext} from "@/context/ToastContext/ToastContext";
@@ -64,7 +63,7 @@ export default function CreateOrderPage() {
     } = React.useContext(ToastContext)!
     const {
         clients,
-        createClient,
+        openModal
     } = React.useContext(ClientContext)!
     const {createOrder, errorOrder} = React.useContext(OrderContext)!
 
@@ -90,9 +89,6 @@ export default function CreateOrderPage() {
     })
 
     const [total, setTotal] = useState(0)
-    const [selectedClient, setSelectedClient] = React.useState<ClientDto | null>(null);
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [isViewMode, setIsViewMode] = React.useState(false);
 
     useEffect(() => {
         calculateTotals()
@@ -150,15 +146,7 @@ export default function CreateOrderPage() {
     }
 
     const handleAdd = () => {
-        setSelectedClient(null);
-        setIsViewMode(false);
-        setIsModalOpen(true);
-    };
-
-    const handleSubmitClient = async (formData: ClientDto) => {
-        const newClient = await createClient(formData);
-        setOrderData({...orderData, clientId: newClient.id});
-        setIsModalOpen(false);
+        openModal(null, false);
     };
 
     const onSelectionChangeProduct = (id: React.Key | null) => {
@@ -551,12 +539,7 @@ export default function CreateOrderPage() {
                 </div>
             </div>
             <ClientModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSubmit={handleSubmitClient}
-                client={selectedClient}
-                isViewMode={isViewMode}
-            />
+                showToast={showToast}/>
         </div>
     )
 }

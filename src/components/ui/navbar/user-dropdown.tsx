@@ -27,10 +27,6 @@ export const UserDropdown = () => {
         }
     }, [authService, router]);
 
-    const transformNameTextEllipsis = (name: string) => {
-        return name.length > 8 ? name.substring(0, 8) + "..." : name;
-    }
-
     return (
         <Dropdown placement="bottom-start" backdrop="blur">
             <DropdownTrigger>
@@ -42,7 +38,7 @@ export const UserDropdown = () => {
                     }}
                     className="transition-transform text-ellipsis"
                     description={`@${user?.username}`}
-                    name={transformNameTextEllipsis(user?.firstName || '')}
+                    name={user?.firstName}
                 />
             </DropdownTrigger>
             <DropdownMenu aria-label="User Actions" variant="faded"

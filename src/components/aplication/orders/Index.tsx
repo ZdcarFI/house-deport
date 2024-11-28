@@ -13,15 +13,17 @@ import ConfirmDialog from "@/components/modal/ConfirmDialog";
 import { ShoppingCartIcon } from "lucide-react";
 import OrderTable from "./OrderTable";
 import OrderModal from "./OrderModal";
+import {useRouter} from "next/navigation";
 
 export default function Orders() {
-  const { orders, loading, error, createOrder, updateOrder, deleteOrder, getOrder } = React.useContext(OrderContext)!;
+  const { orders, loading, errorOrder, createOrder, updateOrder, deleteOrder, getOrder } = React.useContext(OrderContext)!;
   const [selectedOrder, setSelectedOrder] = React.useState<OrderDto | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isViewMode, setIsViewMode] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
+  const router = useRouter()
 
   const filteredOrders = React.useMemo(() => {
     return orders.filter(order => 
@@ -30,12 +32,6 @@ export default function Orders() {
       (order.user?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
     );
   }, [orders, searchQuery]);
-
-  const handleAdd = () => {
-    setSelectedOrder(null);
-    setIsViewMode(false);
-    setIsModalOpen(true);
-  };
 
   const handleView = async (order: OrderDto) => {
     try {
@@ -82,8 +78,8 @@ export default function Orders() {
     return <div className="flex justify-center items-center h-96">Loading...</div>;
   }
 
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
+  if (errorOrder) {
+    return <div className="text-red-500 text-center">{errorOrder}</div>;
   }
 
   return (
@@ -98,14 +94,14 @@ export default function Orders() {
         </li>
         <li className="flex gap-2">
           <ShoppingCartIcon/>
-          <span>Orders</span>
+          <span>Ventas</span>
           <span> / </span>{" "}
         </li>
         <li className="flex gap-2">
-          <span>List</span>
+          <span>Lista</span>
         </li>
       </ul>
-      <h3 className="text-xl font-semibold">All Orders</h3>
+      <h3 className="text-xl font-semibold">Todas las ventas</h3>
       <div className="flex justify-between flex-wrap gap-4 items-center">
         <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
           <Input
@@ -116,9 +112,9 @@ export default function Orders() {
           />
         </div>
         <div className="flex flex-row gap-3.5 flex-wrap">
-          <Button color="primary" onPress={handleAdd}>Add Order</Button>
+          <Button color="primary" onPress={()=> router.push("/createOrder")}>Agregar venta</Button>
           <Button color="primary" startContent={<ExportIcon/>}>
-            Export to CSV
+            Exportar a CSV
           </Button>
         </div>
         <div className="w-full flex flex-col gap-4">
