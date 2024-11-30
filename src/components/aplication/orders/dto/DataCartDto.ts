@@ -15,6 +15,7 @@ export interface DataCartDto {
     readonly productWarehouses: ProductWarehouseBasicDto[];
     readonly location: {
         readonly id: number;
+        readonly name: string;
         readonly row: number;
         readonly column: number;
         readonly color: string;

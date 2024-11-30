@@ -20,7 +20,7 @@ import {
 } from "@nextui-org/react";
 import {ProductContext} from '@/context/ProductContext/productContext';
 import {ClientContext} from '@/context/ClientContext/clientContext';
-import {CreateOrderDto, ProductBasicCreateDto} from '@/services/Order/dto/CreateOrderDto';
+import {CreateOrderDto} from '@/services/Order/dto/CreateOrderDto';
 import {OrderContext} from '@/context/OrderContext/orderContext';
 import {Minus, Plus} from 'lucide-react';
 import {UserContext} from "@/context/UserContext/userContext";
@@ -46,6 +46,7 @@ const initialCart: DataCartDto = {
     },
     location: {
         id: 0,
+        name: '',
         row: 0,
         column: 0,
         color: '',
@@ -67,7 +68,6 @@ export default function CreateOrderPage() {
     } = React.useContext(ClientContext)!
     const {createOrder, errorOrder} = React.useContext(OrderContext)!
 
-    const [cart, setCart] = useState<ProductBasicCreateDto[]>([]);
     const [dataCart, setDataCart] = useState<DataCartDto[]>([]);
     const [newCart, setNewCart] = useState<DataCartDto>(initialCart);
     const [orderData, setOrderData] = useState<CreateOrderDto & {
@@ -88,49 +88,58 @@ export default function CreateOrderPage() {
         paymentType: '',
     })
 
-    const [total, setTotal] = useState(0)
-
     useEffect(() => {
-        calculateTotals()
-    }, [cart, orderData.tax, orderData.discount])
+        calculateTotals();
+    }, [dataCart]);
+
+    const [total, setTotal] = useState(0);
 
     const handleQuantityChange = (id: number, change: number) => {
-        const product = products.find(p => p.id === id)
+        const product = dataCart.find(p => p.id === id);
         if (product) {
-            setCart(cart.map(item => {
-                if (item.id === id) {
-                    const newQuantity = Math.max(1, Math.min(item.quantity + change, product.stockStore))
-                    return {...item, quantity: newQuantity}
-                }
-                return item
-            }))
+            setDataCart(
+                dataCart.map(item => {
+                    if (item.id === id) {
+                        const newQuantity = Math.max(1, Math.min(item.quantity + change, product.location.quantity))
+                        return {...item, quantity: newQuantity}
+                    }
+                    return item
+                })
+            )
         }
     }
 
     const removeFromCart = (id: number) => {
-        setCart(cart.filter(item => item.id !== id))
+        setDataCart(dataCart.filter(item => item.id !== id))
     }
 
     const calculateTotals = () => {
-        const newSubtotal = cart.reduce((sum, item) => {
-            const product = products.find(p => p.id === item.id)
-            return sum + (product ? product.price * item.quantity : 0)
+        const newSubtotal = dataCart.reduce((sum, item) => {
+            return sum + (item ? item.price * item.quantity : 0)
         }, 0)
 
         setTotal(newSubtotal)
-        setOrderData(prev => ({...prev, subtotal: newSubtotal, products: cart}))
+        setOrderData(prev => ({
+            ...prev, subtotal: newSubtotal, products: dataCart.map(item => ({
+                id: item.id,
+                quantity: item.quantity,
+                productWarehouseId: item.location.id
+            }))
+        }));
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log(user);
         console.log(orderData);
         if (orderData.numFac === '') {
             showToast("Debe ingresar un número de factura", ToastType.WARNING);
         } else if (orderData.clientId === 0) {
             showToast("Debe seleccionar un cliente", ToastType.WARNING);
         } else if (orderData.paymentType === '') {
+
             showToast("Debe seleccionar un tipo de pago", ToastType.WARNING);
-        } else if (orderData.products) {
+        } else if (!orderData.products) {
             showToast("Debe agregar productos", ToastType.WARNING);
         } else if (orderData.userId === 0) {
             showToast("Usuario no existe", ToastType.ERROR);
@@ -417,7 +426,8 @@ export default function CreateOrderPage() {
                                                                             row: productWarehouse.row,
                                                                             column: productWarehouse.column,
                                                                             color: productWarehouse.color,
-                                                                            quantity: productWarehouse.quantity
+                                                                            quantity: productWarehouse.quantity,
+                                                                            name: productWarehouse.name
                                                                         }
                                                                     })
                                                                 }
@@ -430,7 +440,9 @@ export default function CreateOrderPage() {
                                                                     key={productWarehouse.id}
                                                                     value={productWarehouse.id.toString()}
                                                                     textValue={`${productWarehouse.row}-${productWarehouse.column}`}
-                                                                    color={productWarehouse.color}
+                                                                    style={{
+                                                                        backgroundColor: productWarehouse.color,
+                                                                    }}
                                                                 >
                                                                     {productWarehouse.name}{" "}{productWarehouse.row}-{productWarehouse.column}
                                                                 </SelectItem>
@@ -470,57 +482,54 @@ export default function CreateOrderPage() {
                                                         </Button>
                                                     </TableCell>
                                                 </TableRow>,
-                                                ...cart
-                                                    .filter((item) => products.some((p) => p.id === item.id))
-                                                    .map((item) => {
-                                                        const product = products.find((p) => p.id === item.id);
-                                                        const location = product?.productWarehouse.find((product) => product.id === item.productWarehouseId);
-
-                                                        return (
-                                                            <TableRow key={item.id}>
-                                                                <TableCell>{product?.name}</TableCell>
-                                                                <TableCell>{product?.price}</TableCell>
-                                                                <TableCell>{product?.size.name}</TableCell>
-                                                                <TableCell>{product?.category.name}</TableCell>
-                                                                <TableCell>
-                                                                    <Button
-                                                                        className="w-full"
-                                                                        color={location?.color}
-                                                                    >
-                                                                        {location?.name}{" "}{location?.row}-{location?.column}
-                                                                    </Button>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <div className="flex items-center">
-                                                                        <Button
-                                                                            size="sm"
-                                                                            isIconOnly
-                                                                            onClick={() => handleQuantityChange(item.id, -1)}
-                                                                        >
-                                                                            <Minus size={16}/>
-                                                                        </Button>
-                                                                        <span className="mx-2">{item.quantity}</span>
-                                                                        <Button
-                                                                            size="sm"
-                                                                            isIconOnly
-                                                                            onClick={() => handleQuantityChange(item.id, 1)}
-                                                                        >
-                                                                            <Plus size={16}/>
-                                                                        </Button>
-                                                                    </div>
-                                                                </TableCell>
-                                                                <TableCell>
+                                                ...dataCart.map(dataCart => {
+                                                    return (
+                                                        <TableRow key={dataCart.id}>
+                                                            <TableCell>{dataCart.name}</TableCell>
+                                                            <TableCell>{dataCart.price}</TableCell>
+                                                            <TableCell>{dataCart.size.name}</TableCell>
+                                                            <TableCell>{dataCart.category.name}</TableCell>
+                                                            <TableCell>
+                                                                <Button
+                                                                    className="w-full"
+                                                                    style={{
+                                                                        backgroundColor: dataCart.location.color,
+                                                                    }}
+                                                                >
+                                                                    {dataCart.location.name}{" "}{dataCart.location.row}-{dataCart.location.column}
+                                                                </Button>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex items-center">
                                                                     <Button
                                                                         size="sm"
-                                                                        color="danger"
-                                                                        onClick={() => removeFromCart(item.id)}
+                                                                        isIconOnly
+                                                                        onClick={() => handleQuantityChange(dataCart.id, -1)}
                                                                     >
-                                                                        Remove
+                                                                        <Minus size={16}/>
                                                                     </Button>
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        );
-                                                    })
+                                                                    <span className="mx-2">{dataCart.quantity}</span>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        isIconOnly
+                                                                        onClick={() => handleQuantityChange(dataCart.id, 1)}
+                                                                    >
+                                                                        <Plus size={16}/>
+                                                                    </Button>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Button
+                                                                    size="sm"
+                                                                    color="danger"
+                                                                    onClick={() => removeFromCart(dataCart.id)}
+                                                                >
+                                                                    Remove
+                                                                </Button>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })
                                             ]}
                                         </TableBody>
                                     </Table>
