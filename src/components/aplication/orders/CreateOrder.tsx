@@ -23,13 +23,14 @@ import {ClientContext} from '@/context/ClientContext/clientContext';
 import {CreateOrderDto} from '@/services/Order/dto/CreateOrderDto';
 import {OrderContext} from '@/context/OrderContext/orderContext';
 import {Minus, Plus} from 'lucide-react';
-import {UserContext} from "@/context/UserContext/userContext";
 import {CirclePlus} from "@/components/icons/CirclePlus";
 import ClientModal from "@/components/aplication/clients/ClientModal";
 import {CheckIcon} from "@/components/icons/CheckIcon";
 import {ToastContext} from "@/context/ToastContext/ToastContext";
 import {ToastType} from "@/components/Toast/Toast";
 import {DataCartDto} from "@/components/aplication/orders/dto/DataCartDto";
+import {AuthContext} from "@/context/AuthContext/authContext";
+import OrderSkeletonPage from "@/components/skeletons/OrderSkeleton";
 
 
 const initialCart: DataCartDto = {
@@ -57,8 +58,8 @@ const initialCart: DataCartDto = {
 }
 
 export default function CreateOrderPage() {
-    const {products} = React.useContext(ProductContext)!
-    const {user} = React.useContext(UserContext)!
+    const {products, loading} = React.useContext(ProductContext)!
+    const {user} = React.useContext(AuthContext)!
     const {
         showToast
     } = React.useContext(ToastContext)!
@@ -87,6 +88,10 @@ export default function CreateOrderPage() {
         subtotal: 0,
         paymentType: '',
     })
+
+    useEffect(() => {
+        console.log(user);
+    }, []);
 
     useEffect(() => {
         calculateTotals();
@@ -213,70 +218,16 @@ export default function CreateOrderPage() {
         return true;
     }
 
+    if(loading){
+        return (
+            <OrderSkeletonPage/>
+        )
+    }
 
     return (
         <div className="container mx-auto p-4">
             <h1 className="text-2xl font-bold mb-4">Nueva Orden</h1>
             <div>
-                {/*<div>
-                    <Card>
-                        <CardHeader>
-                            <h2 className="text-lg font-semibold">Product Selection</h2>
-                        </CardHeader>
-                        <CardBody>
-                            <div className="flex gap-2 mb-4">
-                                <Select
-                                    label="Category"
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                >
-                                    {[
-                                        <SelectItem key="all" value="">All Categories</SelectItem>,
-                                        ...categories.map((category) => (
-                                            <SelectItem key={category.id} value={category.id.toString()}>
-                                                {category.name}
-                                            </SelectItem>
-                                        ))
-                                    ]}
-                                </Select>
-                                <Select
-                                    label="Size"
-                                    value={selectedSize}
-                                    onChange={(e) => setSelectedSize(e.target.value)}
-                                >
-                                    {[
-                                        <SelectItem key="all" value="">
-                                            All Sizes
-                                        </SelectItem>,
-                                        ...sizes.map((size) => (
-                                            <SelectItem key={size.id} value={size.id.toString()}>
-                                                {size.name}
-                                            </SelectItem>
-                                        )),
-                                    ]}
-                                </Select>
-
-                            </div>
-                            <Input
-                                label="Search Product"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="mb-4"
-                            />
-                            <div className="h-96 overflow-y-auto">
-                                {filteredProducts.map((product) => (
-                                    <div
-                                        key={product.id}
-                                        className="p-2 border-b cursor-pointer hover:bg-gray-100"
-                                        onDoubleClick={() => handleProductDoubleClick(product)}>
-                                        <p>{product.name}</p>
-                                        <p className="text-sm text-gray-600">Stock: {product.stockStore}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardBody>
-                    </Card>
-                </div>*/}
                 <div>
                     <Card>
                         <CardHeader>
@@ -336,44 +287,6 @@ export default function CreateOrderPage() {
                                         </Select>
                                     </div>
                                 </div>
-                                {/*<div className="flex items-center gap-2 mb-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={enableTax}
-                                        onChange={(e) => setEnableTax(e.target.checked)}
-                                    />
-                                    <label>Enable Tax</label>
-                                    {enableTax && (
-                                        <Input
-                                            type="number"
-                                            label="Tax (%)"
-                                            value={orderData.tax.toString()}
-                                            onChange={(e) => setOrderData({
-                                                ...orderData,
-                                                tax: parseFloat(e.target.value)
-                                            })}
-                                        />
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2 mb-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={enableDiscount}
-                                        onChange={(e) => setEnableDiscount(e.target.checked)}
-                                    />
-                                    <label>Enable Discount</label>
-                                    {enableDiscount && (
-                                        <Input
-                                            type="number"
-                                            label="Discount"
-                                            value={orderData.discount.toString()}
-                                            onChange={(e) => setOrderData({
-                                                ...orderData,
-                                                discount: parseFloat(e.target.value)
-                                            })}
-                                        />
-                                    )}
-                                </div>*/}
                                 <div className="mt-4">
                                     <h3 className="font-semibold">Productos</h3>
 

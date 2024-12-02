@@ -9,12 +9,9 @@ export class AuthService extends Service {
         super();
     }
 
-    async login(email: string, password: string): Promise<void> {
+    async login(email: string, password: string): Promise<UserDto> {
         const response: AxiosResponse = await this.apiFetch.post('/login', { email, password });
-        const user = response.data;
-
-        // Guardar el usuario en localStorage (incluyendo el rol)
-        localStorage.setItem('user', JSON.stringify(user));
+        return response.data;
     }
 
     async loginUsername(username: string, password: string): Promise<void> {
@@ -33,6 +30,11 @@ export class AuthService extends Service {
 
     async register(user: CreateUserDto): Promise<UserDto> {
         const response: AxiosResponse = await this.apiFetch.post(PARAM_USER, user);
+        return response.data;
+    }
+
+    async profile(): Promise<UserDto> {
+        const response: AxiosResponse = await this.apiFetch.get('/profile');
         return response.data;
     }
 }

@@ -132,17 +132,12 @@ export const SidebarWrapper = () => {
                                 href="sizes"
                             />
 
-                            <CollapseItems
-                                icon={<ProductsIcon/>}
+                            <SidebarItem
+                                isActive={pathname === "/products"}
                                 title="Productos"
-                                items={[
-                                    {label: "Productos", href: "/products"},
-                                    {label: "Agregar nuevo producto", href: "/createProduct"},
-
-                                ]}
+                                icon={<ProductsIcon/>}
+                                href="products"
                             />
-
-
                         </SidebarMenu>
 
                         <SidebarMenu title="General">

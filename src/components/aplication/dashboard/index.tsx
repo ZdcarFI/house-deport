@@ -8,7 +8,6 @@ import { ClientContext } from '@/context/ClientContext/clientContext'
 import { OrderContext } from '@/context/OrderContext/orderContext'
 import { DataCard } from './data-card'
 import { LineChart } from './line-chart'
-import { BarChart } from './bar-chart'
 import { PieChart } from './pie-chart'
 import { RecentSalesTable } from './recent-sales-table'
 
@@ -78,6 +77,12 @@ export default function Dashboard() {
   const productsTrend = calculateTrend(metrics.totalProducts.current, metrics.totalProducts.previous)
   const clientsTrend = calculateTrend(metrics.totalClients.current, metrics.totalClients.previous)
   const avgOrderValueTrend = calculateTrend(metrics.averageOrderValue.current, metrics.averageOrderValue.previous)
+
+  if(true){
+    return (
+        <div>Dashboard</div>
+    )
+  }
 
   return (
     <div className="p-8">

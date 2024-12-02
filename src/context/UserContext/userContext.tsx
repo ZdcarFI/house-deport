@@ -12,15 +12,6 @@ export const UserContext = React.createContext<UserContextType | null>(null);
 
 const userService = new UserService();
 
-const userInitialState: UserDto = {
-    id: 0,
-    firstName: "",
-    lastName: "",
-    username: "",
-    email: "",
-    gender: "",
-}
-
 const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [state, dispatch] = React.useReducer(userReducer, { users: [] } as UserState);
     const [loading, setLoading] = React.useState<boolean>(false);
@@ -70,7 +61,6 @@ const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         try {
             const res = await userService.create(user);
             dispatch({ type: UserActionType.ADD_USER, payload: res });
-            setSelectedUser(userInitialState)
         } catch (e) {
             handleError(e);
         }
@@ -80,7 +70,6 @@ const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         try {
             const res = await userService.updateById(id, user);
             dispatch({ type: UserActionType.EDIT_USER, payload: res });
-            setSelectedUser(userInitialState)
         } catch (e) {
             handleError(e);
         }
@@ -124,7 +113,6 @@ const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         getUser,
         error,
         userLog,
-        user: userInitialState,
         isModalOpen,
         selectedUser,
         isViewMode,

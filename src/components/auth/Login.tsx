@@ -1,29 +1,29 @@
 'use client';
 
-import {useState, FormEvent} from 'react';
+import {useState, FormEvent, useContext} from 'react';
 import {useRouter} from 'next/navigation';
-import {AuthService} from '@/services/Auth/AuthService';
 import {Button} from '@nextui-org/button';
 import {Input} from '@nextui-org/input';
 import {Card, CardBody, CardHeader} from '@nextui-org/card';
 import {EyeFilledIcon} from '@/components/icons/EyeFilledIcon';
 import {EyeSlashFilledIcon} from '@/components/icons/EyeSlashFilledIcon';
 import {MailIcon, LockIcon} from 'lucide-react';
+import {AuthContext} from "@/context/AuthContext/authContext";
 
 export default function LoginForm() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [error, setError] = useState<string>('');
+    const [errorForm, setErrorForm] = useState<string>('');
     const [isVisible, setIsVisible] = useState(false);
     const router = useRouter();
-    const authService = new AuthService();
+    const { loginUser, error } = useContext(AuthContext)!;
 
     const toggleVisibility = () => setIsVisible(!isVisible);
 
     const validateForm = () => {
 
         if (password.length < 6) {
-            setError('La contraseña debe tener al menos 6 caracteres.');
+            setErrorForm('La contraseña debe tener al menos 6 caracteres.');
             return false;
         }
         return true;
@@ -31,16 +31,15 @@ export default function LoginForm() {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setError('');
+        setErrorForm('');
 
         if (!validateForm()) return;
-        try {
-            await authService.login(email, password);
-            router.push('/dashboard');
-        } catch (err) {
-            setError('Error al iniciar sesión. Por favor, verifique sus credenciales.');
-            console.error('Error de inicio de sesión', err);
+        await loginUser(email, password);
+        if(error !== ''){
+            setErrorForm('Credenciales incorrectas');
+            return;
         }
+        router.push('/dashboard');
     };
 
     return (
@@ -78,9 +77,9 @@ export default function LoginForm() {
                             </button>
                         }
                     />
-                    {error && (
+                    {errorForm && (
                         <div className="bg-danger-100 text-danger-500 text-sm p-2 rounded-lg" role="alert">
-                            {error}
+                            {errorForm}
                         </div>
                     )}
                     <Button color="primary" type="submit" className="mt-2">

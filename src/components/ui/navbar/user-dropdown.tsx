@@ -1,31 +1,21 @@
-import React, {useCallback} from "react";
-import {DarkModeSwitch} from "./darkmodeswitch";
+import React, {useContext} from "react";
 import {useRouter} from "next/navigation";
-import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar, User} from "@nextui-org/react";
+import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, User} from "@nextui-org/react";
 
-import {NavbarItem} from "@nextui-org/navbar";
-import {AuthService} from "@/services/Auth/AuthService";
-import {UserDto} from "@/services/Dto/UserDto";
 import {DEFAULT_IMAGE, FEMALE_IMAGE, MALE_IMAGE} from "@/utils/images";
+import {AuthContext} from "@/context/AuthContext/authContext";
 
 export const UserDropdown = () => {
     const router = useRouter();
-    const [user, setUser] = React.useState<UserDto | null>(null);
-    const authService = new AuthService();
+    const { logoutUser, error, user } = useContext(AuthContext);
 
-    React.useEffect(() => {
-        setUser(JSON.parse(localStorage.getItem('user') || 'null'));
-    }, [])
-
-    const handleLogout = useCallback(async () => {
-        try {
-            await authService.logout();
-            localStorage.clear();
-            router.replace("/login");
-        } catch (error) {
-            console.error("Error during logout:", error);
+    const handleLogout = async ()=>{
+        await logoutUser();
+        if (error !== ""){
+            return;
         }
-    }, [authService, router]);
+        router.push('/login');
+    }
 
     return (
         <Dropdown placement="bottom-start" backdrop="blur">
