@@ -49,8 +49,7 @@ export default function UserTable({ users, onEdit, onDelete, onView }: UserTable
           </Chip>
         )
       case 'lastSession':
-        // return user.lastSession ? user.lastSession.toLocaleString() : 'No disponible'
-        return 'aca va fecha'
+        return user.lastSession ? new Date(user.lastSession).toLocaleDateString() : 'No disponible'
       case 'actions':
         return (
           <div className="flex items-center gap-4">

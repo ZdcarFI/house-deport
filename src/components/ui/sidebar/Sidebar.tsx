@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {Sidebar} from "./sidebar.styles";
 import {HomeIcon} from "../../icons/sidebar/home-icon";
 import {PaymentsIcon} from "../../icons/sidebar/payments-icon";
@@ -32,37 +32,36 @@ export const SidebarWrapper = () => {
             {collapsed ? (
                 <div className={Sidebar.Overlay()} onClick={setCollapsed}/>
             ) : null}
-            <div className={Sidebar({collapsed})} >
+            <div className={`${Sidebar({collapsed})}`}>
                 <div
                     className={clsx(
                         "min-h-20 flex items-center w-full",
-                        collapsed
+                        !collapsed
                             ? "flex-col justify-center gap-2"
                             : "justify-between"
                     )}
                 >
                     <div className="flex justify-center items-center">
                         <Tooltip content="House Deport" placement="bottom-end">
-                            <Image src="imgs/logo.png" alt="House Deport" width={40} height={40}/>
+                            <Image src="imgs/logo.svg" alt="House Deport" width={40} height={40}/>
                         </Tooltip>
                         {
-                            !collapsed && (
+                            collapsed && (
                                 <h1 className="text-xl font-bold text-primary-500 dark:text-primary-400">
                                     House Deport
                                 </h1>
                             )
                         }
                     </div>
-
                     <div
                         className={clsx(
-                            "flex items-center justify-center cursor-pointer p-1 rounded",
+                            "hidden md:flex items-center justify-center cursor-pointer p-1 rounded",
                             "dark:hover:bg-primary-100 hover:bg-default-100",
-                            collapsed ? "min-w-10 min-h-10 rounded-xl dark:bg-gray-100" : "rotate-180"
+                            !collapsed ? "min-w-10 min-h-10 rounded-xl dark:bg-[rgb(24_24_27)]" : "rotate-180"
                         )}
                         onClick={handleClick}
                     >
-                        {collapsed ? (
+                        {!collapsed ? (
                             <AlignRight
                                 size={20}
                                 color="#71717a"
@@ -76,7 +75,7 @@ export const SidebarWrapper = () => {
                     </div>
                 </div>
                 <div className="flex flex-col justify-between h-full">
-                <div className={Sidebar.Body()}>
+                    <div className={Sidebar.Body()}>
                         <SidebarItem
                             title="Home"
                             icon={<HomeIcon/>}

@@ -29,7 +29,7 @@ export const CollapseItems = ({icon, items, title}: Props) => {
     };
     const handleClose = () => setIsOpen(false);
 
-    if (collapsed) {
+    if (!collapsed) {
         const isActive = items.some((item) => item.href === pathname);
         return (
 
@@ -47,7 +47,7 @@ export const CollapseItems = ({icon, items, title}: Props) => {
                                 onClick={handleToggle}
                                 className={clsx(
                                     "flex gap-2 min-w-10 min-h-10 h-full items-center rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.98]",
-                                    collapsed ? "justify-center dark:bg-gray-100" : "px-3.5",
+                                    !collapsed ? "justify-center dark:bg-[rgb(24_24_27)]" : "px-3.5",
                                     isActive
                                         ? "bg-primary-100 [&_svg_path]:fill-primary-500"
                                         : "hover:bg-default-100",
@@ -110,7 +110,7 @@ export const CollapseItems = ({icon, items, title}: Props) => {
                             <div
                                 className={clsx(
                                     "flex gap-2 min-w-10 min-h-10 h-full items-center rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.98]",
-                                    collapsed ? "justify-center dark:bg-gray-100" : "",
+                                    !collapsed ? "justify-center dark:bg-[rgb(24_24_27)]" : "",
                                 )}
                             >
                                 {icon}

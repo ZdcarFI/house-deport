@@ -1,18 +1,18 @@
 import React from "react";
-import { useSidebarContext } from "../layouts/Layout-context";
-import { StyledBurgerButton } from "./navbar.styles";
+import {useSidebarContext} from "../layouts/Layout-context";
+import {AlignRight} from "@/components/icons/AlignRight";
 
 export const BurguerButton = () => {
-  const {setCollapsed } = useSidebarContext();
+    const {setCollapsed} = useSidebarContext();
 
-  return (
-    <div
-      className={StyledBurgerButton()}
-      // open={collapsed}
-      onClick={setCollapsed}
-    >
-      <div />
-      <div />
-    </div>
-  );
+    return (
+        <div
+            onClick={setCollapsed}
+        >
+            <AlignRight
+                size={25}
+                color="#71717a"
+            />
+        </div>
+    );
 };

@@ -1,17 +1,24 @@
-import React, {useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, User} from "@nextui-org/react";
 
 import {DEFAULT_IMAGE, FEMALE_IMAGE, MALE_IMAGE} from "@/utils/images";
 import {AuthContext} from "@/context/AuthContext/authContext";
+import {userInitialState} from "@/context/AuthContext/userReducer";
 
 export const UserDropdown = () => {
     const router = useRouter();
-    const { logoutUser, error, user } = useContext(AuthContext);
+    const {logoutUser, error} = useContext(AuthContext);
+    const [user, setUser] = useState(userInitialState);
 
-    const handleLogout = async ()=>{
+    useEffect(() => {
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) setUser(JSON.parse(savedUser));
+    }, []);
+
+    const handleLogout = async () => {
         await logoutUser();
-        if (error !== ""){
+        if (error !== "") {
             return;
         }
         router.push('/login');

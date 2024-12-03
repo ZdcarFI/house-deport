@@ -1,11 +1,12 @@
 import { tv } from "@nextui-org/react";
 
 export const SidebarWrapper = tv({
-  base: "bg-background transition-transform h-full fixed -translate-x-full w-64 shrink-0 z-[202] overflow-y-auto border-r border-divider flex-col py-6 px-3 md:ml-0 md:flex md:static md:h-screen md:translate-x-0",
+  base: "bg-background transition-transform h-full fixed -translate-x-full w-64 shrink-0 z-[202] overflow-y-auto border-r border-divider flex-col py-6 px-3 md:ml-0 md:flex md:static md:h-screen md:translate-x-0 md:pt-50",
 
   variants: {
     collapsed: {
-      true: "w-24",
+      true: "translate-x-0 ml-0[display:inherit] mt-10 md:mt-0",
+      false: "w-24"
     },
   },
 });
@@ -18,7 +19,7 @@ export const Header = tv({
 });
 
 export const Body = tv({
-  base: "flex flex-col gap-6 mt-9 px-2",
+  base: "flex flex-col gap-6 mt-1 md:mt-9 px-2",
 });
 
 export const Footer = tv({

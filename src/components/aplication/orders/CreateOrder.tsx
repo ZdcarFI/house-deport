@@ -29,9 +29,9 @@ import {CheckIcon} from "@/components/icons/CheckIcon";
 import {ToastContext} from "@/context/ToastContext/ToastContext";
 import {ToastType} from "@/components/Toast/Toast";
 import {DataCartDto} from "@/components/aplication/orders/dto/DataCartDto";
-import {AuthContext} from "@/context/AuthContext/authContext";
 import OrderSkeletonPage from "@/components/skeletons/OrderSkeleton";
-
+import {PDFDownloadLink} from "@react-pdf/renderer";
+import Invoice from "@/components/pdf/Invoice";
 
 const initialCart: DataCartDto = {
     id: 0,
@@ -59,7 +59,6 @@ const initialCart: DataCartDto = {
 
 export default function CreateOrderPage() {
     const {products, loading} = React.useContext(ProductContext)!
-    const {user} = React.useContext(AuthContext)!
     const {
         showToast
     } = React.useContext(ToastContext)!
@@ -80,7 +79,7 @@ export default function CreateOrderPage() {
     }>({
         numFac: '',
         clientId: 0,
-        userId: user?.id || 0,
+        userId: 0,
         products: [],
         status: 'pending',
         tax: 18,
@@ -88,10 +87,6 @@ export default function CreateOrderPage() {
         subtotal: 0,
         paymentType: '',
     })
-
-    useEffect(() => {
-        console.log(user);
-    }, []);
 
     useEffect(() => {
         calculateTotals();
@@ -135,8 +130,7 @@ export default function CreateOrderPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(user);
-        console.log(orderData);
+
         if (orderData.numFac === '') {
             showToast("Debe ingresar un número de factura", ToastType.WARNING);
         } else if (orderData.clientId === 0) {
@@ -146,8 +140,6 @@ export default function CreateOrderPage() {
             showToast("Debe seleccionar un tipo de pago", ToastType.WARNING);
         } else if (!orderData.products) {
             showToast("Debe agregar productos", ToastType.WARNING);
-        } else if (orderData.userId === 0) {
-            showToast("Usuario no existe", ToastType.ERROR);
         } else {
             await createOrder(orderData)
             showToast(errorOrder, ToastType.ERROR);
@@ -462,6 +454,12 @@ export default function CreateOrderPage() {
             </div>
             <ClientModal
                 showToast={showToast}/>
+            <PDFDownloadLink document={<Invoice products={dataCart} total={total} client={clients.find(
+                client => client.id === orderData.clientId
+            )} date={new Date().toLocaleDateString(
+            )} />} fileName="nota_de_venta.pdf">
+                Generar Nota de Venta
+            </PDFDownloadLink>
         </div>
     )
 }

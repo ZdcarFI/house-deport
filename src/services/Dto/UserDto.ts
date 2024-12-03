@@ -5,5 +5,6 @@ export interface UserDto{
     readonly username: string,
     readonly email: string,
     readonly gender: string,
-    readonly role: string
+    readonly role: string,
+    readonly lastSession?: Date
 }

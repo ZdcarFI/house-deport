@@ -27,7 +27,7 @@ export default function Orders() {
 
   const filteredOrders = React.useMemo(() => {
     return orders.filter(order => 
-      order.numFac.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.numFac?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (order.client?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
       (order.user?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
     );

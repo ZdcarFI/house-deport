@@ -14,6 +14,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const [state, dispatch] = useReducer(userReducer, {user: userInitialState} as UserState);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
+    const [userTest, setUserTest] = useState(userInitialState);
 
     const authService = new AuthService();
 
@@ -22,11 +23,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
             dispatch({type: UserActionType.ADD_USER, payload: JSON.parse(savedUser)});
+            setUserTest(JSON.parse(savedUser));
         } else {
             authService.profile().then((res) => {
                 dispatch({type: UserActionType.ADD_USER, payload: res});
-                console.log("usuario", state.user);
-                console.log("res", res);
+                setUserTest(res)
             }).catch((e) => {
                 handleError(e);
             }).finally(() => {
@@ -74,7 +75,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
 
     const values = useMemo(() => ({
         error,
-        user: state.user,
+        user: userTest,
         loading,
         registerUser,
         loginUser,
