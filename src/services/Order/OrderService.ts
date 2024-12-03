@@ -1,6 +1,6 @@
 import {Service} from "../Service";
 import {CreateOrderDto} from "./dto/CreateOrderDto";
-import {PARAM_ORDER} from "@/utils/config/config";
+import {BASE_URI, PARAM_ORDER} from "@/utils/config/config";
 import {AxiosResponse} from "axios";
 import {OrderDto} from "@/services/Dto/OrderDto";
 import {UpdateOrderDto} from "@/services/Order/dto/UpdateOrderDto";
@@ -42,5 +42,16 @@ export class OrderService extends Service {
     async updateById(id: number, product: UpdateOrderDto): Promise<OrderDto> {
         const response: AxiosResponse = await this.apiFetch.put(`${this.param}/${id}`, product);
         return response.data;
+    }
+
+    async generatePdf(id: number): Promise<ArrayBuffer> {
+        try {
+            const response = await this.apiFetch.get(`${BASE_URI}${this.param}/nota-venta/${id}`, {
+                responseType: 'arraybuffer',
+            });
+            return response.data; // Devuelve el buffer del PDF
+        } catch (e) {
+            throw new Error('Error generating pdf');
+        }
     }
 }

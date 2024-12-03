@@ -136,7 +136,7 @@ export default function OrderModal({ isOpen, onClose, onSubmit, order, isViewMod
       <ModalContent>
         <form onSubmit={handleSubmit}>
           <ModalHeader className="flex flex-col gap-1">
-            {isViewMode ? 'View Order' : order ? 'Edit Order' : 'Add Order'}
+            {isViewMode ? 'Ver Orden' : order ? 'Editar Order' : 'Agregar Order'}
           </ModalHeader>
           <ModalBody>
             <Input

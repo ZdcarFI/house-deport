@@ -47,13 +47,10 @@ const OrderProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
         }
     };
 
-    const createOrder = async (order: CreateOrderDto): Promise<void> => {
-        try {
-            const res = await orderService.create(order);
-            dispatch({type: OrderActionType.ADD_ORDER, payload: res});
-        } catch (e) {
-            handleError(e);
-        }
+    const createOrder = async (order: CreateOrderDto): Promise<OrderDto> => {
+        const res = await orderService.create(order);
+        dispatch({type: OrderActionType.ADD_ORDER, payload: res});
+        return res;
     };
 
     const updateOrder = async (id: number, order: UpdateOrderDto): Promise<void> => {
@@ -83,6 +80,14 @@ const OrderProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
         }
     };
 
+    const generatePdf = async (id: number): Promise<void> => {
+        try {
+            await orderService.generatePdf(id);
+        } catch (e) {
+            handleError(e)
+        }
+    }
+
     const values = React.useMemo(() => ({
         orders: state.orders,
         createOrder,
@@ -91,7 +96,8 @@ const OrderProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
         getOrders,
         loading,
         getOrder,
-        errorOrder: error
+        errorOrder: error,
+        generatePdf
     }), [state.orders, loading, error]);
 
     return (

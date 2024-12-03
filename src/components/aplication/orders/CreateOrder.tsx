@@ -24,14 +24,13 @@ import {CreateOrderDto} from '@/services/Order/dto/CreateOrderDto';
 import {OrderContext} from '@/context/OrderContext/orderContext';
 import {Minus, Plus} from 'lucide-react';
 import {CirclePlus} from "@/components/icons/CirclePlus";
-import ClientModal from "@/components/aplication/clients/ClientModal";
 import {CheckIcon} from "@/components/icons/CheckIcon";
 import {ToastContext} from "@/context/ToastContext/ToastContext";
 import {ToastType} from "@/components/Toast/Toast";
 import {DataCartDto} from "@/components/aplication/orders/dto/DataCartDto";
 import OrderSkeletonPage from "@/components/skeletons/OrderSkeleton";
-import {PDFDownloadLink} from "@react-pdf/renderer";
-import Invoice from "@/components/pdf/Invoice";
+import {useRouter} from "next/navigation";
+import ClientModal from "@/components/aplication/clients/ClientModal";
 
 const initialCart: DataCartDto = {
     id: 0,
@@ -68,6 +67,9 @@ export default function CreateOrderPage() {
     } = React.useContext(ClientContext)!
     const {createOrder, errorOrder} = React.useContext(OrderContext)!
 
+    const router = useRouter()
+
+
     const [dataCart, setDataCart] = useState<DataCartDto[]>([]);
     const [newCart, setNewCart] = useState<DataCartDto>(initialCart);
     const [orderData, setOrderData] = useState<CreateOrderDto & {
@@ -77,7 +79,6 @@ export default function CreateOrderPage() {
         subtotal: number,
         paymentType: string
     }>({
-        numFac: '',
         clientId: 0,
         userId: 0,
         products: [],
@@ -131,9 +132,7 @@ export default function CreateOrderPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (orderData.numFac === '') {
-            showToast("Debe ingresar un número de factura", ToastType.WARNING);
-        } else if (orderData.clientId === 0) {
+        if (orderData.clientId === 0) {
             showToast("Debe seleccionar un cliente", ToastType.WARNING);
         } else if (orderData.paymentType === '') {
 
@@ -141,8 +140,16 @@ export default function CreateOrderPage() {
         } else if (!orderData.products) {
             showToast("Debe agregar productos", ToastType.WARNING);
         } else {
-            await createOrder(orderData)
-            showToast(errorOrder, ToastType.ERROR);
+            createOrder(orderData).then((response) => {
+                showToast("Orden creada correctamente", ToastType.SUCCESS);
+                router.push('/orders');
+                const orderId = response.id;
+
+                // Abrir nueva pestaña con la URL del PDF
+                window.open(`/pdf/${orderId}`, '_blank');
+            }).catch(() => {
+                showToast(errorOrder, ToastType.ERROR);
+            });
         }
 
     }
@@ -210,7 +217,7 @@ export default function CreateOrderPage() {
         return true;
     }
 
-    if(loading){
+    if (loading) {
         return (
             <OrderSkeletonPage/>
         )
@@ -228,15 +235,7 @@ export default function CreateOrderPage() {
                         <CardBody>
                             <form onSubmit={handleSubmit} className="flex flex-col">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-sm" htmlFor="">Número de Factura</label>
-                                        <Input
-                                            placeholder="F0001"
-                                            value={orderData.numFac}
-                                            onChange={(e) => setOrderData({...orderData, numFac: e.target.value})}
-                                            className="mb-2"
-                                        />
-                                    </div>
+
                                     <div className="flex flex-col gap-2">
                                         <div className="flex justify-between items-start">
                                             <label className="text-sm" htmlFor="">Cliente</label>
@@ -454,12 +453,6 @@ export default function CreateOrderPage() {
             </div>
             <ClientModal
                 showToast={showToast}/>
-            <PDFDownloadLink document={<Invoice products={dataCart} total={total} client={clients.find(
-                client => client.id === orderData.clientId
-            )} date={new Date().toLocaleDateString(
-            )} />} fileName="nota_de_venta.pdf">
-                Generar Nota de Venta
-            </PDFDownloadLink>
         </div>
     )
 }

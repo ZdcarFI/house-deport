@@ -6,15 +6,17 @@ import { DeleteIcon } from '../../icons/table/delete-icon'
 import { EyeIcon } from '../../icons/table/eye-icon'
 import { Chip } from "@nextui-org/chip"
 import React from "react";
+import {FilePdf} from "@/components/icons/file-pdf";
 
 interface OrderTableProps {
   orders: OrderDto[]
   onView: (order: OrderDto) => void
   onEdit: (order: OrderDto) => void
   onDelete: (id: number) => void
+  onViewPdf: (id: number) => void
 }
 
-export default function OrderTable({ orders, onEdit, onDelete, onView }: OrderTableProps) {
+export default function OrderTable({ orders, onEdit, onDelete, onView, onViewPdf }: OrderTableProps) {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -54,19 +56,24 @@ export default function OrderTable({ orders, onEdit, onDelete, onView }: OrderTa
       case 'actions':
         return (
           <div className="flex items-center gap-4">
-            <Tooltip content="Details" color="primary">
+            <Tooltip content="Detalle" color="primary">
               <button onClick={() => onView(order)}>
                 <EyeIcon size={20} fill="#979797" />
               </button>
             </Tooltip>
-            <Tooltip content="Edit order" color="secondary">
+            <Tooltip content="Editar order" color="secondary">
               <button onClick={() => onEdit(order)}>
                 <EditIcon size={20} fill="#979797" />
               </button>
             </Tooltip>
-            <Tooltip content="Delete order" color="danger">
+            <Tooltip content="Eliminar orden" color="danger">
               <button onClick={() => onDelete(order.id)}>
                 <DeleteIcon size={20} fill="#FF0080" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Ver pdf" color="danger">
+              <button onClick={() => onViewPdf(order.id)}>
+                <FilePdf size={20} color="#FF0080" />
               </button>
             </Tooltip>
           </div>

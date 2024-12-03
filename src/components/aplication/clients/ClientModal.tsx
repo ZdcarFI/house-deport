@@ -68,14 +68,14 @@ export default function ClientModal({ showToast }: Props) {
     try {
       if (selectedClient) {
         await updateClient(selectedClient.id, formData as UpdateClientDto);
-        showToast("Talla actualizada exitosamente", ToastType.SUCCESS);
+        showToast("Cliente actualizada exitosamente", ToastType.SUCCESS);
       } else {
         await createClient(formData as CreateClientDto);
-        showToast("Talla creada exitosamente", ToastType.SUCCESS);
+        showToast("Cliente creada exitosamente", ToastType.SUCCESS);
       }
       closeModal();
     } catch (error) {
-      showToast("Error al enviar los datos de la talla:" + error, ToastType.ERROR)
+      showToast("Error al enviar los datos del Cliente:" + error, ToastType.ERROR)
     }
   }
   return (

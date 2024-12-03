@@ -9,10 +9,10 @@ export const RecentSalesTable = ({ orders }) => {
   return (
     <Table aria-label="Recent sales table">
       <TableHeader>
-        <TableColumn>ORDER ID</TableColumn>
-        <TableColumn>CLIENT</TableColumn>
-        <TableColumn>DATE</TableColumn>
-        <TableColumn>AMOUNT</TableColumn>
+        <TableColumn>Orden</TableColumn>
+        <TableColumn>Cliente</TableColumn>
+        <TableColumn>Fecha</TableColumn>
+        <TableColumn>Monto</TableColumn>
       </TableHeader>
       <TableBody>
         {recentOrders.map((order) => (

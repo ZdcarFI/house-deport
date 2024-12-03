@@ -127,6 +127,7 @@ export default function Orders() {
               setIsConfirmDialogOpen(true);
               setTitle("Are you sure you want to delete this order?");
             }}
+            onViewPdf={(orderId: number) => window.open(`/pdf/${orderId}`, '_blank')}
             onView={handleView}
           />
           <OrderModal
