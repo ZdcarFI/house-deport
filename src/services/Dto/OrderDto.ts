@@ -28,4 +28,6 @@ export interface OrderDto {
     readonly subtotal: number;
     readonly total: number;
     readonly details: DetailDto[];
+    readonly created_at : Date;
+    readonly updated_at : Date;
 }

@@ -33,4 +33,6 @@ export interface ProductDto {
     readonly productWarehouse: ProductWarehouseBasicDto[];
     readonly stockInventory: number;
     readonly stockStore: number;
+    readonly created_at : Date;
+    readonly updated_at : Date;
 }

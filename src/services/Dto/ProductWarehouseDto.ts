@@ -18,5 +18,7 @@ export interface ProductWarehouseDto {
   readonly quantity: number;
   readonly productId: number;
   readonly warehouseId: number;
+  readonly created_at : Date;
+  readonly updated_at : Date;
 
 }

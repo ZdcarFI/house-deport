@@ -5,6 +5,7 @@ import { EditIcon } from '../../icons/table/edit-icon'
 import { DeleteIcon } from '../../icons/table/delete-icon'
 import { EyeIcon } from '../../icons/table/eye-icon'
 import { Chip } from "@nextui-org/chip"
+import React from "react";
 
 interface OrderTableProps {
   orders: OrderDto[]
@@ -84,6 +85,8 @@ export default function OrderTable({ orders, onEdit, onDelete, onView }: OrderTa
         <TableColumn>Date</TableColumn>
         <TableColumn>Total</TableColumn>
         <TableColumn>Estado</TableColumn>
+        <TableColumn>Fecha de creación</TableColumn>
+        <TableColumn>Fecha de actualización</TableColumn>
         <TableColumn>Actions</TableColumn>
       </TableHeader>
       <TableBody>
@@ -95,6 +98,8 @@ export default function OrderTable({ orders, onEdit, onDelete, onView }: OrderTa
             <TableCell>{renderCell(order, 'date')}</TableCell>
             <TableCell>{renderCell(order, 'total')}</TableCell>
             <TableCell>{renderCell(order, 'status')}</TableCell>
+            <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+            <TableCell>{new Date(order.updated_at).toLocaleDateString()}</TableCell>
             <TableCell>{renderCell(order, 'actions')}</TableCell>
           </TableRow>
         ))}

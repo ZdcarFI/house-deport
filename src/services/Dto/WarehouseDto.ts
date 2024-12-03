@@ -19,4 +19,6 @@ export interface WarehouseDto {
     readonly spaces: number;
     readonly spacesUsed: number;
     readonly products: ProductBasicWithLocationDto[];
+    readonly created_at : Date;
+    readonly updated_at : Date;
 }

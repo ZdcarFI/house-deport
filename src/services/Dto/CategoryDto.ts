@@ -4,6 +4,8 @@
         readonly id: number;
         readonly name: string;
         readonly sizes: SizeDto[];
+        readonly created_at : Date;
+        readonly updated_at : Date;
     }
 
     export interface CategoryBasicDto {
