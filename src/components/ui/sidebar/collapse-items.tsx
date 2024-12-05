@@ -120,7 +120,7 @@ export const CollapseItems = ({icon, items, title}: Props) => {
                     >
                         <div className="pl-12">
                             {items.map((item, index) => {
-                                // Comparamos el href con la ruta actual para determinar si está activo
+
                                 const isActive = pathname === item.href;
 
                                 return (

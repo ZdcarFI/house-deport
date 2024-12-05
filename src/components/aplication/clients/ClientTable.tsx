@@ -38,19 +38,19 @@ export default function ClientTable({clients, onEdit, onDelete, onView}: ClientT
                     </div>
                 )
             default:
-                return client[columnKey as keyof ClientDto]
+                return null
         }
     }
 
     return (
         <Table aria-label="Clients table">
             <TableHeader>
-                <TableColumn>Name</TableColumn>
-                <TableColumn>Email</TableColumn>
-                <TableColumn>Phone</TableColumn>
+                <TableColumn>Nombre</TableColumn>
+                <TableColumn>Correo</TableColumn>
+                <TableColumn>Celular</TableColumn>
                 <TableColumn>Fecha de creación</TableColumn>
                 <TableColumn>Fecha de actualización</TableColumn>
-                <TableColumn>Actions</TableColumn>
+                <TableColumn>Acciones</TableColumn>
             </TableHeader>
             <TableBody>
                 {clients.map((client) => (

@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect, useContext } from 'react'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal'
-import { Button } from '@nextui-org/button'
-import { Input } from '@nextui-org/input'
-import { Select, SelectItem } from "@nextui-org/select"
-import { EyeFilledIcon } from '@/components/icons/EyeFilledIcon'
-import { EyeSlashFilledIcon } from '@/components/icons/EyeSlashFilledIcon'
-import { UserDto } from '@/services/Dto/UserDto'
-import { CreateUserDto } from '@/services/User/dto/CreateUserDto'
-import { UpdateUserDto } from '@/services/User/dto/UpdateUserDto'
-import { ToastType } from '@/components/Toast/Toast'
-import { UserContext } from '@/context/UserContext/userContext'
+import React, { useState, useEffect, useContext } from 'react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal';
+import { Button } from '@nextui-org/button';
+import { Input } from '@nextui-org/input';
+import { Select, SelectItem } from '@nextui-org/select';
+import { EyeFilledIcon } from '@/components/icons/EyeFilledIcon';
+import { EyeSlashFilledIcon } from '@/components/icons/EyeSlashFilledIcon';
+import { UserDto } from '@/services/Dto/UserDto';
+import { CreateUserDto } from '@/services/User/dto/CreateUserDto';
+import { UpdateUserDto } from '@/services/User/dto/UpdateUserDto';
+import { ToastType } from '@/components/Toast/Toast';
+import { UserContext } from '@/context/UserContext/userContext';
 
 interface Props {
   showToast: (message: string, type: ToastType) => void;
@@ -21,7 +21,9 @@ export default function UserModal({ showToast }: Props) {
   const { isModalOpen, closeModal, selectedUser, isViewMode, createUser, updateUser } = useContext(UserContext)!;
 
 
-  const [formData, setFormData] = useState<Partial<CreateUserDto & UpdateUserDto & { confirmPassword: string }>>({
+  const [formData, setFormData] = useState<Partial<CreateUserDto & UpdateUserDto & { confirmPassword: string } & {
+    created_at: Date
+  } & { updated_at: Date }>>({
     firstName: '',
     lastName: '',
     username: '',
@@ -29,9 +31,12 @@ export default function UserModal({ showToast }: Props) {
     password: '',
     confirmPassword: '',
     gender: '',
-  })
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    role: '',
+  });
 
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (selectedUser) {
@@ -41,7 +46,8 @@ export default function UserModal({ showToast }: Props) {
         username: selectedUser.username,
         email: selectedUser.email,
         gender: selectedUser.gender,
-      })
+        role: selectedUser.role,
+      });
     } else {
       setFormData({
         firstName: '',
@@ -51,35 +57,36 @@ export default function UserModal({ showToast }: Props) {
         password: '',
         confirmPassword: '',
         gender: '',
-      })
+      });
     }
-  }, [selectedUser])
+  }, [selectedUser]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  const handleSelectChange = (value: string) => {
-    setFormData({ ...formData, gender: value })
+
+  const handleSelectChange =(value:string) =>{
+    setFormData({ ...formData, [value]: value });
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       if (selectedUser) {
         await updateUser(selectedUser.id, formData as UpdateUserDto);
-        showToast("Usuario actualizado exitosamente", ToastType.SUCCESS);
+        showToast('Usuario actualizado exitosamente', ToastType.SUCCESS);
       } else {
         await createUser(formData as CreateUserDto);
-        showToast("Usuario creado exitosamente", ToastType.SUCCESS);
+        showToast('Usuario creado exitosamente', ToastType.SUCCESS);
       }
       closeModal();
     } catch (error) {
-      showToast("Error al enviar los datos de la talla:" + error, ToastType.ERROR)
+      showToast('Error al enviar los datos de la talla:' + error, ToastType.ERROR);
     }
-  }
+  };
 
-  const toggleVisibility = () => setIsVisible(!isVisible)
+  const toggleVisibility = () => setIsVisible(!isVisible);
 
   return (
     <Modal
@@ -87,9 +94,9 @@ export default function UserModal({ showToast }: Props) {
       onClose={closeModal}
       scrollBehavior="inside"
       classNames={{
-        base: "max-w-xl",
-        header: "border-b border-gray-200 dark:border-gray-700",
-        footer: "border-t border-gray-200 dark:border-gray-700",
+        base: 'max-w-xl',
+        header: 'border-b border-gray-200 dark:border-gray-700',
+        footer: 'border-t border-gray-200 dark:border-gray-700',
       }}
     >
       <ModalContent>
@@ -111,7 +118,7 @@ export default function UserModal({ showToast }: Props) {
                 isRequired={!isViewMode}
                 isDisabled={isViewMode}
                 classNames={{
-                  label: "font-semibold",
+                  label: 'font-semibold',
                 }}
               />
               <Input
@@ -124,7 +131,7 @@ export default function UserModal({ showToast }: Props) {
                 isRequired={!isViewMode}
                 isDisabled={isViewMode}
                 classNames={{
-                  label: "font-semibold",
+                  label: 'font-semibold',
                 }}
               />
 
@@ -138,7 +145,7 @@ export default function UserModal({ showToast }: Props) {
                 isRequired={!isViewMode}
                 isDisabled={isViewMode}
                 classNames={{
-                  label: "font-semibold",
+                  label: 'font-semibold',
                 }}
               />
 
@@ -151,13 +158,31 @@ export default function UserModal({ showToast }: Props) {
                 isRequired={!isViewMode}
                 isDisabled={isViewMode}
                 classNames={{
-                  label: "font-semibold",
+                  label: 'font-semibold',
                 }}
               >
+
                 <SelectItem key="MALE" value="MALE">Masculino</SelectItem>
                 <SelectItem key="FEMALE" value="FEMALE">Femenino</SelectItem>
               </Select>
+              <Select
+                label="Rol"
+                labelPlacement="outside"
+                placeholder="Escoja el rol"
+                selectedKeys={formData.role ? [formData.role] : []}
+                onChange={(e) => handleSelectChange(e.target.value)}
+                isRequired={!isViewMode}
+                isDisabled={isViewMode}
+                classNames={{
+                  label: 'font-semibold',
+                }}
+              >
 
+                <SelectItem key="admin" value="admin">Administrador</SelectItem>
+                <SelectItem key="warehouse" value="warehouse">Almacenador</SelectItem>
+                <SelectItem key="sales" value="sales">Vendedor</SelectItem>
+                <SelectItem key="user" value="admin">Usuario</SelectItem>
+              </Select>
               <Input
                 label="Correo electronico"
                 labelPlacement="outside"
@@ -170,7 +195,7 @@ export default function UserModal({ showToast }: Props) {
                 isDisabled={isViewMode}
                 className="col-span-2"
                 classNames={{
-                  label: "font-semibold",
+                  label: 'font-semibold',
                 }}
               />
 
@@ -180,13 +205,13 @@ export default function UserModal({ showToast }: Props) {
                     label="Contraseña"
                     labelPlacement="outside"
                     name="password"
-                    type={isVisible ? "text" : "password"}
+                    type={isVisible ? 'text' : 'password'}
                     value={formData.password}
                     onChange={handleInputChange}
-                    placeholder={selectedUser ? "Escriba la nueva contraseña" : "Escriba la contraseña"}
+                    placeholder={selectedUser ? 'Escriba la nueva contraseña' : 'Escriba la contraseña'}
                     isRequired={!selectedUser}
                     classNames={{
-                      label: "font-semibold",
+                      label: 'font-semibold',
                     }}
                     endContent={
                       <button type="button" onClick={toggleVisibility} className="focus:outline-none">
@@ -198,13 +223,13 @@ export default function UserModal({ showToast }: Props) {
                     label="Verificar Contraseña"
                     labelPlacement="outside"
                     name="confirmPassword"
-                    type={isVisible ? "text" : "password"}
+                    type={isVisible ? 'text' : 'password'}
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     placeholder="Verifique la contraseña"
                     isRequired={!selectedUser}
                     classNames={{
-                      label: "font-semibold",
+                      label: 'font-semibold',
                     }}
                     endContent={
                       <button type="button" onClick={toggleVisibility} className="focus:outline-none">
@@ -220,21 +245,21 @@ export default function UserModal({ showToast }: Props) {
                   <Input
                     label="Fecha de creacion"
                     labelPlacement="outside"
-                    value={new Date(selectedUser.created).toLocaleString()}
+                    value={new Date(selectedUser.created_at).toLocaleString()}
                     isDisabled={isViewMode}
                     className="col-span-2"
                     classNames={{
-                      label: "font-semibold",
+                      label: 'font-semibold',
                     }}
                   />
                   <Input
                     label="Última actualización"
                     labelPlacement="outside"
-                    value={new Date(selectedUser.updated).toLocaleString()}
+                    value={new Date(selectedUser.updated_at).toLocaleString()}
                     isDisabled={isViewMode}
                     className="col-span-2"
                     classNames={{
-                      label: "font-semibold",
+                      label: 'font-semibold',
                     }}
                   />
                 </>
@@ -254,5 +279,5 @@ export default function UserModal({ showToast }: Props) {
         </form>
       </ModalContent>
     </Modal>
-  )
+  );
 }

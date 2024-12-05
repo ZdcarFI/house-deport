@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { Button, Input } from "@nextui-org/react";
-import Link from "next/link";
-import React, { useContext } from "react";
-import { ExportIcon } from "@/components/icons/accounts/export-icon";
-import { HouseIcon } from "@/components/icons/breadcrumb/house-icon";
+import { Button, Input } from '@nextui-org/react';
+import Link from 'next/link';
+import React, { useContext } from 'react';
+import { ExportIcon } from '@/components/icons/accounts/export-icon';
+import { HouseIcon } from '@/components/icons/breadcrumb/house-icon';
 
-import SizeTable from "@/components/aplication/sizes/SizeTable";
-import SizeModal from "@/components/aplication/sizes/SizeModal";
-import { SizeDto } from "@/services/Dto/SizeDto";
+import SizeTable from '@/components/aplication/sizes/SizeTable';
+import SizeModal from '@/components/aplication/sizes/SizeModal';
+import { SizeDto } from '@/services/Dto/SizeDto';
 
-import { SizeContext } from "@/context/SizeContext/sizeContext";
+import { SizeContext } from '@/context/SizeContext/sizeContext';
 import { SearchIcon } from 'lucide-react';
-import ConfirmDialog from "@/components/modal/ConfirmDialog";
-import { ToastContext } from "@/context/ToastContext/ToastContext";
-import { ToastType } from "@/components/Toast/Toast";
+import ConfirmDialog from '@/components/modal/ConfirmDialog';
+import { ToastContext } from '@/context/ToastContext/ToastContext';
+import { ToastType } from '@/components/Toast/Toast';
 
 export default function Sizes() {
   const {
@@ -22,18 +22,18 @@ export default function Sizes() {
     loading,
     error,
     deleteSize,
-    openModal
+    openModal,
   } = useContext(SizeContext)!;
 
   const { showToast } = useContext(ToastContext)!;
 
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
   const [selectedSizeId, setSelectedSizeId] = React.useState<number | null>(null);
 
   const filteredSizes = React.useMemo(() => {
     return sizes.filter(size =>
-      size.name.toLowerCase().includes(searchQuery.toLowerCase())
+      size.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [sizes, searchQuery]);
 
@@ -52,27 +52,29 @@ export default function Sizes() {
   const handleDelete = async (id: number) => {
     try {
       await deleteSize(id);
-      showToast("Talla eliminada exitosamente", ToastType.SUCCESS);
+      showToast('Talla eliminada exitosamente', ToastType.SUCCESS);
       setIsConfirmDialogOpen(false);
-    }
-    catch (error) {
-      showToast("Error:" + error, ToastType.ERROR);
+    } catch (error) {
+      showToast('Error:' + error, ToastType.ERROR);
     }
   };
 
   if (loading) {
     return <div>Loading...</div>;
   }
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
-  }
+  React.useEffect(() => {
+    if (error) {
+      showToast(error, ToastType.ERROR);
+    }
+  }, [error, showToast]);
+
 
   return (
     <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full flex flex-col gap-4">
       <ul className="flex">
         <li className="flex gap-2">
           <HouseIcon />
-          <Link href={"/"}>
+          <Link href={'/'}>
             <span>Inicio</span>
           </Link>
           <span> / </span>

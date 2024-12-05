@@ -220,11 +220,99 @@
 //   )
 // }
 
-import Dashboard from '@/components/aplication/dashboard'
-import React from 'react'
+// import Dashboard from '@/components/aplication/dashboard'
+// import React from 'react'
+//
+// export default function page() {
+//   return (
+//<Dashboard />
+//   )
+// }
 
-export default function page() {
+
+'use client';
+
+import React, { useState } from 'react';
+import { Card, CardBody, CardHeader } from '@nextui-org/react';
+import { ProductSalesPercentage } from '@/components/dashboard/ProductosVentas';
+import { OldProductsReport } from '@/components/dashboard/ProductosAntiguos';
+import { BenefitCostRatio } from '@/components/dashboard/Beneficio-Costo';
+import { LowStockNotification } from '@/components/dashboard/ProductStockBajo';
+import { DailySalesChart } from '@/components/dashboard/VentasDiarias';
+import { DateRangePicker } from '@/components/dashboard/RangoTiempo';
+import DashboardIndex from '@/components/aplication/dashboard';
+import { RecentSalesTable } from '@/components/aplication/dashboard/recent-sales-table';
+
+export default function Dashboard() {
+  const [dateRange, setDateRange] = useState({
+    start: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+    end: new Date(),
+  });
+
   return (
-    <Dashboard />
-  )
+    <div className="p-8 bg-background dark:bg-background text-foreground dark:text-foreground min-h-screen">
+      <h1 className="text-4xl font-bold mb-8 text-primary dark:text-primary">Dashboard</h1>
+      <DashboardIndex />
+      <div className="grid grid-cols-1  gap-8 mb-8">
+        <DateRangePicker onChange={setDateRange} />
+        <Card className="h-[400px] bg-card dark:bg-card text-card-foreground dark:text-card-foreground">
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Ventas Diarias y Mensuales</h4>
+          </CardHeader>
+          <CardBody>
+            <DailySalesChart dateRange={dateRange} />
+          </CardBody>
+        </Card>
+
+        <Card className="h-[400px] bg-card dark:bg-card text-card-foreground dark:text-card-foreground">
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Porcentaje de Ventas por Producto</h4>
+          </CardHeader>
+          <CardBody>
+            <ProductSalesPercentage />
+          </CardBody>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <Card className="bg-card dark:bg-card text-card-foreground dark:text-card-foreground">
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Productos en Tienda por más de 3 Años</h4>
+          </CardHeader>
+          <CardBody>
+            <OldProductsReport />
+          </CardBody>
+        </Card>
+
+        <Card className="bg-card dark:bg-card text-card-foreground dark:text-card-foreground">
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Relación Beneficio/Costo</h4>
+          </CardHeader>
+          <CardBody>
+            <BenefitCostRatio />
+          </CardBody>
+        </Card>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <Card className="bg-card dark:bg-card text-card-foreground dark:text-card-foreground">
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Notificaciones de Stock Bajo</h4>
+          </CardHeader>
+          <CardBody>
+            <LowStockNotification />
+          </CardBody>
+        </Card>
+
+        <Card className="h-[400px]">
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+            <h4 className="font-bold text-large">Ventas Recientes</h4>
+          </CardHeader>
+          <CardBody className="overflow-y-auto py-2">
+            <RecentSalesTable />
+          </CardBody>
+        </Card>
+      </div>
+
+    </div>
+  );
 }
