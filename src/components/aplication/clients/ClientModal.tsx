@@ -11,13 +11,6 @@ import { ClientContext } from '@/context/ClientContext/clientContext'
 import { UpdateClientDto } from '@/services/Client/dto/UpdateClientDto'
 import { CreateClientDto } from '@/services/Client/dto/CreateClientDto'
 
-interface ClientModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (formData: ClientDto) => void
-  client: ClientDto | null
-  isViewMode: boolean
-}
 interface Props {
   showToast: (message: string, type: ToastType) => void;
 }
@@ -34,7 +27,9 @@ export default function ClientModal({ showToast }: Props) {
     address: '',
     numberDocument: '',
     typeDocument: '',
-    createdAt: ""
+    createdAt: "",
+    created_at: new Date(),
+    updated_at: new Date()
   });
 
   useEffect(() => {
@@ -50,7 +45,9 @@ export default function ClientModal({ showToast }: Props) {
         address: '',
         numberDocument: '',
         typeDocument: '',
-        createdAt: ""
+        createdAt: "",
+        created_at: new Date(),
+        updated_at: new Date()
       })
     }
   }, [selectedClient])

@@ -36,7 +36,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
         }
         setLoading(false);
 
-    }, []);
+    }, [state.user]);
 
 
     const registerUser = async (user: CreateUserDto): Promise<void> => {
