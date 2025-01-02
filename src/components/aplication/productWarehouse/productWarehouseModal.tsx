@@ -40,7 +40,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
         initialData,
     } = useContext(ProductWarehouseContext)!;
 
-    const {products} = React.useContext(ProductContext)!;
+    const {getProducts, products} = React.useContext(ProductContext)!;
     const {warehouses} = React.useContext(WarehouseContext)!;
     const boolean = true;
     const [formData, setFormData] = useState<
@@ -262,6 +262,8 @@ export default function ProductWarehouseModal({showToast}: Props) {
             return;
         }
 
+        await getProducts()
+
         try {
             if (selectedProductWarehouse) {
                 await updateProductWarehouse(selectedProductWarehouse.id, formData as UpdateProductWarehouseDto);
@@ -274,6 +276,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
         } catch (error) {
             showToast("Error submitting product warehouse data: " + error, ToastType.ERROR);
         }
+
     };
 
     return (

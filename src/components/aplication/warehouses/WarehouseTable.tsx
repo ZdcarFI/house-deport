@@ -29,9 +29,9 @@ export default function WarehouseTable({warehouses, onView, onEdit, onDelete}: W
 
                         >
                             <CardBody className="p-4 relative">
-                                <div className="flex items-center justify-between bg-gray-100 p-2 rounded-md">
+                                <div className="flex items-center justify-between  p-2 rounded-md">
                                     <div
-                                        className="flex-grow bg-gray-200 text-white p-2 rounded-md"
+                                        className="flex-grow  text-white p-2 rounded-md"
                                         style={{
                                             backgroundColor: warehouse.color,
                                             textAlign: "left",

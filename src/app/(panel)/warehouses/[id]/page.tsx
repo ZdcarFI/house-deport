@@ -2,9 +2,9 @@
 
 import {useParams} from "next/navigation";
 import Link from "next/link";
-import {useContext, useState} from "react";
+import React, {useContext, useState} from "react";
 import {ProductBasicWithLocationDto, WarehouseDto} from "@/services/Dto/WarehouseDto";
-import {Card, CardBody, CardHeader, Chip, Button, Progress} from "@nextui-org/react";
+import {Card, CardBody, CardHeader, Chip, Button, Progress, Skeleton} from "@nextui-org/react";
 import WarehouseMatrix, {WarehouseProduct} from "@/components/aplication/warehouses/WarehousesGrid";
 import ProductDetails from "@/components/aplication/products/ProductsDetails";
 import {ArrowLeft, Box, CheckCircle, AlertTriangle} from 'lucide-react';
@@ -14,6 +14,7 @@ import {ToastType} from "@/components/Toast/Toast";
 import ProductWarehouseModal from "@/components/aplication/productWarehouse/productWarehouseModal";
 import ConfirmDialog from "@/components/modal/ConfirmDialog";
 import {ProductWarehouseDto} from "@/services/Dto/ProductWarehouseDto";
+import {WarehouseContext} from "@/context/WareHouseContext/warehouseContext";
 
 const WarehouseDetails = () => {
     const {id} = useParams();
@@ -21,20 +22,37 @@ const WarehouseDetails = () => {
         openModal,
         deleteProductWarehouse,
         productWarehouses,
-
+        getProductWarehouse
     } = useContext(ProductWarehouseContext)!;
     const {showToast} = useContext(ToastContext)!;
-    const [warehouse] = useState<WarehouseDto | null>(null);
+    const [warehouse, setWarehouse] = useState<WarehouseDto | null>(null);
     const [selectedProduct, setSelectedProduct] = useState<ProductBasicWithLocationDto | null>(null);
     const [selectedCell, setSelectedCell] = useState<{ row: number, column: number } | null>(null);
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
     const [selectedProductWarehouseId, setSelectedProductWarehouseId] = useState<number | null>(null);
-    const [selectedProductWarehouseSelect, setSelectedProductWarehouseSelect] = useState< ProductWarehouseDto | null | Partial<ProductWarehouseDto>>(null);
+    const [selectedProductWarehouseSelect, setSelectedProductWarehouseSelect] = useState<ProductWarehouseDto | null | Partial<ProductWarehouseDto>>(null);
+    const { getWarehouse, loading, error } = useContext(WarehouseContext)!;
 
     const [matrixKey, setMatrixKey] = useState(0);
 
+    React.useEffect(() => {
+        if (!id) return;
 
-    const handleCellClick = (product:  WarehouseProduct | undefined, row: number, column: number) => {
+        const fetchWarehouseData = async () => {
+            try {
+                const warehouseData = await getWarehouse(Number(id));
+                setWarehouse(warehouseData);
+                await getProductWarehouse(Number(id));
+            } catch (e) {
+                console.error("Error fetching warehouse:", e);
+            }
+        };
+
+        fetchWarehouseData();
+    }, [id, getWarehouse, getProductWarehouse]);
+
+
+    const handleCellClick = (product: WarehouseProduct | undefined, row: number, column: number) => {
         if (product) {
             const productWarehouse = productWarehouses.find(pw =>
                 pw.product.id === product.id &&
@@ -48,7 +66,7 @@ const WarehouseDetails = () => {
                 setSelectedCell({row, column});
                 setSelectedProductWarehouseId(productWarehouse.id);
 
-                const productWarehouseSelect:Partial<ProductWarehouseDto>= {
+                const productWarehouseSelect: Partial<ProductWarehouseDto> = {
                     id: productWarehouse.id,
                     productId: product.id,
                     warehouseId: Number(id),
@@ -132,6 +150,38 @@ const WarehouseDetails = () => {
     }
 
     const usagePercentage = (warehouse.spacesUsed / warehouse.spaces) * 100;
+
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-8 space-y-4">
+                <Skeleton className="h-8 w-40 rounded-lg" />
+                <Card>
+                    <CardBody className="space-y-3">
+                        <Skeleton className="h-6 w-3/4 rounded-lg" />
+                        <Skeleton className="h-4 w-1/2 rounded-lg" />
+                        <Skeleton className="h-4 w-1/3 rounded-lg" />
+                    </CardBody>
+                </Card>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <Card className="container mx-auto px-4 py-8">
+                <CardBody className="flex items-center justify-center text-center">
+                    <AlertTriangle className="text-danger h-12 w-12 mb-4" />
+                    <h2 className="text-xl font-bold">Error al cargar los datos</h2>
+                    <p className="text-gray-500">{error}</p>
+                    <Link href="/warehouses">
+                        <Button color="primary" variant="shadow" className="mt-4">
+                            Volver a Almacenes
+                        </Button>
+                    </Link>
+                </CardBody>
+            </Card>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4 py-8 space-y-6">

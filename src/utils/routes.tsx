@@ -1,11 +1,11 @@
 import {
-    BookOpen,
+    // BookOpen,
     Box, Home,
     Layers,
     ListOrdered,
     PlusSquare,
     Ruler,
-    Settings,
+    // Settings,
     Tag,
     UserPlus, Users,
     Warehouse,
@@ -44,7 +44,7 @@ export const routes = [
         title: 'Gestión de Usuarios',
         routes: [{
             path: '/users',
-            title: 'Listado de Usuariosn',
+            title: 'Listado de Usuarios',
             icon: <Users strokeWidth={1.5} size={24}/>,
             roles: Roles.Users,
         },
@@ -125,30 +125,30 @@ export const routes = [
         },
         ],
     },
-    {
-        title: 'Configuración',
-        routes: [{
-            path: '/view',
-            title: 'Vista de Datos',
-            icon: <BookOpen strokeWidth={1.5} size={24}/>,
-            roles: Roles.View,
-        },
-            {
-                path: '/settings',
-                title: 'Configuraciones',
-                icon: <Settings strokeWidth={1.5} size={24}/>,
-                roles: Roles.View,
-            },
-        ],
-    },
-    {
-        title: 'Informacion',
-        routes: [{
-            path: '/changelog',
-            title: 'Registro de Cambios',
-            icon: <BookOpen strokeWidth={1.5} size={24}/>,
-            roles: Roles.View,
-        },
-        ],
-    },
+    // {
+    //     title: 'Configuración',
+    //     routes: [{
+    //         path: '/view',
+    //         title: 'Vista de Datos',
+    //         icon: <BookOpen strokeWidth={1.5} size={24}/>,
+    //         roles: Roles.View,
+    //     },
+    //         {
+    //             path: '/settings',
+    //             title: 'Configuraciones',
+    //             icon: <Settings strokeWidth={1.5} size={24}/>,
+    //             roles: Roles.View,
+    //         },
+    //     ],
+    // },
+    // {
+    //     title: 'Informacion',
+    //     routes: [{
+    //         path: '/changelog',
+    //         title: 'Registro de Cambios',
+    //         icon: <BookOpen strokeWidth={1.5} size={24}/>,
+    //         roles: Roles.View,
+    //     },
+    //     ],
+    // },
 ];

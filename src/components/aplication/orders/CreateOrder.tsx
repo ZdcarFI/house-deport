@@ -57,7 +57,7 @@ const initialCart: DataCartDto = {
 }
 
 export default function CreateOrderPage() {
-    const {products, loading} = React.useContext(ProductContext)!
+    const {products, loading, getProducts} = React.useContext(ProductContext)!
     const {
         showToast
     } = React.useContext(ToastContext)!
@@ -66,6 +66,7 @@ export default function CreateOrderPage() {
         openModal
     } = React.useContext(ClientContext)!
     const {createOrder, errorOrder} = React.useContext(OrderContext)!
+
 
     const router = useRouter()
 
@@ -151,6 +152,7 @@ export default function CreateOrderPage() {
                 showToast(errorOrder, ToastType.ERROR);
             });
         }
+        await getProducts()
 
     }
 

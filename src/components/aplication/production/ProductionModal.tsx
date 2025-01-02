@@ -34,7 +34,7 @@ export default function ProductionModal({showToast}: Props) {
         updateProduction,
     } = useContext(ProductionContext)!;
 
-    const {products} = useContext(ProductContext)!;
+    const {products, getProducts} = useContext(ProductContext)!;
 
     const [formData, setFormData] = useState<ProductionFormData>({
         quantity: 0,
@@ -86,6 +86,7 @@ export default function ProductionModal({showToast}: Props) {
                     user_receive_orderId: userLog?.id || formData.user_receive_orderId
                 };
                 await updateProduction(selectedProduction.id, updateData);
+                await getProducts()
                 showToast("Production updated successfully", ToastType.SUCCESS);
             } else {
                 const createData: CreateProductionDto = {
