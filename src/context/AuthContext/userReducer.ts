@@ -1,4 +1,4 @@
-import {UserDto} from "@/services/Dto/UserDto";
+import {UserDto, UserRol} from "@/services/Dto/UserDto";
 
 export const userInitialState: UserDto = {
     id: 0,
@@ -6,7 +6,7 @@ export const userInitialState: UserDto = {
     lastName: '',
     username: '',
     email: '',
-    role: '',
+    role: UserRol.USER,
     gender: '',
 };
 

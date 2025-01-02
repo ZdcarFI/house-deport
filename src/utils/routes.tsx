@@ -19,6 +19,7 @@ export const Roles = {
     Products: ['admin', 'warehouse', 'sales'],
     Users: ['admin'],
     Clients: ['admin', 'sales'],
+    Production: ['admin', 'warehouse'],
     Orders: ['admin', 'sales'],
     Warehouses: ['admin', 'warehouse'],
     WarehouseProducts: ['admin', 'warehouse'],
@@ -100,7 +101,7 @@ export const routes = [
             roles: Roles.Categories,
         },
             {
-                path: '/Sizes',
+                path: '/sizes',
                 title: 'Tallas',
                 icon: <Ruler strokeWidth={1.5} size={24}/>,
                 roles: Roles.Sizes,
@@ -112,6 +113,16 @@ export const routes = [
                 roles: Roles.Products,
             },
 
+        ],
+    },
+    {
+        title: 'Gestión de Produccion',
+        routes: [{
+            path: '/production',
+            title: 'Listado de Produccion',
+            icon: <Box strokeWidth={1.5} size={24}/>,
+            roles: Roles.Clients,
+        },
         ],
     },
     {

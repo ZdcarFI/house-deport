@@ -49,6 +49,8 @@ export default function UserTable({users, onEdit, onDelete, onView}: UserTablePr
                         Activo
                     </Chip>
                 )
+            case 'rol':
+                return user.role
             case 'lastSession':
                 return user.lastSession ? new Date(user.lastSession).toLocaleDateString() : 'No disponible'
             case 'created_at':
@@ -87,6 +89,7 @@ export default function UserTable({users, onEdit, onDelete, onView}: UserTablePr
                 <TableColumn key="username">Nombre de usuario</TableColumn>
                 <TableColumn key="email">Correo</TableColumn>
                 <TableColumn key="status">Estado</TableColumn>
+                <TableColumn key="status">Rol</TableColumn>
                 <TableColumn key="lastSession">Última sesión</TableColumn>
                 <TableColumn>Fecha de creación</TableColumn>
                 <TableColumn>Fecha de actualización</TableColumn>
@@ -99,6 +102,7 @@ export default function UserTable({users, onEdit, onDelete, onView}: UserTablePr
                         <TableCell>{renderCell(user, 'username')}</TableCell>
                         <TableCell>{renderCell(user, 'email')}</TableCell>
                         <TableCell>{renderCell(user, 'status')}</TableCell>
+                        <TableCell>{renderCell(user, 'rol')}</TableCell>
                         <TableCell>{renderCell(user, 'lastSession')}</TableCell>
                         <TableCell>{renderCell(user, 'created_at')}</TableCell>
                         <TableCell>{renderCell(user, 'updated_at')}</TableCell>

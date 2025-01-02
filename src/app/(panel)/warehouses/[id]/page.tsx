@@ -1,31 +1,30 @@
 'use client'
 
-import { WarehouseContext } from "@/context/WareHouseContext/warehouseContext";
-import { useParams } from "next/navigation";
+import {WarehouseContext} from "@/context/WareHouseContext/warehouseContext";
+import {useParams} from "next/navigation";
 import Link from "next/link";
-import { useContext, useEffect, useState } from "react";
-import { WarehouseDto } from "@/services/Dto/WarehouseDto";
-import { Card, CardBody, CardHeader, Chip, Button, Progress, Skeleton } from "@nextui-org/react";
+import {useContext, useEffect, useState} from "react";
+import {WarehouseDto} from "@/services/Dto/WarehouseDto";
+import {Card, CardBody, CardHeader, Chip, Button, Progress, Skeleton} from "@nextui-org/react";
 import WarehouseMatrix from "@/components/aplication/warehouses/WarehousesGrid";
 import ProductDetails from "@/components/aplication/products/ProductsDetails";
-import { ArrowLeft, Box, CheckCircle, AlertTriangle } from 'lucide-react';
-import { ProductWarehouseContext } from "@/context/ProductWarehouseContext/productWarehouseContext";
-import { ToastContext } from "@/context/ToastContext/ToastContext";
-import { ToastType } from "@/components/Toast/Toast";
+import {ArrowLeft, Box, CheckCircle, AlertTriangle} from 'lucide-react';
+import {ProductWarehouseContext} from "@/context/ProductWarehouseContext/productWarehouseContext";
+import {ToastContext} from "@/context/ToastContext/ToastContext";
+import {ToastType} from "@/components/Toast/Toast";
 import ProductWarehouseModal from "@/components/aplication/productWarehouse/productWarehouseModal";
 import ConfirmDialog from "@/components/modal/ConfirmDialog";
-import { ProductWarehouseDto } from "@/services/Dto/ProductWarehouseDto";
+import {ProductWarehouseDto} from "@/services/Dto/ProductWarehouseDto";
 
 const WarehouseDetails = () => {
-    const { id } = useParams();
-    const { getWarehouse, loading, error } = useContext(WarehouseContext)!;
+    const {id} = useParams();
     const {
         openModal,
         deleteProductWarehouse,
         productWarehouses,
-        getProductWarehouse
+
     } = useContext(ProductWarehouseContext)!;
-    const { showToast } = useContext(ToastContext)!;
+    const {showToast} = useContext(ToastContext)!;
     const [warehouse, setWarehouse] = useState<WarehouseDto | null>(null);
     const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
     const [selectedCell, setSelectedCell] = useState<{ row: number, column: number } | null>(null);
@@ -35,21 +34,6 @@ const WarehouseDetails = () => {
 
     const [matrixKey, setMatrixKey] = useState(0);
 
-    useEffect(() => {
-        if (!id) return;
-
-        const fetchWarehouseData = async () => {
-            try {
-                const warehouseData = await getWarehouse(Number(id));
-                setWarehouse(warehouseData);
-                await getProductWarehouse(Number(id));
-            } catch (e) {
-                console.error("Error fetching warehouse:", e);
-            }
-        };
-
-        fetchWarehouseData();
-    }, [id, getWarehouse, getProductWarehouse]);
 
     const handleCellClick = (product: any | null, row: number, column: number) => {
         if (product) {
@@ -62,7 +46,7 @@ const WarehouseDetails = () => {
 
             if (productWarehouse) {
                 setSelectedProduct(product);
-                setSelectedCell({ row, column });
+                setSelectedCell({row, column});
                 setSelectedProductWarehouseId(productWarehouse.id);
 
                 const productWarehouseSelect = {
@@ -81,7 +65,7 @@ const WarehouseDetails = () => {
             }
         } else {
             setSelectedProduct(null);
-            setSelectedCell({ row, column });
+            setSelectedCell({row, column});
             setSelectedProductWarehouseId(null);
             setSelectedProductWarehouseSelect(null);
         }
@@ -130,43 +114,12 @@ const WarehouseDetails = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="container mx-auto px-4 py-8 space-y-4">
-                <Skeleton className="h-8 w-40 rounded-lg" />
-                <Card>
-                    <CardBody className="space-y-3">
-                        <Skeleton className="h-6 w-3/4 rounded-lg" />
-                        <Skeleton className="h-4 w-1/2 rounded-lg" />
-                        <Skeleton className="h-4 w-1/3 rounded-lg" />
-                    </CardBody>
-                </Card>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <Card className="container mx-auto px-4 py-8">
-                <CardBody className="flex items-center justify-center text-center">
-                    <AlertTriangle className="text-danger h-12 w-12 mb-4" />
-                    <h2 className="text-xl font-bold">Error al cargar los datos</h2>
-                    <p className="text-gray-500">{error}</p>
-                    <Link href="/warehouses">
-                        <Button color="primary" variant="shadow" className="mt-4">
-                            Volver a Almacenes
-                        </Button>
-                    </Link>
-                </CardBody>
-            </Card>
-        );
-    }
 
     if (!warehouse) {
         return (
             <Card className="container mx-auto px-4 py-8">
                 <CardBody className="flex items-center justify-center text-center">
-                    <Box className="text-warning h-12 w-12 mb-4" />
+                    <Box className="text-warning h-12 w-12 mb-4"/>
                     <h2 className="text-xl font-bold">Almacén no encontrado</h2>
                     <p className="text-gray-500">No se encontró información del almacén solicitado.</p>
                     <Link href="/warehouses">
@@ -188,7 +141,7 @@ const WarehouseDetails = () => {
                     <Button
                         color="primary"
                         variant="light"
-                        startContent={<ArrowLeft size={20} />}
+                        startContent={<ArrowLeft size={20}/>}
                     >
                         Volver a Almacenes
                     </Button>
@@ -196,7 +149,8 @@ const WarehouseDetails = () => {
                 <Chip
                     color={warehouse.status === 'available' ? 'success' : 'warning'}
                     variant="flat"
-                    startContent={warehouse.status === 'available' ? <CheckCircle size={16} /> : <AlertTriangle size={16} />}
+                    startContent={warehouse.status === 'available' ? <CheckCircle size={16}/> :
+                        <AlertTriangle size={16}/>}
                 >
                     {warehouse.status === 'available' ? 'Disponible' : 'Ocupado'}
                 </Chip>
@@ -265,9 +219,10 @@ const WarehouseDetails = () => {
                     ) : selectedCell ? (
                         <Card>
                             <CardBody className="flex flex-col items-center justify-center text-center p-8">
-                                <Box className="text-gray-400 h-12 w-12 mb-4" />
+                                <Box className="text-gray-400 h-12 w-12 mb-4"/>
                                 <p className="text-gray-500 mb-4">
-                                    Celda seleccionada: Fila {numberToLetter(selectedCell.row)}, Columna {selectedCell.column}
+                                    Celda seleccionada: Fila {numberToLetter(selectedCell.row)},
+                                    Columna {selectedCell.column}
                                 </p>
                                 <Button color="primary" onPress={handleAddProduct}>
                                     Agregar Producto
@@ -277,7 +232,7 @@ const WarehouseDetails = () => {
                     ) : (
                         <Card>
                             <CardBody className="flex items-center justify-center text-center p-8">
-                                <Box className="text-gray-400 h-12 w-12 mb-4" />
+                                <Box className="text-gray-400 h-12 w-12 mb-4"/>
                                 <p className="text-gray-500">
                                     Selecciona una ubicación para ver los detalles del producto
                                 </p>

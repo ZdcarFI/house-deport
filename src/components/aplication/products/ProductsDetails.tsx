@@ -12,7 +12,6 @@ interface ProductDetailsProps {
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDeleteProduct, productWarehouseSelect }) => {
 
-    console.log(productWarehouseSelect)
     return (
         <Card className="max-w-md">
             <CardHeader className="flex flex-col items-start gap-2 px-4 pb-0 pt-4">

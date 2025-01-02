@@ -16,9 +16,9 @@ import ConfirmDialog from '@/components/modal/ConfirmDialog';
 import CategoryModal from '../categories/CategoryModal';
 import SizeModal from '../sizes/SizeModal';
 import WarehouseModal from '../warehouses/WarehouseModal';
-import StockIncrementModal from './StockIncrement';
 import ProductWarehouseModal from '../productWarehouse/productWarehouseModal';
 import OrdersTableSkeleton from "@/components/skeletons/TableSkeleton";
+import ProductionModal from "@/components/aplication/production/ProductionModal";
 
 export default function Products() {
     const {
@@ -177,14 +177,14 @@ export default function Products() {
                                 setIsConfirmDialogOpen(true);
                             }}
                             onView={handleView}
-                            onIncrementStock={handleIncrementStock}
+
                         />
                     )}
                     <ProductModal showToast={showToast}/>
                     <CategoryModal showToast={showToast}/>
                     <SizeModal showToast={showToast}/>
                     <WarehouseModal showToast={showToast}/>
-                    <StockIncrementModal showToast={showToast}/>
+                    <ProductionModal showToast={showToast}/>
                     <ProductWarehouseModal showToast={showToast}/>
                     <ConfirmDialog
                         title="¿Estás seguro de que deseas eliminar este producto?"

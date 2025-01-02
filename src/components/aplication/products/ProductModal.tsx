@@ -1,19 +1,19 @@
 'use client'
 
-import React, { useState, useEffect, useContext } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal';
-import { Button } from '@nextui-org/button';
-import { Input } from '@nextui-org/input';
-import { Select, SelectItem } from '@nextui-org/select';
-import { Card, CardBody } from "@nextui-org/card";
-import { CreateProductDto, LocationDto } from '@/services/Product/dto/CreateProductDto';
-import { UpdateProductDto } from '@/services/Product/dto/UpdateProductDto';
-import { CategoryContext } from "@/context/CategoryContext/categoryContext";
-import { ToastType } from '@/components/Toast/Toast';
-import { ProductContext } from '@/context/ProductContext/productContext';
-import { WarehouseContext } from '@/context/WareHouseContext/warehouseContext';
-import { Archive, Edit, Eye, Package, Plus, Trash2 } from 'lucide-react';
-import { Badge, Divider } from '@nextui-org/react';
+import React, {useState, useEffect, useContext} from 'react';
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@nextui-org/modal';
+import {Button} from '@nextui-org/button';
+import {Input} from '@nextui-org/input';
+import {Select, SelectItem} from '@nextui-org/select';
+import {Card, CardBody} from "@nextui-org/card";
+import {CreateProductDto, LocationDto} from '@/services/Product/dto/CreateProductDto';
+import {UpdateProductDto} from '@/services/Product/dto/UpdateProductDto';
+import {CategoryContext} from "@/context/CategoryContext/categoryContext";
+import {ToastType} from '@/components/Toast/Toast';
+import {ProductContext} from '@/context/ProductContext/productContext';
+import {WarehouseContext} from '@/context/WareHouseContext/warehouseContext';
+import {Archive, Edit, Eye, Package, Plus, Trash2} from 'lucide-react';
+import {Badge, Divider} from '@nextui-org/react';
 import WarehouseSelector from '../warehouses/WarehouseSelector';
 
 interface Props {
@@ -28,9 +28,17 @@ interface FormErrors {
     location?: string;
 }
 
-export default function ProductModal({ showToast }: Props) {
-    const { isModalOpen, closeModal, selectedProduct, isViewMode, createProduct, updateProduct, products } = useContext(ProductContext)!;
-    let isWarehouseDisabled = false;
+export default function ProductModal({showToast}: Props) {
+    const {
+        isModalOpen,
+        closeModal,
+        selectedProduct,
+        isViewMode,
+        createProduct,
+        updateProduct,
+        products
+    } = useContext(ProductContext)!;
+    const isWarehouseDisabled = false;
     const [formData, setFormData] = useState<CreateProductDto & {
         stockStore: number,
         stockInventory: number,
@@ -134,7 +142,7 @@ export default function ProductModal({ showToast }: Props) {
         }
 
         setErrors(prev => {
-            const newErrors = { ...prev };
+            const newErrors = {...prev};
             delete newErrors.name;
             delete newErrors.code;
             delete newErrors.category;
@@ -145,7 +153,7 @@ export default function ProductModal({ showToast }: Props) {
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         const newFormData = {
             ...formData,
             [name]: name === 'price' || name === 'stockInventory' || name === 'stockStore' ? parseFloat(value) : value
@@ -159,12 +167,12 @@ export default function ProductModal({ showToast }: Props) {
     };
 
     const handleSelectChange = (name: string) => (value: string) => {
-        const newFormData = { ...formData, [name]: parseInt(value, 10) };
+        const newFormData = {...formData, [name]: parseInt(value, 10)};
         setFormData(newFormData);
 
         // Check for duplicates when category or size changes
         if (['categoryId', 'sizeId'].includes(name)) {
-            const updatedFormData = { ...formData, [name]: parseInt(value, 10) };
+            const updatedFormData = {...formData, [name]: parseInt(value, 10)};
             const duplicate = products.find(p =>
                 p.name.toLowerCase() === updatedFormData.name.toLowerCase() &&
                 p.code.toLowerCase() === updatedFormData.code.toLowerCase() &&
@@ -184,7 +192,7 @@ export default function ProductModal({ showToast }: Props) {
                 }));
             } else {
                 setErrors(prev => {
-                    const newErrors = { ...prev };
+                    const newErrors = {...prev};
                     delete newErrors.name;
                     delete newErrors.code;
                     delete newErrors.category;
@@ -196,7 +204,7 @@ export default function ProductModal({ showToast }: Props) {
     };
 
     const handleLocationInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setCurrentLocation({
             ...currentLocation,
             [name]: parseInt(value, 10)
@@ -270,7 +278,6 @@ export default function ProductModal({ showToast }: Props) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-
         try {
             const dataToSend = {
                 ...formData,
@@ -279,14 +286,11 @@ export default function ProductModal({ showToast }: Props) {
 
             if (selectedProduct) {
                 const updateData: UpdateProductDto = {
-                    ...dataToSend,
                     name: dataToSend.name,
                     code: dataToSend.code,
+                    price: dataToSend.price,
                     categoryId: dataToSend.categoryId,
                     sizeId: dataToSend.sizeId,
-                    stockInventory: dataToSend.stockInventory,
-                    stockStore: dataToSend.stockStore,
-                    location: dataToSend.location,
                 };
                 await updateProduct(selectedProduct.id, updateData);
                 showToast("Producto actualizado exitosamente", ToastType.SUCCESS);
@@ -319,7 +323,7 @@ export default function ProductModal({ showToast }: Props) {
     const renderBasicInfo = () => (
         <div className="space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Package className="w-5 h-5" />
+                <Package className="w-5 h-5"/>
                 Información básica
             </h3>
             <div className="space-y-4">
@@ -404,7 +408,7 @@ export default function ProductModal({ showToast }: Props) {
                         color="primary"
                         variant="flat"
                         onPress={handleEditCategory}
-                        startContent={<Edit className="w-4 h-4" />}
+                        startContent={<Edit className="w-4 h-4"/>}
                         className="w-full"
                     >
                         {formData.categoryId ? "Editar categoría" : "Nueva categoría"}
@@ -425,7 +429,7 @@ export default function ProductModal({ showToast }: Props) {
                     value={formData.stockInventory ? formData.stockInventory.toString() : ''}
                     onChange={handleInputChange}
                     variant="bordered"
-                    isRequired
+                    isDisabled={isViewMode}
                 />
                 <Input
                     label="Stock en tienda"
@@ -434,7 +438,7 @@ export default function ProductModal({ showToast }: Props) {
                     value={formData.stockStore ? formData.stockStore.toString() : ''}
                     onChange={handleInputChange}
                     variant="bordered"
-                    isRequired
+                    isDisabled={isViewMode}
                 />
             </div>
         </div>
@@ -443,14 +447,14 @@ export default function ProductModal({ showToast }: Props) {
     const renderLocations = () => (
         <div className="space-y-4">
             <div className="flex items-center gap-2">
-                <Archive className="w-5 h-5" />
+                <Archive className="w-5 h-5"/>
                 <h3 className="text-lg font-semibold">Ubicaciones en Almacén
                     <span className='font-extralight text-xs'>{'  '}Esto lo puede hacer o mas adelante</span>
                 </h3>
             </div>
             <WarehouseSelector
                 onLocationSelect={handleLocationSelect}
-                isWarehouseDisabled={isWarehouseDisabled} />
+                isWarehouseDisabled={isWarehouseDisabled}/>
             <div className="grid grid-cols-2 gap-4">
                 <Input
                     label="Fila"
@@ -485,7 +489,7 @@ export default function ProductModal({ showToast }: Props) {
             <Button
                 color="primary"
                 onPress={addLocation}
-                startContent={<Plus className="w-4 h-4" />}
+                startContent={<Plus className="w-4 h-4"/>}
                 className="w-full"
             >
                 Agregar Ubicación
@@ -516,7 +520,7 @@ export default function ProductModal({ showToast }: Props) {
                                             size="sm"
                                             onPress={() => removeLocation(index)}
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Trash2 className="w-4 h-4"/>
                                         </Button>
                                     </div>
                                 </CardBody>
@@ -547,11 +551,11 @@ export default function ProductModal({ showToast }: Props) {
                         <ModalHeader className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                                 {isViewMode ? (
-                                    <Eye className="w-6 h-6 text-primary" />
+                                    <Eye className="w-6 h-6 text-primary"/>
                                 ) : selectedProduct ? (
-                                    <Edit className="w-6 h-6 text-primary" />
+                                    <Edit className="w-6 h-6 text-primary"/>
                                 ) : (
-                                    <Plus className="w-6 h-6 text-primary" />
+                                    <Plus className="w-6 h-6 text-primary"/>
                                 )}
                                 <span className="text-xl font-semibold">
                                     {isViewMode ? 'Detalles del Producto' : selectedProduct ? 'Editar Producto' : 'Nuevo Producto'}
@@ -563,37 +567,72 @@ export default function ProductModal({ showToast }: Props) {
                             <div className="h-full grid grid-cols-2 gap-6">
                                 <div className="overflow-y-auto pr-4 space-y-6">
                                     {renderBasicInfo()}
-                                    <Divider />
+                                    <Divider/>
                                     {renderCategorization()}
                                 </div>
                                 <div className="overflow-y-auto pr-4">
-                                    {isViewMode ? (
+                                    {isViewMode && (
                                         <>
                                             {renderInventoryInfo()}
-                                            <div className="mt-4">
-                                                <h4 className="text-medium font-semibold">Ubicaciones agregadas:</h4>
-                                                {formData.location.map((loc, index) => (
-                                                    <Card key={index} className="bg-default-50 mt-2">
-                                                        <CardBody className="py-2">
-                                                            <div className="flex items-center gap-2 flex-wrap">
-                                                                <Badge color="primary" variant="flat">
-                                                                    {warehouses.find(w => w.id === loc.warehouseId)?.name}
-                                                                </Badge>
-                                                                <span className="text-small">
-                                                                    Fila: {numberToLetter(loc.row)}, Columna: {loc.column}
-                                                                </span>
-                                                                <Badge color="secondary" variant="flat">
-                                                                    Cantidad: {loc.quantity}
-                                                                </Badge>
-                                                            </div>
-                                                        </CardBody>
-                                                    </Card>
-                                                ))}
+                                            <div className="mt-6">
+                                                <h4 className="text-lg font-bold text-gray-800 dark:text-gray-200">Ubicaciones
+                                                    agregadas:</h4>
+                                                <div className="grid grid-cols-1 gap-4 mt-4">
+                                                    {formData.location.map((loc, index) => (
+                                                        <Card
+                                                            key={index}
+                                                            className="border border-gray-200 dark:border-gray-700 shadow-md"
+                                                        >
+                                                            <CardBody className="py-4 px-6">
+                                                                <div className="flex flex-col gap-3">
+                                                                    {/* Almacén */}
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Badge
+                                                                            color="primary"
+                                                                            variant="flat"
+                                                                            className="text-sm px-3 py-1 dark:bg-blue-800 dark:text-blue-200"
+                                                                        >
+                                                                            {warehouses.find(w => w.id === loc.warehouseId)?.name || 'Almacén desconocido'}
+                                                                        </Badge>
+                                                                    </div>
+
+                                                                    {/* Ubicación */}
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span
+                                                                            className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                               Fila: <span className="font-semibold">{numberToLetter(loc.row)}</span>,
+                                           Columna: <span className="font-semibold">{loc.column}</span>
+                                                                        </span>
+                                                                        <span
+                                                                            className="inline-flex items-center gap-1 text-gray-500 text-sm font-medium dark:text-gray-400">
+                                                                            <i className="fas fa-map-marker-alt text-primary dark:text-blue-400"></i> Ubicación precisa
+                                                                        </span>
+                                                                    </div>
+
+                                                                    {/* Cantidad */}
+                                                                    <div className="flex items-center justify-between">
+                                                                        <Badge
+                                                                            color="secondary"
+                                                                            variant="flat"
+                                                                            className="text-sm px-3 py-1 dark:bg-purple-800 dark:text-purple-200"
+                                                                        >
+                                                                            Cantidad: {loc.quantity}
+                                                                        </Badge>
+                                                                        <span
+                                                                            className="inline-flex items-center gap-1 text-gray-500 text-sm font-medium dark:text-gray-400">
+                                                 <i className="fas fa-box text-purple-400"></i> Inventario
+                                                   </span>
+                                                                    </div>
+                                                                </div>
+                                                            </CardBody>
+                                                        </Card>
+                                                    ))}
+                                                </div>
                                             </div>
+
                                         </>
-                                    ) : (
-                                        renderLocations()
                                     )}
+                                    {!isViewMode && !selectedProduct && renderLocations()}
                                 </div>
                             </div>
                         </ModalBody>
@@ -610,7 +649,8 @@ export default function ProductModal({ showToast }: Props) {
                                 <Button
                                     color="primary"
                                     type="submit"
-                                    startContent={selectedProduct ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                    startContent={selectedProduct ? <Edit className="w-4 h-4"/> :
+                                        <Plus className="w-4 h-4"/>}
                                 >
                                     {selectedProduct ? 'Actualizar' : 'Crear'}
                                 </Button>

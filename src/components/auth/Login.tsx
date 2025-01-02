@@ -34,12 +34,13 @@ export default function LoginForm() {
         setErrorForm('');
 
         if (!validateForm()) return;
-        await loginUser(email, password);
-        if(error !== ''){
+
+        try {
+            await loginUser(email, password);
+            router.push('/dashboard');
+        } catch (error) {
             setErrorForm('Credenciales incorrectas');
-            return;
         }
-        router.push('/dashboard');
     };
 
     return (

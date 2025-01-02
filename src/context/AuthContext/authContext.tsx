@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, {createContext, useReducer, useState, useMemo, useEffect} from "react";
 import {UserActionType, userInitialState, UserState} from "./userReducer";
@@ -12,75 +12,99 @@ export const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const [state, dispatch] = useReducer(userReducer, {user: userInitialState} as UserState);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
-    const [userTest, setUserTest] = useState(userInitialState);
-
     const authService = new AuthService();
 
     useEffect(() => {
-        setLoading(true);
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-            dispatch({type: UserActionType.ADD_USER, payload: JSON.parse(savedUser)});
-            setUserTest(JSON.parse(savedUser));
-        } else {
-            authService.profile().then((res) => {
-                dispatch({type: UserActionType.ADD_USER, payload: res});
-                setUserTest(res)
-            }).catch((e) => {
-                handleError(e);
-            }).finally(() => {
+        const initializeAuth = async () => {
+            try {
+                setLoading(true);
+                const savedUser = localStorage.getItem('user');
+
+                if (savedUser) {
+                    // If we have a saved user, verify the session is still valid
+                    try {
+                        const profile = await authService.profile();
+                        dispatch({type: UserActionType.ADD_USER, payload: profile});
+                    } catch (error) {
+                        handleError(error);
+                        localStorage.removeItem('user');
+                        dispatch({type: UserActionType.REMOVE_USER});
+                    }
+                }
+            } catch (error) {
+                handleError(error);
+            } finally {
                 setLoading(false);
-            });
-        }
-        setLoading(false);
+            }
+        };
 
-    }, [state.user]);
-
-
-    const registerUser = async (user: CreateUserDto): Promise<void> => {
-        try {
-            await authService.register(user);
-        } catch (error) {
-            handleError(error);
-        }
-    }
-
-    const loginUser = async (email: string, password: string): Promise<void> => {
-        try {
-            const user = await authService.login(email, password);
-            dispatch({type: UserActionType.ADD_USER, payload: user});
-        } catch (error) {
-            handleError(error);
-        }
-    }
+        initializeAuth();
+    }, []);
 
     const handleError = (e: unknown) => {
         if (e instanceof AxiosError) {
-            setError(e.response?.data?.message || e.message);
+            const errorMessage = e.response?.data?.message || e.message;
+            setError(errorMessage);
+            if (e.response?.status === 401) {
+                dispatch({type: UserActionType.REMOVE_USER});
+            }
         } else {
             setError((e as Error).message);
         }
     };
 
+    const clearError = () => setError('');
+
+    const registerUser = async (user: CreateUserDto): Promise<void> => {
+        try {
+            clearError();
+            setLoading(true);
+            await authService.register(user);
+        } catch (error) {
+            handleError(error);
+            throw error; // Rethrow to handle in the component
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loginUser = async (email: string, password: string): Promise<void> => {
+        try {
+            clearError();
+            setLoading(true);
+            const user = await authService.login(email, password);
+            dispatch({type: UserActionType.ADD_USER, payload: user});
+        } catch (error) {
+            handleError(error);
+            throw error; // Rethrow to handle in the component
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const logoutUser = async (): Promise<void> => {
         try {
+            clearError();
+            setLoading(true);
             await authService.logout();
             dispatch({type: UserActionType.REMOVE_USER});
         } catch (error) {
             handleError(error);
+        } finally {
+            setLoading(false);
         }
-    }
+    };
 
     const values = useMemo(() => ({
         error,
-        user: userTest,
+        user: state.user,
         loading,
         registerUser,
         loginUser,
         logoutUser
-    }), []);
+    }), [error, state.user, loading]);
 
     return (
         <AuthContext.Provider value={values}>
@@ -90,4 +114,3 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
 };
 
 export default AuthProvider;
-

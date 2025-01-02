@@ -1,4 +1,3 @@
-import { Warehouse } from 'lucide-react';
 
 export interface UserDto {
   readonly id: number;

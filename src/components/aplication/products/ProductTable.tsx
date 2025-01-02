@@ -1,4 +1,6 @@
+'use client'
 import React, {useContext} from 'react';
+
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@nextui-org/table';
 import {Tooltip} from '@nextui-org/tooltip';
 import {Button} from '@nextui-org/button';
@@ -9,24 +11,30 @@ import {PlusCircle, Warehouse} from 'lucide-react';
 import {ProductDto} from '@/services/Dto/ProductDto';
 import {ProductWarehouseContext} from '@/context/ProductWarehouseContext/productWarehouseContext';
 import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@nextui-org/dropdown";
+import {useRouter} from "next/navigation";
 
 interface ProductTableProps {
     products: ProductDto[];
     onView: (product: ProductDto) => void;
     onEdit: (product: ProductDto) => void;
     onDelete: (id: number) => void;
-    onIncrementStock: (product: ProductDto) => void;
 }
 
-export default function ProductTable({products, onView, onEdit, onDelete, onIncrementStock}: ProductTableProps) {
-    const {openModal} = useContext(ProductWarehouseContext)!;
+export default function ProductTable({products, onView, onEdit, onDelete}: ProductTableProps) {
+    const router = useRouter();
+    const {openModal: openModalProductWarehouse} = useContext(ProductWarehouseContext)!;
+
+    const handleProductionClick = () => {
+
+        return router.push('/production');
+    };
 
     const renderCell = (product: ProductDto, columnKey: React.Key): React.ReactNode => {
         switch (columnKey) {
             case 'actions':
                 return (
                     <div className="flex items-center gap-4">
-                        <Tooltip content="Details" color="primary" >
+                        <Tooltip content="Details" color="primary">
                             <button onClick={() => onView(product)}>
                                 <EyeIcon size={20} fill="#979797"/>
                             </button>
@@ -48,24 +56,26 @@ export default function ProductTable({products, onView, onEdit, onDelete, onIncr
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu aria-label="Actions">
-                                <DropdownItem onClick={() => onIncrementStock(product)} key="increment-stock" color="success" icon={<PlusCircle size={20} />} textValue="Increment Stock">
-                                    <button >Incrementar Stock</button>
+                                <DropdownItem
+                                    onClick={() => handleProductionClick()}
+                                    key="increment-stock"
+                                    color="success"
+                                    icon={<PlusCircle size={20}/>}
+                                    textValue="Increment Stock"
+                                >
+                                    <button>Ir a produccion</button>
                                 </DropdownItem>
-                                <DropdownItem onClick={() => openModal(null, false, product)} key="send-to-warehouse" color="warning" icon={<Warehouse size={20} />} textValue="Send to Warehouse">
+                                <DropdownItem
+                                    onClick={() => openModalProductWarehouse(null, false, product)}
+                                    key="send-to-warehouse"
+                                    color="warning"
+                                    icon={<Warehouse size={20}/>}
+                                    textValue="Send to Warehouse"
+                                >
                                     <button>Enviar al almacén</button>
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
-                        {/*<Tooltip content="Incrementar Stock" color="success">
-                            <Button color="success" onClick={() => onIncrementStock(product)}>
-                                <PlusCircle size={20}/>
-                            </Button>
-                        </Tooltip>
-                        <Tooltip content="Enviar producto al almacen" color="warning">
-                            <Button color="warning" onClick={() => openModal(null, false, product)}>
-                                <Warehouse size={20}/>
-                            </Button>
-                        </Tooltip>*/}
                     </div>
                 );
             case 'category':
@@ -111,4 +121,3 @@ export default function ProductTable({products, onView, onEdit, onDelete, onIncr
         </Table>
     );
 }
-
