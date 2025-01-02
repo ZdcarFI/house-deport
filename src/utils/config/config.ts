@@ -1,4 +1,6 @@
-export const BASE_URI = "http://localhost:8000";
+import {environment} from "@/utils/environment";
+
+export const BASE_URI = environment.API;
 export const PARAM_CLIENT = "/clients";
 export const PARAM_PRODUCT = "/products";
 export const PARAM_CATEGORY = "/categories";
