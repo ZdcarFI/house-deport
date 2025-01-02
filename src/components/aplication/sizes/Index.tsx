@@ -2,7 +2,7 @@
 
 import { Button, Input } from '@nextui-org/react';
 import Link from 'next/link';
-import React, { useContext } from 'react';
+import React, {useContext, useEffect} from 'react';
 import { ExportIcon } from '@/components/icons/accounts/export-icon';
 import { HouseIcon } from '@/components/icons/breadcrumb/house-icon';
 
@@ -24,6 +24,12 @@ export default function Sizes() {
     deleteSize,
     openModal,
   } = useContext(SizeContext)!;
+
+  useEffect(() => {
+    if (error) {
+      showToast(error, ToastType.ERROR);
+    }
+  }, [error]);
 
   const { showToast } = useContext(ToastContext)!;
 
@@ -62,11 +68,8 @@ export default function Sizes() {
   if (loading) {
     return <div>Loading...</div>;
   }
-  React.useEffect(() => {
-    if (error) {
-      showToast(error, ToastType.ERROR);
-    }
-  }, [error, showToast]);
+
+
 
 
   return (

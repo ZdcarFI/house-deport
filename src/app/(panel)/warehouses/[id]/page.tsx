@@ -1,12 +1,11 @@
 'use client'
 
-import {WarehouseContext} from "@/context/WareHouseContext/warehouseContext";
 import {useParams} from "next/navigation";
 import Link from "next/link";
-import {useContext, useEffect, useState} from "react";
-import {WarehouseDto} from "@/services/Dto/WarehouseDto";
-import {Card, CardBody, CardHeader, Chip, Button, Progress, Skeleton} from "@nextui-org/react";
-import WarehouseMatrix from "@/components/aplication/warehouses/WarehousesGrid";
+import {useContext, useState} from "react";
+import {ProductBasicWithLocationDto, WarehouseDto} from "@/services/Dto/WarehouseDto";
+import {Card, CardBody, CardHeader, Chip, Button, Progress} from "@nextui-org/react";
+import WarehouseMatrix, {WarehouseProduct} from "@/components/aplication/warehouses/WarehousesGrid";
 import ProductDetails from "@/components/aplication/products/ProductsDetails";
 import {ArrowLeft, Box, CheckCircle, AlertTriangle} from 'lucide-react';
 import {ProductWarehouseContext} from "@/context/ProductWarehouseContext/productWarehouseContext";
@@ -25,17 +24,17 @@ const WarehouseDetails = () => {
 
     } = useContext(ProductWarehouseContext)!;
     const {showToast} = useContext(ToastContext)!;
-    const [warehouse, setWarehouse] = useState<WarehouseDto | null>(null);
-    const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+    const [warehouse] = useState<WarehouseDto | null>(null);
+    const [selectedProduct, setSelectedProduct] = useState<ProductBasicWithLocationDto | null>(null);
     const [selectedCell, setSelectedCell] = useState<{ row: number, column: number } | null>(null);
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
     const [selectedProductWarehouseId, setSelectedProductWarehouseId] = useState<number | null>(null);
-    const [selectedProductWarehouseSelect, setSelectedProductWarehouseSelect] = useState<any | null>(null);
+    const [selectedProductWarehouseSelect, setSelectedProductWarehouseSelect] = useState< ProductWarehouseDto | null | Partial<ProductWarehouseDto>>(null);
 
     const [matrixKey, setMatrixKey] = useState(0);
 
 
-    const handleCellClick = (product: any | null, row: number, column: number) => {
+    const handleCellClick = (product:  WarehouseProduct | undefined, row: number, column: number) => {
         if (product) {
             const productWarehouse = productWarehouses.find(pw =>
                 pw.product.id === product.id &&
@@ -45,11 +44,11 @@ const WarehouseDetails = () => {
             );
 
             if (productWarehouse) {
-                setSelectedProduct(product);
+                setSelectedProduct(product as ProductBasicWithLocationDto);
                 setSelectedCell({row, column});
                 setSelectedProductWarehouseId(productWarehouse.id);
 
-                const productWarehouseSelect = {
+                const productWarehouseSelect:Partial<ProductWarehouseDto>= {
                     id: productWarehouse.id,
                     productId: product.id,
                     warehouseId: Number(id),

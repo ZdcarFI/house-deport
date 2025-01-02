@@ -16,7 +16,7 @@ export default function LoginForm() {
     const [errorForm, setErrorForm] = useState<string>('');
     const [isVisible, setIsVisible] = useState(false);
     const router = useRouter();
-    const { loginUser, error } = useContext(AuthContext)!;
+    const { loginUser } = useContext(AuthContext)!;
 
     const toggleVisibility = () => setIsVisible(!isVisible);
 
@@ -38,6 +38,7 @@ export default function LoginForm() {
         try {
             await loginUser(email, password);
             router.push('/dashboard');
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             setErrorForm('Credenciales incorrectas');
         }

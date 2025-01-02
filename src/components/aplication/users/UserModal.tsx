@@ -7,7 +7,6 @@ import { Input } from '@nextui-org/input';
 import { Select, SelectItem } from '@nextui-org/select';
 import { EyeFilledIcon } from '@/components/icons/EyeFilledIcon';
 import { EyeSlashFilledIcon } from '@/components/icons/EyeSlashFilledIcon';
-import { UserDto } from '@/services/Dto/UserDto';
 import { CreateUserDto } from '@/services/User/dto/CreateUserDto';
 import { UpdateUserDto } from '@/services/User/dto/UpdateUserDto';
 import { ToastType } from '@/components/Toast/Toast';
@@ -21,7 +20,7 @@ export default function UserModal({ showToast }: Props) {
   const { isModalOpen, closeModal, selectedUser, isViewMode, createUser, updateUser } = useContext(UserContext)!;
 
 
-  const [formData, setFormData] = useState<Partial<CreateUserDto & UpdateUserDto & { confirmPassword: string } & {
+  const [formData, setFormData] = useState<Partial<CreateUserDto & UpdateUserDto & { confirmPassword: string, createdAt: Date, updatedAt: Date} & {
     created_at: Date
   } & { updated_at: Date }>>({
     firstName: '',

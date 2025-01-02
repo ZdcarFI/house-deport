@@ -50,9 +50,9 @@ export default function Productions() {
     if (loading) {
         return <div className="flex justify-center items-center h-96">Cargando...</div>;
     }
-
     if (error) {
-        return showToast('Error: ' + error, ToastType.ERROR);
+        showToast("Error " + (error), ToastType.ERROR); // Llamamos la función
+        return <div>Error: {error}</div>; // Retornamos JSX adecuado
     }
 
     return (

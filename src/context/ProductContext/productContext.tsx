@@ -19,9 +19,11 @@ const productInitialState: ProductDto = {
     price: 0,
     stockInventory: 0,
     stockStore: 0,
-    size: {id: 0, name: ''},
+    size: {id: 0, name: '', created_at: new Date(), updated_at: new Date()},
     category: {id: 0, name: ''},
-    productWarehouse: []
+    productWarehouse: [],
+    created_at: new Date(),
+    updated_at: new Date(),
 };
 
 const ProductProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {

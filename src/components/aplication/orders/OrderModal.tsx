@@ -25,7 +25,7 @@ export default function OrderModal({ isOpen, onClose, onSubmit, order, isViewMod
   const { clients } = React.useContext(ClientContext)!
   const { users } = React.useContext(UserContext)!
   const { products } = React.useContext(ProductContext)!
-  const [formData, setFormData] = useState<CreateOrderDto & { status?: string, tax: number, discount: number, subtotal: number }>({
+  const [formData, setFormData] = useState<CreateOrderDto & { numFac: string, status?: string, tax: number, discount: number, subtotal: number }>({
     numFac: '',
     clientId: 0,
     userId: 0,
@@ -48,6 +48,7 @@ export default function OrderModal({ isOpen, onClose, onSubmit, order, isViewMod
         products: order.details?.map(detail => ({
           id: detail.product?.id || 0,
           quantity: detail.quantity || 0,
+          productWarehouseId: 0
         })) || [],
         status: order.status || 'pending',
         tax: order.tax || 0,
@@ -95,7 +96,7 @@ export default function OrderModal({ isOpen, onClose, onSubmit, order, isViewMod
   const addProduct = () => {
     setFormData({
       ...formData,
-      products: [...formData.products, { id: 0, quantity: 1 }],
+      products: [...formData.products, { id: 0, quantity: 1, productWarehouseId: 0 }],
     })
   }
 

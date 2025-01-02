@@ -16,6 +16,8 @@ const categoryInitialState: CategoryDto = {
     id: 0,
     name: '',
     sizes: [],
+    created_at: new Date(),
+    updated_at: new Date(),
 };
 
 const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -87,13 +89,10 @@ const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children })
         }
     }
 
-    const deleteCategory = async (id: number): Promise<void> => {
-        try {
-            await categoryService.deleteById(id)
-            dispatch({ type: CategoryActionType.REMOVE_CATEGORY, payload: id })
-        } catch (e) {
-            handleError(e)
-        }
+    const deleteCategory = async (id: number): Promise<boolean> => {
+        const response = await categoryService.deleteById(id)
+        dispatch({ type: CategoryActionType.REMOVE_CATEGORY, payload: id })
+        return response;
     }
 
     const updateCategoryWithNewSize = (categoryId: number, newSize: SizeDto) => {

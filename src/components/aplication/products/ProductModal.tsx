@@ -291,6 +291,7 @@ export default function ProductModal({showToast}: Props) {
                     price: dataToSend.price,
                     categoryId: dataToSend.categoryId,
                     sizeId: dataToSend.sizeId,
+                    location: []
                 };
                 await updateProduct(selectedProduct.id, updateData);
                 showToast("Producto actualizado exitosamente", ToastType.SUCCESS);

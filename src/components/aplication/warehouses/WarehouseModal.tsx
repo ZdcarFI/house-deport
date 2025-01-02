@@ -5,7 +5,6 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextu
 import { Button } from '@nextui-org/button'
 import { Input } from '@nextui-org/input'
 import { Select, SelectItem } from "@nextui-org/select"
-import { WarehouseDto } from '@/services/Dto/WarehouseDto'
 import { CreateWarehouseDto } from '@/services/Warehouse/dto/CreateWarehouseDto'
 import { UpdateWarehouseDto } from '@/services/Warehouse/dto/UpdateWarehouseDto'
 import { ToastType } from '@/components/Toast/Toast'

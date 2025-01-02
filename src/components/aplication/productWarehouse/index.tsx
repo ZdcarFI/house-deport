@@ -8,8 +8,6 @@ import { HouseIcon } from "@/components/icons/breadcrumb/house-icon";
 import { ProductWarehouseDto } from "@/services/Dto/ProductWarehouseDto";
 import { ProductWarehouseContext } from "@/context/ProductWarehouseContext/productWarehouseContext";
 import ConfirmDialog from "@/components/modal/ConfirmDialog";
-import { CreateProductWarehouseDto } from "@/services/ProductWarehouse/dto/CreateProductWarehouse.dto";
-import { UpdateProductWarehouseDto } from "@/services/ProductWarehouse/dto/UpdateProductWarehouse.dto";
 import ProductWarehouseTable from "./productWarehouseTable";
 import ProductWarehouseModal from "./productWarehouseModal";
 import { BoxIcon, SearchIcon } from "lucide-react";

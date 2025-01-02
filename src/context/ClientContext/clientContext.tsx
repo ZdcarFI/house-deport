@@ -21,7 +21,9 @@ const clientInitialState: ClientDto = {
     address: '',
     numberDocument: '',
     typeDocument: '',
-    createdAt:''
+    createdAt:'',
+    created_at: new Date(),
+    updated_at: new Date(),
 };
 
 const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

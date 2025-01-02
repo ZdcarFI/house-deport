@@ -20,7 +20,7 @@ const ProtectedRoute = ({ roles, children }:ProtectedRouteProps) => {
         }
     }, [userRole, roles, router]);
 
-    return userRole && roles.includes(userRole) ? children : null;
+    return <>{userRole && roles.includes(userRole) ? children : null}</>;
 };
 
 export default ProtectedRoute;

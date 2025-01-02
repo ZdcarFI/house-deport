@@ -60,19 +60,23 @@ export default function ProductTable({products, onView, onEdit, onDelete}: Produ
                                     onClick={() => handleProductionClick()}
                                     key="increment-stock"
                                     color="success"
-                                    icon={<PlusCircle size={20}/>}
                                     textValue="Increment Stock"
                                 >
-                                    <button>Ir a produccion</button>
+                                    <>
+                                        <PlusCircle size={20}/>
+                                        <button>Ir a produccion</button>
+                                    </>
                                 </DropdownItem>
                                 <DropdownItem
                                     onClick={() => openModalProductWarehouse(null, false, product)}
                                     key="send-to-warehouse"
                                     color="warning"
-                                    icon={<Warehouse size={20}/>}
                                     textValue="Send to Warehouse"
                                 >
-                                    <button>Enviar al almacén</button>
+                                    <>
+                                        <Warehouse size={20}/>
+                                        <button>Enviar al almacén</button>
+                                    </>
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>

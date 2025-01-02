@@ -1,6 +1,5 @@
 import {Image} from "@nextui-org/image";
 import {Divider} from "@nextui-org/divider";
-import AuthProvider from "@/context/AuthContext/authContext";
 
 interface Props {
     children: React.ReactNode;

@@ -8,6 +8,9 @@ export const userInitialState: UserDto = {
     email: '',
     role: UserRol.USER,
     gender: '',
+    created_at: new Date(),
+    updated_at: new Date(),
+    lastSession: new Date(),
 };
 
 export interface UserState {

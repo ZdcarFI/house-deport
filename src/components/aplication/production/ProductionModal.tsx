@@ -91,7 +91,7 @@ export default function ProductionModal({showToast}: Props) {
                 const createData: CreateProductionDto = {
                     quantity: formData.quantity!,
                     productId: formData.productId!,
-                    user_orderId: userLog?.id!,
+                    user_orderId: userLog?.id,
                 };
                 await createProduction(createData);
                 showToast("Production created successfully", ToastType.SUCCESS);

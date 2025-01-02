@@ -4,11 +4,11 @@ import { Button, Tooltip, Chip, Table, TableHeader, TableBody, TableColumn, Tabl
 import { ProductContext } from '@/context/ProductContext/productContext';
 import { ProductDto } from '@/services/Dto/ProductDto';
 
-type WarehouseProduct = Omit<ProductDto, "productWarehouse" | "stockInventory" | "stockStore"> | ProductBasicWithLocationDto;
+export type WarehouseProduct = Omit<ProductDto, "productWarehouse" | "stockInventory" | "stockStore"> | ProductBasicWithLocationDto;
 
 interface WarehouseMatrixProps {
     warehouse: WarehouseDto;
-    onCellClick: (product: WarehouseProduct | null, row: number, column: number) => void;
+    onCellClick: (product: WarehouseProduct | undefined, row: number, column: number) => void;
 }
 
 interface ColumnData {
@@ -109,7 +109,7 @@ const WarehouseMatrix: React.FC<WarehouseMatrixProps> = ({ warehouse, onCellClic
                         className={`w-12 h-12 min-w-0 mx-auto ${
                             cellColor === 'primary' ? 'bg-red-500 hover:bg-red-300' : 'bg-blue-500 hover:bg-blue-300'
                         }`}
-                        onPress={() => onCellClick(product || null, row, col)}
+                        onPress={() => onCellClick(product, row, col)}
                     >
                         <span className="text-tiny font-medium">{cellLocation}</span>
                     </Button>

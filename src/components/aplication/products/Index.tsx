@@ -27,7 +27,6 @@ export default function Products() {
         error,
         deleteProduct,
         openModal,
-        openStockModal
     } = useContext(ProductContext)!;
 
     const {showToast} = useContext(ToastContext)!;
@@ -73,9 +72,6 @@ export default function Products() {
         }
     };
 
-    const handleIncrementStock = (product: ProductDto) => {
-        openStockModal(product);
-    };
     if (loading) {
         return (
             <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full flex flex-col gap-4">

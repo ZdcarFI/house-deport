@@ -53,6 +53,8 @@ const productionInitialState: ProductionDto = {
         size: {
             id: 0, // Si `SizeDto` tiene más propiedades, añádelas aquí
             name: "",
+            created_at: new Date(),
+            updated_at: new Date(),
         },
         productWarehouse: [], // Lista vacía como predeterminado
         stockInventory: 0,

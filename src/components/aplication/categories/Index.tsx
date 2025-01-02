@@ -15,7 +15,7 @@ import ConfirmDialog from "@/components/modal/ConfirmDialog";
 import {ToastContext} from '@/context/ToastContext/ToastContext';
 import {ToastType} from '@/components/Toast/Toast';
 
-export default function Categories() {
+const Categories = () => {
     const {
         categories,
         loading,
@@ -50,34 +50,25 @@ export default function Categories() {
     };
 
     const handleDelete = async (id: number) => {
-        try {
-            const response = await deleteCategory(id);
-
-            // Solo mostrar éxito si realmente se eliminó en el backend
-            if (response && response.success) {
+        deleteCategory(id).then((response) => {
+            if (response) {
                 showToast("Categoría eliminada exitosamente", ToastType.SUCCESS);
                 setIsConfirmDialogOpen(false);
             } else {
                 throw new Error("No se pudo eliminar la categoría");
             }
-        } catch (error: any) {
-            // Mostrar un mensaje más específico para el error de clave foránea
-            if (error.message?.includes('foreign key constraint') ||
-                error.message?.includes('FK_3a3ca0681511e948bf87fade638')) {
-                showToast("No se puede eliminar la categoría porque tiene tallas asociadas", ToastType.ERROR);
-            } else {
-                showToast("Error al eliminar la categoría: " + (error.message || error), ToastType.ERROR);
-            }
-            setIsConfirmDialogOpen(false);
-        }
-    };
+        }).catch(() => {
+            showToast(error, ToastType.ERROR);
+        });
+    }
 
 
     if (loading) {
         return <div>Loading...</div>;
     }
     if (error) {
-        return showToast("Error " + (error), ToastType.ERROR);
+        showToast("Error " + (error), ToastType.ERROR); // Llamamos la función
+        return <div>Error: {error}</div>; // Retornamos JSX adecuado
     }
 
     return (
@@ -150,4 +141,6 @@ export default function Categories() {
         </div>
     );
 }
+
+export default Categories;
 

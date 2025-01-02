@@ -24,6 +24,8 @@ const warehouseInitialState: WarehouseDto = {
     spaces: 0,
     spacesUsed: 0,
     products: [],
+    created_at: new Date(),
+    updated_at: new Date(),
 }
 
 const WarehouseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

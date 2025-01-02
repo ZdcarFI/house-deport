@@ -37,6 +37,8 @@ const productWarehouseInitialState: ProductWarehouseDto = {
   quantity: 0,
    productId: 0,
    warehouseId: 0,
+  created_at: new Date(),
+    updated_at: new Date(),
 
 };
 

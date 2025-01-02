@@ -14,7 +14,9 @@ export const SizeContext = createContext<SizeContextType | null>(null);
 const sizeService = new SizeService();
 const sizeInitialState: SizeDto = {
   id: 0,
-  name: ''
+  name: '',
+    created_at: new Date(),
+    updated_at: new Date(),
 };
 
 const SizeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

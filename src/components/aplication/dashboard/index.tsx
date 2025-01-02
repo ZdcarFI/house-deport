@@ -1,26 +1,13 @@
 'use client'
 
-import React, { useContext, useMemo } from 'react'
-import { Card, CardBody, CardHeader } from "@nextui-org/react"
+import React, { useContext } from 'react'
 import { ProductContext } from '@/context/ProductContext/productContext'
-import { CategoryContext } from '@/context/CategoryContext/categoryContext'
 import { ClientContext } from '@/context/ClientContext/clientContext'
 import { OrderContext } from '@/context/OrderContext/orderContext'
 import { DataCard } from './data-card'
-import { LineChart } from './line-chart'
-import { PieChart } from './pie-chart'
-import { RecentSalesTable } from './recent-sales-table'
-
-const calculateTrend = (currentValue: number, previousValue: number): { trendText: string; status: 'success' | 'error' } => {
-  const percentageChange = ((currentValue - previousValue) / previousValue) * 100
-  const trendText = `${percentageChange > 0 ? '+' : ''}${percentageChange.toFixed(2)}%`
-  const status = percentageChange >= 0 ? 'success' : 'error'
-  return { trendText, status }
-}
 
 export default function DashboardIndex() {
   const { products } = useContext(ProductContext)!
-  const { categories } = useContext(CategoryContext)!
   const { clients } = useContext(ClientContext)!
   const { orders } = useContext(OrderContext)!
 

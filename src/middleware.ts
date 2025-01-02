@@ -3,7 +3,7 @@ import type {NextRequest} from 'next/server';
 
 export function middleware(request: NextRequest) {
 
-    const token = request.cookies.get('hG7$kL2@qT9&zX1!mN4#vB8*eW5^rY3')?.value;
+    const token = request.cookies.get('exampled_secret')?.value;
 
     const {pathname} = request.nextUrl;
 

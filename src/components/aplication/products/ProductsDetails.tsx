@@ -7,7 +7,7 @@ interface ProductDetailsProps {
     product: ProductBasicWithLocationDto;
     onEdit: (productWarehouse: ProductWarehouseDto) => void
     onDeleteProduct: () => void;
-    productWarehouseSelect: ProductWarehouseDto | null;
+    productWarehouseSelect: ProductWarehouseDto | null | Partial<ProductWarehouseDto>;
 }
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDeleteProduct, productWarehouseSelect }) => {
@@ -64,7 +64,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDele
                         color="primary"
                         onPress={() => {
                             if (productWarehouseSelect) {
-                                onEdit(productWarehouseSelect); 
+                                onEdit(productWarehouseSelect as ProductWarehouseDto);
                             }
                         }}
                         isDisabled={!productWarehouseSelect}
