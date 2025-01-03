@@ -4,7 +4,7 @@ import {environment} from "@/utils/environment";
 
 export function middleware(request: NextRequest) {
 
-    const token = request.cookies.get(environment.JWT_SECRET)?.value;
+    const token = request.cookies.get('exampled_secret')?.value;
 
     const {pathname} = request.nextUrl;
 
