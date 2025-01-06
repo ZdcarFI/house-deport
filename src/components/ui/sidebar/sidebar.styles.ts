@@ -6,7 +6,7 @@ export const SidebarWrapper = tv({
   variants: {
     collapsed: {
       true: "translate-x-0 ml-0[display:inherit] mt-10 md:mt-0",
-      false: "w-24"
+      false: "w-[7rem]"
     },
   },
 });

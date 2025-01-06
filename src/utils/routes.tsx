@@ -33,7 +33,7 @@ export const routes = [
     {
         title: 'Inicio',
         routes: [{
-            path: '/',
+            path: '/dashboard',
             title: 'Inicio',
             icon: <Home strokeWidth={1.5} size={24}/>,
             roles: Roles.All,

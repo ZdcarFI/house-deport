@@ -32,8 +32,8 @@ const AuthLayoutWrapper = ({children}: Props) => {
                     onChange={() => {
                         setTheme(isDark ? "light" : "dark");
                     }}
-                    startContent={<MoonIcon/>}
-                    endContent={<SunIcon/>}
+                    startContent={<SunIcon/>}
+                    endContent={<MoonIcon/>}
                 />
                 <div className='md:hidden absolute left-0 right-0 bottom-0 top-0 z-0'>
                     <Image
@@ -52,9 +52,10 @@ const AuthLayoutWrapper = ({children}: Props) => {
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-black/30"></div>
 
-                <div className='z-10 flex flex-col justify-center items-center '>
-                    <span className='font-bold text-[45px] text-center text-white'>House Deport</span>
-                    <div className='font-light text-slate-300 mt-4 text-lg'>
+                <div className='z-10 flex flex-col justify-end items-start w-2/3 h-1/2'>
+
+                    <span className='font-bold text-[5rem] text-center text-white'>House Deport</span>
+                    <div className='font-light text-slate-300 text-3xl'>
                         Gestiona tus tareas y pedidos
                     </div>
                 </div>

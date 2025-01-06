@@ -41,13 +41,13 @@ export const NavbarWrapper = ({children}: Props) => {
                     {/*<NotificationsDropdown />*/}
                     <Switch
                         size="md"
-                        color="success"
+                        color="primary"
                         checked={isDark}
                         onChange={() => {
                             setTheme(isDark ? "light" : "dark");
                         }}
-                        startContent={<MoonIcon/>}
-                        endContent={<SunIcon/>}
+                        startContent={<SunIcon/>}
+                        endContent={<MoonIcon/>}
                     />
                     <UserDropdown/>
                 </NavbarContent>

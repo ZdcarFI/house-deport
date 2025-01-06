@@ -44,7 +44,7 @@ export const UserDropdown = () => {
                     <p className="font-bold">Inició sesión como</p>
                     <p className="font-bold">{user?.email}</p>
                 </DropdownItem>
-                <DropdownItem key="settings">
+                {/*<DropdownItem key="settings">
                     My Settings
                 </DropdownItem>
                 <DropdownItem key="team_settings">Team Settings</DropdownItem>
@@ -55,9 +55,9 @@ export const UserDropdown = () => {
                 <DropdownItem key="configurations">Configurations</DropdownItem>
                 <DropdownItem key="help_and_feedback">
                     Help & Feedback
-                </DropdownItem>
+                </DropdownItem>*/}
                 <DropdownItem key="logout" color="danger" onPress={handleLogout}>
-                    Log Out
+                    Cerrar sesión
                 </DropdownItem>
             </DropdownMenu>
         </Dropdown>

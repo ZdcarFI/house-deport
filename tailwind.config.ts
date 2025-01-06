@@ -1,5 +1,6 @@
 import { nextui } from '@nextui-org/theme';
 import type { Config } from 'tailwindcss';
+import colors from "tailwindcss/colors";
 
 const config: Config = {
   content: [
@@ -15,7 +16,7 @@ const config: Config = {
         foreground: 'hsl(var(--foreground))',
         card: 'hsl(var(--card))',
         'card-foreground': 'hsl(var(--card-foreground))',
-        primary: '#2dd4bf',
+        primary: 'hsl(var(--primary))',
         'primary-foreground': 'hsl(var(--primary-foreground))',
         secondary: 'hsl(var(--secondary))',
         'secondary-foreground': 'hsl(var(--secondary-foreground))',
@@ -27,7 +28,6 @@ const config: Config = {
         'destructive-foreground': 'hsl(var(--destructive-foreground))',
         border: 'hsl(var(--border))',
       },
-
     },
   },
   darkMode: 'class',

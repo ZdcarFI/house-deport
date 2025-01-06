@@ -25,7 +25,7 @@ const Page = () => {
                 <nav className="absolute top-0 left-0 right-0 px-6 py-4 flex justify-center items-center gap-4">
                     <h1 className="text-lg font-bold leading-tight text-white">HOUSE DEPORT</h1>
                     <Image
-                        src="/icons/logo.ico"
+                        src="/icons/logo-blue.ico"
                         alt="loading-skeleton"
                         width={50} height={50} />
                 </nav>

@@ -7,7 +7,7 @@ export default function LoadingSkeleton() {
       <div className="text-center">
         <div className="flex justify-center items-center mb-4">
           <Image
-            src="/icons/logo.ico"
+            src="/icons/logo-blue.ico"
             alt="loading-skeleton"
             width={100} height={100} />
         </div>

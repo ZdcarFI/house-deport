@@ -76,6 +76,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
             setLoading(true);
             const user = await authService.login(email, password);
             dispatch({type: UserActionType.ADD_USER, payload: user});
+            const valueCodificate = btoa(JSON.stringify(user));
+            // save cookie expiration 7 days
+            document.cookie = `userSession=${valueCodificate}; max-age=604800; path=/;`;
         } catch (error) {
             handleError(error);
             throw error; // Rethrow to handle in the component
@@ -90,6 +93,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
             setLoading(true);
             await authService.logout();
             dispatch({type: UserActionType.REMOVE_USER});
+            // remove cookie
+            document.cookie = `userSession=; max-age=0; path=/;`;
         } catch (error) {
             handleError(error);
         } finally {
