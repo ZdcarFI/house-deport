@@ -15,7 +15,7 @@ const config: Config = {
         foreground: 'hsl(var(--foreground))',
         card: 'hsl(var(--card))',
         'card-foreground': 'hsl(var(--card-foreground))',
-        primary: 'hsl(var(--primary))',
+        primary: '#2dd4bf',
         'primary-foreground': 'hsl(var(--primary-foreground))',
         secondary: 'hsl(var(--secondary))',
         'secondary-foreground': 'hsl(var(--secondary-foreground))',

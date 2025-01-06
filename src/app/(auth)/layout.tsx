@@ -1,15 +1,40 @@
+"use client"
+
 import {Image} from "@nextui-org/image";
-import {Divider} from "@nextui-org/divider";
+import React, {useEffect} from "react";
+import {useTheme} from "next-themes";
+import {MoonIcon} from "@/components/icons/MoonIcon";
+import {SunIcon} from "@/components/icons/SunIcon";
+import {Switch} from "@nextui-org/switch";
 
 interface Props {
     children: React.ReactNode;
 }
 
 const AuthLayoutWrapper = ({children}: Props) => {
-    return (
-        <div className='flex h-screen relative'>
+    const {setTheme, resolvedTheme, theme} = useTheme();
+    useEffect(() => {
+        if (!theme) {
+            setTheme('light'); // Tema predeterminado si no hay valor en localStorage
+        }
+    }, [theme, setTheme]);
+    const isDark = resolvedTheme === 'dark';
 
-            <div className='flex-1 flex-col flex items-center justify-center p-6'>
+    return (
+        <div className='h-screen relative grid  grid-cols-1 md:grid-cols-[1fr_2fr]'>
+
+            <div className='relative flex-col flex items-center justify-center p-6'>
+                <Switch
+                    className="absolute top-4 right-4"
+                    size="md"
+                    color="primary"
+                    checked={isDark}
+                    onChange={() => {
+                        setTheme(isDark ? "light" : "dark");
+                    }}
+                    startContent={<MoonIcon/>}
+                    endContent={<SunIcon/>}
+                />
                 <div className='md:hidden absolute left-0 right-0 bottom-0 top-0 z-0'>
                     <Image
                         className='w-full h-full'
@@ -20,23 +45,17 @@ const AuthLayoutWrapper = ({children}: Props) => {
                 {children}
             </div>
 
-            <div className='hidden my-10 md:block'>
-                <Divider orientation='vertical'/>
-            </div>
+            <div className='col-span-1 hidden md:flex relative items-center justify-center p-6 bg-cover bg-center bg-no-repeat'
+                 style={{
+                     backgroundImage: `url('/imgs/bg-textil.png')`,
+                 }}>
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/30"></div>
 
-            <div className='hidden md:flex flex-1 relative items-center justify-center p-6'>
-                <div className='absolute left-0 right-0 bottom-0 top-0 z-0'>
-                    <Image
-                        className='w-full h-full'
-                        src='https://nextui.org/gradients/docs-right.png'
-                        alt='gradient'
-                    />
-                </div>
-
-                <div className='z-10'>
-                    <h1 className='font-bold text-[45px] text-center'>House Deport</h1>
-                    <div className='font-light text-slate-400 mt-4'>
-                        Venta al por menor de equipo de deporte en comercios especializados
+                <div className='z-10 flex flex-col justify-center items-center '>
+                    <span className='font-bold text-[45px] text-center text-white'>House Deport</span>
+                    <div className='font-light text-slate-300 mt-4 text-lg'>
+                        Gestiona tus tareas y pedidos
                     </div>
                 </div>
             </div>

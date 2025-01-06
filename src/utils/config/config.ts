@@ -1,6 +1,4 @@
-import {environment} from "@/utils/environment";
-
-export const BASE_URI = environment.API;
+export const BASE_URI = "https://house-deport-api-production.up.railway.app";
 export const PARAM_CLIENT = "/clients";
 export const PARAM_PRODUCT = "/products";
 export const PARAM_CATEGORY = "/categories";

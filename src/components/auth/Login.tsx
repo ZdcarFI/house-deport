@@ -90,9 +90,9 @@ export default function LoginForm() {
                     <Button
                         color="secondary"
                         variant="flat"
-                        onPress={() => router.push('/register')}
+                        onPress={() => router.push('/')}
                     >
-                        Crear una cuenta
+                        Regresar
                     </Button>
                 </form>
             </CardBody>
