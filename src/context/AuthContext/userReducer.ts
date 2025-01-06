@@ -34,7 +34,6 @@ export const userReducer = (state: UserState, action: UserAction): UserState => 
     switch (action.type) {
          case UserActionType.LOAD_USER:
             const user = localStorage.getItem('user');
-            console.log(user);
             if (user) {
                 return {
                     ...state,

@@ -65,8 +65,8 @@ export default function UserModal({ showToast }: Props) {
   };
 
 
-  const handleSelectChange =(value:string) =>{
-    setFormData({ ...formData, [value]: value });
+  const handleSelectChange = (name: string) => (value: string) => {
+    setFormData({ ...formData, [name]: value });
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,25 +151,26 @@ export default function UserModal({ showToast }: Props) {
               <Select
                 label="Genero"
                 labelPlacement="outside"
+                name="gender"
                 placeholder="Escoja un genero"
                 selectedKeys={formData.gender ? [formData.gender] : []}
-                onChange={(e) => handleSelectChange(e.target.value)}
+                onChange={(e) => handleSelectChange('gender')(e.target.value)}
                 isRequired={!isViewMode}
                 isDisabled={isViewMode}
                 classNames={{
                   label: 'font-semibold',
                 }}
               >
-
                 <SelectItem key="MALE" value="MALE">Masculino</SelectItem>
                 <SelectItem key="FEMALE" value="FEMALE">Femenino</SelectItem>
               </Select>
               <Select
                 label="Rol"
                 labelPlacement="outside"
+                name="role"
                 placeholder="Escoja el rol"
                 selectedKeys={formData.role ? [formData.role] : []}
-                onChange={(e) => handleSelectChange(e.target.value)}
+                onChange={(e) => handleSelectChange('role')(e.target.value)}
                 isRequired={!isViewMode}
                 isDisabled={isViewMode}
                 classNames={{

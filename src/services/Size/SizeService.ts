@@ -18,8 +18,7 @@ export class SizeService extends Service {
 
     async getAll(): Promise<SizeDto[]> {
         const response: AxiosResponse = await this.apiFetch.get(this.param);
-        console.log(response.data);
-        
+
         return response.data;
     }
 

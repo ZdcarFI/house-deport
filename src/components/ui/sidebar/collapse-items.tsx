@@ -24,7 +24,6 @@ export const CollapseItems = ({icon, items, title}: Props) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const handleToggle = () => {
-        console.log("isOpen", isOpen);
         setIsOpen(!isOpen)
     };
     const handleClose = () => setIsOpen(false);

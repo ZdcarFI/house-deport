@@ -35,7 +35,6 @@ export default function ProductWarehouses() {
       (pw.warehouse && pw.warehouse.name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [productWarehouses, searchQuery]);
-  console.log("ProductWarehouses:", productWarehouses);
 
   const handleAdd = () => {
     openModal(null, false);

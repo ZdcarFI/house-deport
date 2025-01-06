@@ -11,9 +11,6 @@ export class AuthService extends Service {
 
     async login(email: string, password: string): Promise<UserDto> {
         const response: AxiosResponse = await this.apiFetch.post('/login', { email, password });
-        console.log("...............");
-        console.log(this.apiFetch);
-        console.log("...............");
         return response.data;
     }
 
