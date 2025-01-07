@@ -1,17 +1,18 @@
 import React, {useState} from 'react';
-import {Button} from '@nextui-org/button';
 import {Input} from '@nextui-org/input';
-import {Select, SelectItem} from "@nextui-org/select";
 import {Card, CardBody} from '@nextui-org/card';
 import {ProductDto} from '@/services/Dto/ProductDto';
 import {ToastType} from '@/components/Toast/Toast';
+import {Autocomplete, AutocompleteItem} from "@nextui-org/react";
+import {DataCartDto} from "@/components/aplication/orders/dto/DataCartDto";
+import {initialCart} from "@/components/aplication/orders/CreateOrder";
 
 interface ProductSearchProps {
     products: ProductDto[];
     isViewMode: boolean;
     isProductDisabled: boolean;
     showToast: (message: string, type: ToastType) => void;
-    onProductSelect: (productId: number, maxQuantity: number) => void;
+    onProductSelect: (productId: number) => void;
     selectedProduct?: ProductDto;
     onQuantityChange: (value: number) => void;
     quantity: number;
@@ -19,184 +20,50 @@ interface ProductSearchProps {
     boolean: boolean;
 }
 
-interface ProductSearchState {
-    searchByCode: boolean;
-    code: string;
-    searchTerm: string;
-    searchResults: ProductDto[];
-}
 
 export default function ProductSearch({
                                           products,
-                                          isViewMode,
-                                          isProductDisabled,
-                                          showToast,
                                           onProductSelect,
-                                          selectedProduct,
                                           onQuantityChange,
+                                          selectedProduct,
                                           quantity,
                                           quantityError,
                                           boolean
                                       }: ProductSearchProps) {
-    const [searchState, setSearchState] = useState<ProductSearchState>({
-        searchByCode: true,
-        code: '',
-        searchTerm: '',
-        searchResults: []
-    });
 
-    const handleCodeSearch = (code: string) => {
-        if (code.length > 12) {
-            showToast("El código no puede tener más de 12 caracteres", ToastType.WARNING);
-            return;
-        }
 
-        setSearchState(prev => ({...prev, code}));
+    const [newCart, setNewCart] = useState<DataCartDto>(initialCart);
 
-        if (!code.trim()) {
-            setSearchState(prev => ({...prev, searchResults: []}));
-            onProductSelect(0, 0);
-            return;
-        }
 
-        const matchingProducts = products.filter(p =>
-            p.code.toLowerCase().includes(code.toLowerCase().trim())
-        );
-
-        if (matchingProducts.length > 0) {
-            setSearchState(prev => ({...prev, searchResults: matchingProducts}));
-
-            const exactMatch = matchingProducts.find(p =>
-                p.code.toLowerCase() === code.toLowerCase()
-            );
-
-            if (exactMatch) {
-                onProductSelect(exactMatch.id, exactMatch.stockInventory);
-            }
-        } else {
-            setSearchState(prev => ({...prev, searchResults: []}));
-            if (code.length > 0) {
-                showToast("No se encontraron coincidencias con ningún producto", ToastType.ERROR);
-            }
+    const onSelectionChangeProduct = (id: React.Key | null) => {
+        if(id){
+            onProductSelect(parseInt(id.toString()));
         }
     };
 
-    const handleSearch = (searchTerm: string) => {
-        setSearchState(prev => ({...prev, searchTerm}));
-
-        if (searchTerm.length >= 2) {
-            const results = products.filter(product =>
-                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.size.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.price.toString().includes(searchTerm)
-            );
-            setSearchState(prev => ({...prev, searchResults: results}));
-        } else {
-            setSearchState(prev => ({...prev, searchResults: []}));
-        }
-    };
 
     return (
         <Card className="p-4">
             <CardBody className="space-y-4">
-                {!isViewMode && !isProductDisabled && (
-                    <>
-                        <div className="flex gap-4 mb-4">
-                            <Button
-                                color={searchState.searchByCode ? "primary" : "default"}
-                                onClick={() => {
-                                    setSearchState(prev => ({
-                                        ...prev,
-                                        searchByCode: true,
-                                        code: '',
-                                        searchResults: []
-                                    }));
-                                    onProductSelect(0, 0);
-                                }}
-                            >
-                                Buscar por código
-                            </Button>
-                            <Button
-                                color={!searchState.searchByCode ? "primary" : "default"}
-                                onClick={() => {
-                                    setSearchState(prev => ({
-                                        ...prev,
-                                        searchByCode: false,
-                                        searchTerm: '',
-                                        searchResults: []
-                                    }));
-                                    onProductSelect(0, 0);
-                                }}
-                            >
-                                Buscar por filtros
-                            </Button>
-                        </div>
-
-                        {searchState.searchByCode ? (
-                            <div className="space-y-4">
-                                <Input
-                                    label="Código del producto"
-                                    value={searchState.code}
-                                    onChange={(e) => handleCodeSearch(e.target.value)}
-                                    maxLength={12}
-                                    placeholder="Ingrese el código del producto"
-                                />
-
-                                {searchState.searchResults.length > 0 && !selectedProduct && (
-                                    <Select
-                                        label="Productos encontrados"
-                                        placeholder="Seleccione un producto"
-                                        onChange={(e) => {
-                                            const selected = products.find(p => p.id === parseInt(e.target.value));
-                                            if (selected) {
-                                                onProductSelect(selected.id, selected.stockInventory);
-                                                setSearchState(prev => ({
-                                                    ...prev,
-                                                    code: selected.code
-                                                }));
-                                            }
-                                        }}
-                                    >
-                                        {searchState.searchResults.map((product) => (
-                                            <SelectItem key={product.id} value={product.id.toString()}>
-                                                {`${product.code} - ${product.name} - ${product.category.name} - ${product.size.name}`}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <Input
-                                    label="Buscar producto"
-                                    value={searchState.searchTerm}
-                                    onChange={(e) => handleSearch(e.target.value)}
-                                    placeholder="Buscar por nombre, categoría, talla o precio"
-                                />
-
-                                {searchState.searchResults.length > 0 && (
-                                    <Select
-                                        label="Seleccionar producto"
-                                        placeholder="Seleccione un producto"
-                                        onChange={(e) => {
-                                            const selected = products.find(p => p.id === parseInt(e.target.value));
-                                            if (selected) {
-                                                onProductSelect(selected.id, selected.stockInventory);
-                                            }
-                                        }}
-                                    >
-                                        {searchState.searchResults.map((product) => (
-                                            <SelectItem key={product.id} value={product.id.toString()}>
-                                                {`${product.name} - ${product.category.name} - ${product.size.name} - $${product.price}`}
-                                            </SelectItem>
-                                        ))}
-                                    </Select>
-                                )}
-                            </div>
-                        )}
-                    </>
-                )}
+                <div className="space-y-4">
+                    <Autocomplete
+                        allowsCustomValue={true}
+                        defaultItems={products}
+                        onSelectionChange={onSelectionChangeProduct}
+                        aria-label="Select a product"
+                        inputValue={newCart.name}
+                        onInputChange={(value) => setNewCart({
+                            ...newCart,
+                            name: value
+                        })}
+                    >
+                        {products.map((product) => (
+                            <AutocompleteItem key={product.id} value={product.id}>
+                                {`${product.name} | Talla: ${product.size.name} | Codigo: ${product.code}`}
+                            </AutocompleteItem>
+                        ))}
+                    </Autocomplete>
+                </div>
 
                 {selectedProduct && (
                     <div className="mt-4 space-y-4">
@@ -256,8 +123,9 @@ export default function ProductSearch({
                         value={quantity.toString()}
                         onChange={(e) => onQuantityChange(parseInt(e.target.value))}
                         required
-                        errorMessage={quantityError}
-                        isInvalid={!!quantityError}
+                        max={boolean ? selectedProduct.stockInventory : 10000}
+                        isInvalid={boolean ? quantity > selectedProduct.stockInventory : quantity > 10000}
+                        errorMessage={boolean ? "La cantidad a enviar no puede ser mayor a la cantidad en el inventario" : "La cantidad de produccion no puede ser mayor a 10000"}
                     />
                 )}
             </CardBody>

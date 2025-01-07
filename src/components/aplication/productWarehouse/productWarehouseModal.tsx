@@ -60,6 +60,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
     const [errors, setErrors] = useState<FormErrors>({});
     const [isProductDisabled, setIsProductDisabled] = useState(false);
     const [isWarehouseDisabled, setIsWarehouseDisabled] = useState(false);
+    const [productSelected, setProductSelected] = useState<ProductDto | undefined>(undefined);
 
     useEffect(() => {
         let productDisabled = false;
@@ -211,10 +212,6 @@ export default function ProductWarehouseModal({showToast}: Props) {
     const numberToLetter = (num: number) => {
         return String.fromCharCode(65 + num - 1);
     };
-    const getSelectedProduct = () => {
-        return products.find(p => p.id === formData.productId);
-    };
-
 
     const renderProductSearch = () => (
         <ProductSearch
@@ -223,14 +220,14 @@ export default function ProductWarehouseModal({showToast}: Props) {
             isViewMode={isViewMode}
             isProductDisabled={isProductDisabled}
             showToast={showToast}
-            onProductSelect={(productId, maxQuantity) => {
+            onProductSelect={(productId) => {
+                setProductSelected(products.find(p => p.id === productId));
                 setFormData(prev => ({
                     ...prev,
-                    productId,
-                    maxQuantity
+                    productId
                 }));
             }}
-            selectedProduct={getSelectedProduct()}
+            selectedProduct={productSelected}
             onQuantityChange={(value) => {
                 setFormData(prev => ({
                     ...prev,
@@ -262,9 +259,10 @@ export default function ProductWarehouseModal({showToast}: Props) {
             return;
         }
 
-        await getProducts()
 
-        try {
+        console.log('formData', formData);
+        console.log('selectedProductWarehouse', selectedProductWarehouse?.id);
+        /*try {
             if (selectedProductWarehouse) {
                 await updateProductWarehouse(selectedProductWarehouse.id, formData as UpdateProductWarehouseDto);
                 showToast("Product warehouse updated successfully", ToastType.SUCCESS);
@@ -272,10 +270,11 @@ export default function ProductWarehouseModal({showToast}: Props) {
                 await createProductWarehouse(formData as CreateProductWarehouseDto);
                 showToast("Product warehouse created successfully", ToastType.SUCCESS);
             }
+            await getProducts();
             closeModal();
         } catch (error) {
             showToast("Error submitting product warehouse data: " + error, ToastType.ERROR);
-        }
+        }*/
 
     };
 

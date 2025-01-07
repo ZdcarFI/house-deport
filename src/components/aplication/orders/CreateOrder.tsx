@@ -32,7 +32,7 @@ import OrderSkeletonPage from "@/components/skeletons/OrderSkeleton";
 import {useRouter} from "next/navigation";
 import ClientModal from "@/components/aplication/clients/ClientModal";
 
-const initialCart: DataCartDto = {
+export const initialCart: DataCartDto = {
     id: 0,
     name: '',
     price: 0,
@@ -310,7 +310,7 @@ export default function CreateOrderPage() {
                                                         >
                                                             {products.map((product) => (
                                                                 <AutocompleteItem key={product.id} value={product.id}>
-                                                                    {product.name}
+                                                                    {`${product.name} | ${product.size.name}`}
                                                                 </AutocompleteItem>
                                                             ))}
                                                         </Autocomplete>

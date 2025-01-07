@@ -11,6 +11,7 @@ import {CreateProductionDto} from '@/services/Production/dto/CreateProductionDto
 import {ProductContext} from "@/context/ProductContext/productContext";
 import {ToastType} from '@/components/Toast/Toast';
 import ProductSearch from "@/components/aplication/products/ProductSearch";
+import {ProductDto} from "@/services/Dto/ProductDto";
 
 interface Props {
     showToast: (message: string, type: ToastType) => void;
@@ -43,6 +44,8 @@ export default function ProductionModal({showToast}: Props) {
     });
 
     const [quantityError, setQuantityError] = useState<string>("");
+    const [productSelected, setProductSelected] = useState<ProductDto | undefined>(undefined);
+
 
     useEffect(() => {
         if (selectedProduction) {
@@ -103,9 +106,6 @@ export default function ProductionModal({showToast}: Props) {
         }
     };
 
-    const getSelectedProduct = () => {
-        return products.find(p => p.id === formData.productId);
-    };
     const boolean = false
     return (
         <Modal
@@ -128,12 +128,13 @@ export default function ProductionModal({showToast}: Props) {
                                 isProductDisabled={false}
                                 showToast={showToast}
                                 onProductSelect={(productId) => {
+                                    setProductSelected(products.find(p => p.id === productId));
                                     setFormData(prev => ({
                                         ...prev,
                                         productId
                                     }));
                                 }}
-                                selectedProduct={getSelectedProduct()}
+                                selectedProduct={productSelected}
                                 onQuantityChange={handleQuantityChange}
                                 quantity={formData.quantity || 0}
                                 quantityError={quantityError}
