@@ -4,12 +4,10 @@ import React, { useState, useEffect, useContext } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/modal'
 import { Button } from '@nextui-org/button'
 import { Input } from '@nextui-org/input'
-import { Select, SelectItem } from "@nextui-org/select"
 import { CreateWarehouseDto } from '@/services/Warehouse/dto/CreateWarehouseDto'
 import { UpdateWarehouseDto } from '@/services/Warehouse/dto/UpdateWarehouseDto'
 import { ToastType } from '@/components/Toast/Toast'
 import { WarehouseContext } from '@/context/WareHouseContext/warehouseContext'
-import { warehouseColors } from '@/utils/colors'
 
 interface Props {
   showToast: (message: string, type: ToastType) => void;
@@ -88,89 +86,121 @@ export default function WarehouseModal({ showToast }: Props) {
           </ModalHeader>
           <ModalBody>
             <Input
-              name="name"
-              label="Nombre"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Escriba el nombre del almacén"
-              isRequired={!isViewMode}
-              isDisabled={isViewMode}
-              classNames={{
-                label: "font-semibold",
-              }}
+                name="name"
+                label="Nombre"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Escriba el nombre del almacén"
+                isRequired={!isViewMode}
+                isDisabled={isViewMode}
+                classNames={{
+                  label: "font-semibold",
+                }}
             />
             <Input
-              name="rowMax"
-              label="Filas máximas"
-              type="number"
-              value={formData.rowMax?.toString()}
-              onChange={handleInputChange}
-              placeholder="Escriba la cantidad de filas máximas"
-              isRequired={!isViewMode}
-              isDisabled={isViewMode}
-              classNames={{
-                label: "font-semibold",
-              }}
+                name="rowMax"
+                label="Filas máximas"
+                type="number"
+                min={1}
+                value={formData.rowMax?.toString()}
+                onChange={handleInputChange}
+                placeholder="Escriba la cantidad de filas máximas"
+                isRequired={!isViewMode}
+                isDisabled={isViewMode}
+                classNames={{
+                  label: "font-semibold",
+                }}
             />
             <Input
-              name="columnMax"
-              label="Columnas Máximas"
-              type="number"
-              value={formData.columnMax?.toString()}
-              onChange={handleInputChange}
-              placeholder="Escriba la cantidad de columnas máximas"
-              isRequired={!isViewMode}
-              isDisabled={isViewMode}
-              classNames={{
-                label: "font-semibold",
-              }}
+                name="columnMax"
+                label="Columnas Máximas"
+                type="number"
+                min={1}
+                value={formData.columnMax?.toString()}
+                onChange={handleInputChange}
+                placeholder="Escriba la cantidad de columnas máximas"
+                isRequired={!isViewMode}
+                isDisabled={isViewMode}
+                classNames={{
+                  label: "font-semibold",
+                }}
             />
             <Input
-              name="description"
-              label="Descripción"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Escriba la descripción del almacén"
-              isRequired={!isViewMode}
-              isDisabled={isViewMode}
-              classNames={{
-                label: "font-semibold",
-              }}
+                name="description"
+                label="Descripción"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Escriba la descripción del almacén"
+                isRequired={!isViewMode}
+                isDisabled={isViewMode}
+                classNames={{
+                  label: "font-semibold",
+                }}
             />
 
-            <Select
-              label="Color"
-              selectedKeys={formData.color ? [formData.color] : []}
-              onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
-              placeholder="Seleccione un color"
-              isRequired={!isViewMode}
-              isDisabled={isViewMode}
+           {/* <Select
+                label="Color"
+                selectedKeys={formData.color ? [formData.color] : []}
+                onChange={(e) => setFormData(prev => ({...prev, color: e.target.value}))}
+                placeholder="Seleccione un color"
+                isRequired={!isViewMode}
+                isDisabled={isViewMode}
             >
-              {warehouseColors.map((color) => (
-                <SelectItem
-                  key={color.value}
-                  value={color.value}
-                  textValue={color.label}
-                >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: color.value }}
-                    />
-                    {color.label}
-                  </div>
-                </SelectItem>
-              ))}
-            </Select>
+              {
+                warehouseColors.map((color) => (
+                    <SelectItem
+                        key={color.value}
+                        value={color.value}
+                        textValue={color.label}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                            className="w-4 h-4 rounded-full"
+                            style={{backgroundColor: color.value}}
+                        />
+                        {color.label}
+                      </div>
+                    </SelectItem>
+                ))
+              }
+
+            </Select>*/}
+            <div className="flex gap-4">
+              <Input
+                  type="color"
+                  name="color"
+                  label="Color"
+                  value={formData.color || "#000000"}
+                  onChange={handleInputChange}
+                  placeholder="Escriba la descripción del almacén"
+                  isRequired={!isViewMode}
+                  isDisabled={isViewMode}
+                  classNames={{
+                    label: "font-semibold",
+                  }}
+              />
+              <Input
+                  type="text"
+                  name="color"
+                  value={formData.color || ""}
+                  onChange={handleInputChange}
+                  placeholder="#000000"
+                  isDisabled={isViewMode}
+                  classNames={{
+                    label: "font-semibold",
+                  }}
+                  className="w-fit"
+              />
+            </div>
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={closeModal}>
               Cerrar
             </Button>
             {!isViewMode && (
-              <Button color="primary" type="submit">
-                {selectedWarehouse ? 'Actualizar' : 'Crear'}
-              </Button>
+                <Button color="primary" type="submit">
+                  {selectedWarehouse ? 'Actualizar' : 'Crear'}
+                </Button>
             )}
           </ModalFooter>
         </form>

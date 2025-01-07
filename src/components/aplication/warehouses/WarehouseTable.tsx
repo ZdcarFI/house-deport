@@ -3,7 +3,7 @@
 import {WarehouseDto} from '@/services/Dto/WarehouseDto'
 import {Card, CardBody, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, Chip} from "@nextui-org/react"
 import {MoreVertical, Box, Grid} from 'lucide-react'
-import Link from "next/link";
+import {useRouter} from "next/navigation";
 
 interface WarehouseTableProps {
     warehouses: WarehouseDto[],
@@ -14,18 +14,18 @@ interface WarehouseTableProps {
 
 export default function WarehouseTable({warehouses, onView, onEdit, onDelete}: WarehouseTableProps) {
 
-
+    const router = useRouter();
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {warehouses.map((warehouse) => (
                 <div key={warehouse.id}>
-                    <Link href={`/warehouses/${warehouse.id}`}>
                         <Card
                             key={warehouse.id}
                             className="w-full"
                             shadow="sm"
                             isPressable
                             isHoverable
+                            onClick={()=> router.push(`/warehouses/${warehouse.id}`)}
 
                         >
                             <CardBody className="p-4 relative">
@@ -110,7 +110,6 @@ export default function WarehouseTable({warehouses, onView, onEdit, onDelete}: W
                                 </Chip>
                             </CardBody>
                         </Card>
-                    </Link>
                 </div>
             ))}
         </div>

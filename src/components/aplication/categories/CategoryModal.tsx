@@ -65,10 +65,12 @@ export default function CategoryModal({showToast}: Props) {
     const handleAddSize = () => {
         const sizeToAdd = sizes.find(size => size.id.toString() === selectedSize);
         if (sizeToAdd && !selectedSizes.some(s => s.id === sizeToAdd.id)) {
+
             setSelectedSizes(prev => [...prev, sizeToAdd]);
+
             setFormData(prev => ({
                 ...prev,
-                sizes: [...(prev.sizes || []), {sizeId: sizeToAdd.id}]
+                sizes: [...(prev.sizes || []), {sizeId: parseInt(sizeToAdd.id)}]
             }));
         }
         setSelectedSize('');
@@ -112,7 +114,7 @@ export default function CategoryModal({showToast}: Props) {
             if (isViewMode) {
                 // When in view mode, only render the name cell
                 return (
-                    <TableRow key={size.id}>
+                    <TableRow key={size.id.toString()}>
                         <TableCell>{size.name}</TableCell>
                     </TableRow>
                 );
@@ -120,7 +122,7 @@ export default function CategoryModal({showToast}: Props) {
 
             // When not in view mode, render both name and action cells
             return (
-                <TableRow key={size.id}>
+                <TableRow key={size.id.toString()}>
                     <TableCell>{size.name}</TableCell>
                     <TableCell>
                         <Button
@@ -140,6 +142,11 @@ export default function CategoryModal({showToast}: Props) {
     const renderTable = () => {
         if (selectedSizes.length === 0 && !isViewMode) return null;
 
+        const columns = [
+            {key: 'name', label: 'TALLAS'},
+            {key: 'actions', label: 'ACCIONES'},
+        ];
+
         return (
             <Table aria-label="Tallas seleccionadas">
                 <TableHeader>
@@ -148,10 +155,9 @@ export default function CategoryModal({showToast}: Props) {
                         <TableColumn key="name">TALLAS</TableColumn>
                     ) : (
                         // Edit mode: show both name and actions columns
-                        <>
-                            <TableColumn key="name">TALLAS</TableColumn>
-                            <TableColumn key="actions">ACCIONES</TableColumn>
-                        </>
+                        columns.map((column) =>
+                            <TableColumn key={column.key}>{column.label}</TableColumn>
+                        )
                     )}
                 </TableHeader>
                 <TableBody>

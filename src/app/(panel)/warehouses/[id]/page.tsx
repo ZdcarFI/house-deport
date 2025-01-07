@@ -21,8 +21,7 @@ const WarehouseDetails = () => {
     const {
         openModal,
         deleteProductWarehouse,
-        productWarehouses,
-        getProductWarehouse
+        productWarehouses
     } = useContext(ProductWarehouseContext)!;
     const {showToast} = useContext(ToastContext)!;
     const [warehouse, setWarehouse] = useState<WarehouseDto | null>(null);
@@ -42,14 +41,13 @@ const WarehouseDetails = () => {
             try {
                 const warehouseData = await getWarehouse(Number(id));
                 setWarehouse(warehouseData);
-                await getProductWarehouse(Number(id));
             } catch (e) {
                 console.error("Error fetching warehouse:", e);
             }
         };
 
         fetchWarehouseData();
-    }, [id, getWarehouse, getProductWarehouse]);
+    }, []);
 
 
     const handleCellClick = (product: WarehouseProduct | undefined, row: number, column: number) => {

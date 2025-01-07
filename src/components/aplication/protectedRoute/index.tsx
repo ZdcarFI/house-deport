@@ -10,15 +10,15 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ roles, children }:ProtectedRouteProps) => {
-    const { user } = useContext(AuthContext);
+    const { user, loading } = useContext(AuthContext);
     const userRole = user.role;
     const router = useRouter()
 
     useEffect(() => {
-        if (!userRole || !roles.includes(userRole)) {
+        if (!loading && (!userRole || !roles.includes(userRole))) {
             router.push('/unauthorized');
         }
-    }, [userRole, roles, router]);
+    }, [userRole, roles, router, loading]);
 
     return <>{userRole && roles.includes(userRole) ? children : null}</>;
 };
