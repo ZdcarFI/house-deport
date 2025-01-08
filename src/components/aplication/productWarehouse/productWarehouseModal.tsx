@@ -32,10 +32,8 @@ export default function ProductWarehouseModal({showToast}: Props) {
     const {
         isModalOpen,
         closeModal,
-        selectedProductWarehouse,
         isViewMode,
         createProductWarehouse,
-        updateProductWarehouse,
         productWarehouses,
         initialData,
     } = useContext(ProductWarehouseContext)!;
@@ -65,41 +63,10 @@ export default function ProductWarehouseModal({showToast}: Props) {
     useEffect(() => {
         let productDisabled = false;
         let warehouseDisabled = false;
-        if (selectedProductWarehouse) {
-            setFormData({
-                productId: selectedProductWarehouse.product?.id || selectedProductWarehouse.productId,
-                warehouseId: selectedProductWarehouse.warehouse?.id || selectedProductWarehouse.warehouseId,
-                quantity: selectedProductWarehouse.quantity,
-                row: selectedProductWarehouse.row,
-                column: selectedProductWarehouse.column,
-            });
-            productDisabled = true;
-            warehouseDisabled = true;
-        } else if (initialData) {
-            if ('code' in initialData) {
-                // It's a ProductDto
-                setFormData(prevState => ({
-                    ...prevState,
-                    productId: (initialData as ProductDto).id,
-                }));
-                productDisabled = true;
-            } else if ('rowMax' in initialData) {
-                // It's a WarehouseDto
-                setFormData(prevState => ({
-                    ...prevState,
-                    warehouseId: (initialData as WarehouseDto).id,
-                }));
-            } else if ('warehouseId' in initialData && 'row' in initialData && 'column' in initialData) {
-                // New condition to handle warehouseId, row, and column data
-                setFormData(prevState => ({
-                    ...prevState,
-                    warehouseId: (initialData as { warehouseId: number, row: number, column: number }).warehouseId,
-                    row: (initialData as { warehouseId: number, row: number, column: number }).row,
-                    column: (initialData as { warehouseId: number, row: number, column: number }).column,
-                }));
-                warehouseDisabled = true;
-            }
-        } else {
+
+        if (!isModalOpen) {
+            // Reiniciar estados cuando el modal se cierra
+            setProductSelected(undefined);
             setFormData({
                 productId: 0,
                 warehouseId: 0,
@@ -107,20 +74,61 @@ export default function ProductWarehouseModal({showToast}: Props) {
                 row: 0,
                 column: 0,
             });
+            setErrors({});
+            return;
         }
 
-        // Set product disabled state
+        if (initialData) {
+            // Si es un ProductWarehouseDto (caso de vista/edición)
+            if ('product' in initialData) {
+                setFormData(prevState => ({
+                    ...prevState,
+                    productId: initialData.product.id,
+                    warehouseId: initialData.warehouse.id,
+                    quantity: initialData.quantity,
+                    row: initialData.row,
+                    column: initialData.column
+                }));
+                setProductSelected(initialData.product);
+                productDisabled = true;
+                warehouseDisabled = true;
+            }
+            // Los demás casos...
+            else if ('code' in initialData) {
+                setFormData(prevState => ({
+                    ...prevState,
+                    productId: (initialData as ProductDto).id,
+                }));
+                setProductSelected(initialData as ProductDto);
+                productDisabled = true;
+            } else if ('rowMax' in initialData) {
+                setFormData(prevState => ({
+                    ...prevState,
+                    warehouseId: (initialData as WarehouseDto).id,
+                }));
+                warehouseDisabled = true;
+            }
+        } else if (!isViewMode) { // Solo reiniciar si no estamos en modo vista
+            setFormData({
+                productId: 0,
+                warehouseId: 0,
+                quantity: 0,
+                row: 0,
+                column: 0,
+            });
+            setProductSelected(undefined);
+        }
+
         setIsProductDisabled(productDisabled);
-        setIsWarehouseDisabled(warehouseDisabled)
+        setIsWarehouseDisabled(warehouseDisabled);
         setErrors({});
-    }, [selectedProductWarehouse, initialData]);
+    }, [initialData, isModalOpen, isViewMode]);
 
     const checkLocationAvailability = (warehouseId: number, row: number, column: number): boolean => {
         const existingProduct = productWarehouses.find(pw =>
             pw.warehouse.id === warehouseId &&
             pw.row === row &&
-            pw.column === column &&
-            (!selectedProductWarehouse || pw.id !== selectedProductWarehouse.id) //
+            pw.column === column
         );
 
         if (existingProduct) {
@@ -137,6 +145,19 @@ export default function ProductWarehouseModal({showToast}: Props) {
             return newErrors;
         });
         return true;
+    };
+
+    const handleCloseModal = () => {
+        setProductSelected(undefined);
+        setFormData({
+            productId: 0,
+            warehouseId: 0,
+            quantity: 0,
+            row: 0,
+            column: 0,
+        });
+        setErrors({});
+        closeModal();
     };
 
     const validateField = (name: string, value: number) => {
@@ -159,7 +180,6 @@ export default function ProductWarehouseModal({showToast}: Props) {
                     newErrors.row = `La fila no puede exceder de  ${formData.maxRow} que es la fila maxima del almacen`;
                 } else {
                     delete newErrors.row;
-                    // Verificar disponibilidad de ubicación cuando cambia la fila
                     if (formData.warehouseId && formData.column !== undefined) {
                         checkLocationAvailability(formData.warehouseId, value, formData.column);
                     }
@@ -191,9 +211,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
         const isLocationOccupied = productWarehouses.find(pw =>
             pw.warehouse.id === warehouseId &&
             pw.row === row &&
-            pw.column === column &&
-            (!selectedProductWarehouse || pw.id !== selectedProductWarehouse.id)
-        );
+            pw.column === column);
 
         if (isLocationOccupied) {
             showToast(`Esta ubicación ya está ocupada por el producto: ${isLocationOccupied.product.name}`, ToastType.ERROR);
@@ -260,21 +278,17 @@ export default function ProductWarehouseModal({showToast}: Props) {
         }
 
 
-        console.log('formData', formData);
-        console.log('selectedProductWarehouse', selectedProductWarehouse?.id);
-        /*try {
-            if (selectedProductWarehouse) {
-                await updateProductWarehouse(selectedProductWarehouse.id, formData as UpdateProductWarehouseDto);
-                showToast("Product warehouse updated successfully", ToastType.SUCCESS);
-            } else {
-                await createProductWarehouse(formData as CreateProductWarehouseDto);
-                showToast("Product warehouse created successfully", ToastType.SUCCESS);
-            }
+        try {
+
+            await createProductWarehouse(formData as CreateProductWarehouseDto);
+
+            showToast("Product warehouse created successfully", ToastType.SUCCESS);
+
             await getProducts();
             closeModal();
         } catch (error) {
             showToast("Error submitting product warehouse data: " + error, ToastType.ERROR);
-        }*/
+        }
 
     };
 
@@ -282,7 +296,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
         <Modal
             size='full'
             isOpen={isModalOpen}
-            onClose={closeModal}
+            onClose={handleCloseModal}
             scrollBehavior="inside"
             classNames={{
                 base: "h-screen rounded-l-lg rounded-r-none w-2/3 m-0",
@@ -294,7 +308,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
             <ModalContent>
                 <form onSubmit={handleSubmit} className="h-screen flex flex-col">
                     <ModalHeader className="flex flex-col gap-1">
-                        {isViewMode ? 'Ver producto en el almacen' : selectedProductWarehouse ? 'Editar Producto y almacen' : 'Agregar producto en el almacen'}
+                        {isViewMode ? 'Ver producto en el almacen' : 'Agregar producto en el almacen'}
                     </ModalHeader>
                     <ModalBody className='flex-grow overflow-hidden'>
                         <div className="h-full grid grid-cols-2 gap-6">
@@ -332,7 +346,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
                         </Button>
                         {!isViewMode && (
                             <Button color="primary" type="submit">
-                                {selectedProductWarehouse ? 'Actualizar' : 'Crear'}
+                                {'Crear'}
                             </Button>
                         )}
                     </ModalFooter>

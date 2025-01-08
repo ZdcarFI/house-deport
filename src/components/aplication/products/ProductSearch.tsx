@@ -20,27 +20,23 @@ interface ProductSearchProps {
     boolean: boolean;
 }
 
-
 export default function ProductSearch({
                                           products,
                                           onProductSelect,
                                           onQuantityChange,
                                           selectedProduct,
                                           quantity,
-                                          quantityError,
+                                          isViewMode,
+                                          isProductDisabled,
                                           boolean
                                       }: ProductSearchProps) {
-
-
     const [newCart, setNewCart] = useState<DataCartDto>(initialCart);
 
-
     const onSelectionChangeProduct = (id: React.Key | null) => {
-        if(id){
+        if (id) {
             onProductSelect(parseInt(id.toString()));
         }
     };
-
 
     return (
         <Card className="p-4">
@@ -50,12 +46,19 @@ export default function ProductSearch({
                         allowsCustomValue={true}
                         defaultItems={products}
                         onSelectionChange={onSelectionChangeProduct}
-                        aria-label="Select a product"
-                        inputValue={newCart.name}
-                        onInputChange={(value) => setNewCart({
-                            ...newCart,
-                            name: value
-                        })}
+                        label="Seleccione un producto"
+                        defaultSelectedKey={selectedProduct?.id.toString()}
+                        isDisabled={isViewMode || isProductDisabled}
+                        selectedKey={selectedProduct?.id.toString()}
+                        value={selectedProduct ? `${selectedProduct.name} | Talla: ${selectedProduct.size.name} | Codigo: ${selectedProduct.code}` : newCart.name}
+                        onInputChange={(value) => {
+                            if (!isViewMode && !isProductDisabled) {
+                                setNewCart({
+                                    ...newCart,
+                                    name: value
+                                });
+                            }
+                        }}
                     >
                         {products.map((product) => (
                             <AutocompleteItem key={product.id} value={product.id}>
@@ -112,7 +115,6 @@ export default function ProductSearch({
                                 isDisabled
                             />
                         </div>
-
                     </div>
                 )}
 
@@ -123,6 +125,7 @@ export default function ProductSearch({
                         value={quantity.toString()}
                         onChange={(e) => onQuantityChange(parseInt(e.target.value))}
                         required
+                        isDisabled={isViewMode}
                         max={boolean ? selectedProduct.stockInventory : 10000}
                         isInvalid={boolean ? quantity > selectedProduct.stockInventory : quantity > 10000}
                         errorMessage={boolean ? "La cantidad a enviar no puede ser mayor a la cantidad en el inventario" : "La cantidad de produccion no puede ser mayor a 10000"}

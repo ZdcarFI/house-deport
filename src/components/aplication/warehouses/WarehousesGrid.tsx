@@ -47,7 +47,7 @@ const WarehouseMatrix: React.FC<WarehouseMatrixProps> = ({ warehouse, onCellClic
                 <div className="flex items-center gap-2">
                     <span>Cantidad:</span>
                     <Chip
-                        color={product.quantity <= 20 ? 'danger' : 'success'}
+                        color={product.quantity <= 5 ? 'danger' : 'success'}
                         size="sm"
                         variant="flat"
                     >

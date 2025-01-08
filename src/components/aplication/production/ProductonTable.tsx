@@ -113,7 +113,8 @@ export default function ProductionTable({productions, onView, onEdit}: Productio
                         size="sm"
                         className="capitalize"
                     >
-                        {production.status}
+
+                        {production.status === 'completed' ? 'Completado' : production.status === 'canceled' ? 'Cancelado' : 'Pendiente'}
 
                     </Chip>
                 )
@@ -127,7 +128,17 @@ export default function ProductionTable({productions, onView, onEdit}: Productio
     };
 
     return (
-        <Table aria-label="Production table">
+        <Table
+            aria-label="Product Warehouses table"
+            classNames={{
+                base: "max-w-full",
+                table: "min-w-full",
+                thead: "bg-gray-50 dark:bg-gray-800",
+                th: "text-gray-500 dark:text-gray-400 font-medium text-sm",
+                tr: "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors",
+                td: "py-3"
+            }}
+        >
             <TableHeader>
                 <TableColumn>Producto</TableColumn>
                 <TableColumn>Cantidad</TableColumn>
