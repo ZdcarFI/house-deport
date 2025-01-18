@@ -1,16 +1,18 @@
-import { ProductWarehouseDto } from '@/services/Dto/ProductWarehouseDto';
-import { ProductBasicWithLocationDto } from '@/services/Dto/WarehouseDto';
-import { Card, CardBody, CardHeader, Divider, Chip, Button } from "@nextui-org/react";
-import { DollarSign, Box, Barcode, Database } from 'lucide-react';
+import {ProductWarehouseDto} from '@/services/Dto/ProductWarehouseDto';
+import {ProductBasicWithLocationDto} from '@/services/Dto/WarehouseDto';
+import {Card, CardBody, CardHeader, Divider, Chip, Button} from "@nextui-org/react";
+import {DollarSign, Box, Barcode, Database} from 'lucide-react';
+import {Tooltip} from "@nextui-org/tooltip";
+import AgregarStock from "@/components/aplication/productWarehouse/agregarStock";
+import React from "react";
 
 interface ProductDetailsProps {
     product: ProductBasicWithLocationDto;
-    onEdit: (productWarehouse: ProductWarehouseDto) => void
     onDeleteProduct: () => void;
-    productWarehouseSelect: ProductWarehouseDto | null | Partial<ProductWarehouseDto>;
+    productWarehouseSelect: ProductWarehouseDto;
 }
 
-const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDeleteProduct, productWarehouseSelect }) => {
+const ProductDetails: React.FC<ProductDetailsProps> = ({product, onDeleteProduct, productWarehouseSelect}) => {
 
     return (
         <Card className="max-w-md">
@@ -19,16 +21,16 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDele
                 <Chip
                     size="sm"
                     variant="flat"
-                    color={product.quantity <= 20 ? "danger" : "success"}
+                    color={product.quantity <= 5 ? "danger" : "success"}
                 >
-                    {product.quantity <= 20 ? "Bajo stock" : "Stock disponible"}
+                    {product.quantity <= 5 ? "Bajo stock" : "Stock disponible"}
                 </Chip>
             </CardHeader>
             <CardBody className="gap-6">
-                <Divider />
+                <Divider/>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-center gap-2">
-                        <Barcode className="text-primary" size={20} />
+                        <Barcode className="text-primary" size={20}/>
                         <div>
                             <p className="text-sm text-default-500">Código</p>
                             <p className="font-semibold">{product.code}</p>
@@ -36,7 +38,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDele
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <DollarSign className="text-primary" size={20} />
+                        <DollarSign className="text-primary" size={20}/>
                         <div>
                             <p className="text-sm text-default-500">Precio</p>
                             <p className="font-semibold">S/. {Number(product.price).toFixed(2)}</p>
@@ -44,7 +46,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDele
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <Database className="text-primary" size={20} />
+                        <Database className="text-primary" size={20}/>
                         <div>
                             <p className="text-sm text-default-500">Cantidad</p>
                             <p className="font-semibold">{product.quantity} unidades</p>
@@ -52,7 +54,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDele
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <Box className="text-primary" size={20} />
+                        <Box className="text-primary" size={20}/>
                         <div>
                             <p className="text-sm text-default-500">Ubicación</p>
                             <p className="font-semibold">Fila {product.row}, Col {product.column}</p>
@@ -60,17 +62,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onEdit, onDele
                     </div>
                 </div>
                 <div className="flex justify-between mt-4">
-                    <Button
-                        color="primary"
-                        onPress={() => {
-                            if (productWarehouseSelect) {
-                                onEdit(productWarehouseSelect as ProductWarehouseDto);
-                            }
-                        }}
-                        isDisabled={!productWarehouseSelect}
-                    >
-                        Editar
-                    </Button>
+                    <Tooltip content="Add Stock" color="success">
+                        <AgregarStock productWarehouse={productWarehouseSelect}/>
+                    </Tooltip>
                     <Button
                         color="danger"
                         variant="light"

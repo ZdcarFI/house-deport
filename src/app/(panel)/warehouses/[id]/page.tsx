@@ -16,6 +16,31 @@ import ConfirmDialog from "@/components/modal/ConfirmDialog";
 import {ProductWarehouseDto} from "@/services/Dto/ProductWarehouseDto";
 import {WarehouseContext} from "@/context/WareHouseContext/warehouseContext";
 
+const productWarehouseInitialState: ProductWarehouseDto = {
+    id: 0,
+    warehouse: {
+        id: 0,
+        name: "",
+        rowMax: 0,
+        columnMax: 0,
+        status: "",
+    },
+    product: {
+        id: 0,
+        name: '',
+        code: '',
+        price: 0,
+
+    },
+    row: 0,
+    column: 0,
+    quantity: 0,
+    productId: 0,
+    warehouseId: 0,
+    created_at: new Date(),
+    updated_at: new Date(),
+
+};
 const WarehouseDetails = () => {
     const {id} = useParams();
     const {
@@ -29,12 +54,9 @@ const WarehouseDetails = () => {
     const [selectedCell, setSelectedCell] = useState<{ row: number, column: number } | null>(null);
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
     const [selectedProductWarehouseId, setSelectedProductWarehouseId] = useState<number | null>(null);
-    const [selectedProductWarehouseSelect, setSelectedProductWarehouseSelect] = useState<ProductWarehouseDto | null | Partial<ProductWarehouseDto>>(null);
-    const { getWarehouse, loading, error } = useContext(WarehouseContext)!;
+    const [selectedProductWarehouseSelect, setSelectedProductWarehouseSelect] = useState<ProductWarehouseDto>(productWarehouseInitialState);
+    const {getWarehouse, loading, error} = useContext(WarehouseContext)!;
 
-<<<<<<< Updated upstream
-    const [matrixKey, setMatrixKey] = useState(0);
-=======
 
     const [refreshKey, setRefreshKey] = useState(0);
     const isRefreshing = React.useRef(false);
@@ -54,22 +76,10 @@ const WarehouseDetails = () => {
             isRefreshing.current = false;
         }
     }, [id, showToast]);
->>>>>>> Stashed changes
 
     React.useEffect(() => {
-        if (!id) return;
-
-        const fetchWarehouseData = async () => {
-            try {
-                const warehouseData = await getWarehouse(Number(id));
-                setWarehouse(warehouseData);
-            } catch (e) {
-                console.error("Error fetching warehouse:", e);
-            }
-        };
-
-        fetchWarehouseData();
-    }, []);
+        refreshWarehouseData();
+    }, [refreshWarehouseData]);
 
 
     const handleCellClick = (product: WarehouseProduct | undefined, row: number, column: number) => {
@@ -86,14 +96,31 @@ const WarehouseDetails = () => {
                 setSelectedCell({row, column});
                 setSelectedProductWarehouseId(productWarehouse.id);
 
-                const productWarehouseSelect: Partial<ProductWarehouseDto> = {
-                    id: productWarehouse.id,
-                    productId: product.id,
-                    warehouseId: Number(id),
-                    row: row,
-                    column: column,
-                    quantity: productWarehouse.quantity,
-                };
+                const productWarehouseSelect: ProductWarehouseDto = {
+                        id: productWarehouse.id,
+                        productId: product.id,
+                        warehouseId: Number(id),
+                        row: row,
+                        column: column,
+                        quantity: productWarehouse.quantity,
+                        created_at: new Date(),
+                        updated_at: new Date(),
+                        warehouse: {
+                            id: productWarehouse.warehouse.id,
+                            name: productWarehouse.warehouse.name,
+                            rowMax: productWarehouse.warehouse.rowMax,
+                            columnMax: productWarehouse.warehouse.columnMax,
+                            status: productWarehouse.warehouse.status
+                        },
+                        product: {
+                            id: productWarehouse.product.id,
+                            name: productWarehouse.product.name,
+                            code: productWarehouse.product.code,
+                            price: productWarehouse.product.price,
+
+                        }
+                    }
+                ;
 
                 setSelectedProductWarehouseSelect(productWarehouseSelect);
             } else {
@@ -104,7 +131,7 @@ const WarehouseDetails = () => {
             setSelectedProduct(null);
             setSelectedCell({row, column});
             setSelectedProductWarehouseId(null);
-            setSelectedProductWarehouseSelect(null);
+            setSelectedProductWarehouseSelect(productWarehouseInitialState);
         }
     };
 
@@ -115,22 +142,11 @@ const WarehouseDetails = () => {
                 warehouseId: warehouse.id,
                 row: selectedCell.row,
                 column: selectedCell.column,
-                onSuccess: () => {
-                    // Trigger matrix refresh
-                    setMatrixKey(prev => prev + 1);
-                }
+
             });
         }
     };
 
-    const handleEdit = (productWarehouse: ProductWarehouseDto) => {
-        openModal(productWarehouse, false, {
-            onSuccess: () => {
-                // Trigger matrix refresh
-                setMatrixKey(prev => prev + 1);
-            }
-        });
-    };
 
     const handleDeleteProduct = async () => {
         if (selectedProductWarehouseId) {
@@ -140,10 +156,8 @@ const WarehouseDetails = () => {
                 setIsConfirmDialogOpen(false);
                 setSelectedProduct(null);
                 setSelectedProductWarehouseId(null);
-                setSelectedProductWarehouseSelect(null);
-
-                // Trigger matrix refresh
-                setMatrixKey(prev => prev + 1);
+                setSelectedProductWarehouseSelect(productWarehouseInitialState);
+                refreshWarehouseData();
             } catch (error) {
                 showToast("Error: " + error, ToastType.ERROR);
             }
@@ -175,12 +189,12 @@ const WarehouseDetails = () => {
     if (loading) {
         return (
             <div className="container mx-auto px-4 py-8 space-y-4">
-                <Skeleton className="h-8 w-40 rounded-lg" />
+                <Skeleton className="h-8 w-40 rounded-lg"/>
                 <Card>
                     <CardBody className="space-y-3">
-                        <Skeleton className="h-6 w-3/4 rounded-lg" />
-                        <Skeleton className="h-4 w-1/2 rounded-lg" />
-                        <Skeleton className="h-4 w-1/3 rounded-lg" />
+                        <Skeleton className="h-6 w-3/4 rounded-lg"/>
+                        <Skeleton className="h-4 w-1/2 rounded-lg"/>
+                        <Skeleton className="h-4 w-1/3 rounded-lg"/>
                     </CardBody>
                 </Card>
             </div>
@@ -191,7 +205,7 @@ const WarehouseDetails = () => {
         return (
             <Card className="container mx-auto px-4 py-8">
                 <CardBody className="flex items-center justify-center text-center">
-                    <AlertTriangle className="text-danger h-12 w-12 mb-4" />
+                    <AlertTriangle className="text-danger h-12 w-12 mb-4"/>
                     <h2 className="text-xl font-bold">Error al cargar los datos</h2>
                     <p className="text-gray-500">{error}</p>
                     <Link href="/warehouses">
@@ -258,7 +272,7 @@ const WarehouseDetails = () => {
                     <CardBody>
                         <div className="overflow-auto">
                             <WarehouseMatrix
-                                key={matrixKey}
+                                key={refreshKey}
                                 warehouse={warehouse}
                                 onCellClick={handleCellClick}
                             />
@@ -280,7 +294,7 @@ const WarehouseDetails = () => {
                             <CardBody>
                                 <ProductDetails
                                     product={selectedProduct}
-                                    onEdit={handleEdit}
+
                                     onDeleteProduct={() => setIsConfirmDialogOpen(true)}
                                     productWarehouseSelect={selectedProductWarehouseSelect}
                                 />

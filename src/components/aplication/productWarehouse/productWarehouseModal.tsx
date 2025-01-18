@@ -35,11 +35,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
         selectedProductWarehouse,
         isViewMode,
         createProductWarehouse,
-<<<<<<< Updated upstream
-        updateProductWarehouse,
-=======
 
->>>>>>> Stashed changes
         productWarehouses,
         initialData,
     } = useContext(ProductWarehouseContext)!;
@@ -276,24 +272,11 @@ export default function ProductWarehouseModal({showToast}: Props) {
         }
 
 
-<<<<<<< Updated upstream
-        console.log('formData', formData);
-        console.log('selectedProductWarehouse', selectedProductWarehouse?.id);
-        /*try {
-            if (selectedProductWarehouse) {
-                await updateProductWarehouse(selectedProductWarehouse.id, formData as UpdateProductWarehouseDto);
-                showToast("Product warehouse updated successfully", ToastType.SUCCESS);
-            } else {
-                await createProductWarehouse(formData as CreateProductWarehouseDto);
-                showToast("Product warehouse created successfully", ToastType.SUCCESS);
-            }
-=======
         try {
 
 
             await createProductWarehouse(formData as CreateProductWarehouseDto);
             showToast("Product warehouse created successfully", ToastType.SUCCESS);
->>>>>>> Stashed changes
             await getProducts();
 
             // Reset the form after successful creation
@@ -302,7 +285,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
             closeModal();
         } catch (error) {
             showToast("Error submitting product warehouse data: " + error, ToastType.ERROR);
-        }*/
+        }
 
     };
 
@@ -310,14 +293,10 @@ export default function ProductWarehouseModal({showToast}: Props) {
         <Modal
             size='full'
             isOpen={isModalOpen}
-<<<<<<< Updated upstream
-            onClose={closeModal}
-=======
             onClose={() => {
                 closeModal();
                 resetForm(); // Reset form when modal is closed
             }}
->>>>>>> Stashed changes
             scrollBehavior="inside"
             classNames={{
                 base: "h-screen rounded-l-lg rounded-r-none w-2/3 m-0",
