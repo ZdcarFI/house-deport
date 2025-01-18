@@ -28,18 +28,6 @@ const productionInitialState: ProductionDto = {
         created_at: new Date(),
         updated_at: new Date(),
     },
-    user_receive_order: {
-        id: 0,
-        firstName: "",
-        lastName: "",
-        username: "",
-        email: "",
-        gender: "",
-        role: UserRol.USER, // Igual que en `user_order`
-        lastSession: undefined,
-        created_at: new Date(),
-        updated_at: new Date(),
-    },
     quantity: 0, // Valor predeterminado
     product: {
         id: 0,

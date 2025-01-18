@@ -102,9 +102,7 @@ const Categories = () => {
                 />
                 <div className="flex flex-row gap-3.5 flex-wrap">
                     <Button color="primary" onPress={handleAdd}>Agregar Categoría</Button>
-                    <Button color="secondary" startContent={<ExportIcon/>}>
-                        Exportar a CSV
-                    </Button>
+
                 </div>
                 <div className="w-full flex flex-col gap-4">
                     <CategoryTable

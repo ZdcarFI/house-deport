@@ -225,6 +225,7 @@ export default function CreateOrderPage() {
         )
     }
 
+
     return (
         <div className="container mx-auto p-4">
             <h1 className="text-2xl font-bold mb-4">Nueva Orden</h1>
@@ -272,7 +273,7 @@ export default function CreateOrderPage() {
                                             value={orderData.paymentType}
                                             onChange={(e) => setOrderData({...orderData, paymentType: e.target.value})}
                                             className="mb-2"
-                                            aria-label="Select a payment type"
+                                            label="Seleccione el tipo de pago"
                                         >
                                             <SelectItem key="YAPE" value="yape">Yape</SelectItem>
                                             <SelectItem key="CASH" value="cash">Efectivo</SelectItem>
@@ -301,7 +302,7 @@ export default function CreateOrderPage() {
                                                             allowsCustomValue={true}
                                                             defaultItems={products}
                                                             onSelectionChange={onSelectionChangeProduct}
-                                                            aria-label="Select a product"
+                                                            label="Seleccione el producto"
                                                             inputValue={newCart.name}
                                                             onInputChange={(value) => setNewCart({
                                                                 ...newCart,
@@ -310,7 +311,7 @@ export default function CreateOrderPage() {
                                                         >
                                                             {products.map((product) => (
                                                                 <AutocompleteItem key={product.id} value={product.id}>
-                                                                    {`${product.name} | ${product.size.name}`}
+                                                                    {`${product.name} - ${product.size.name} - ${product.code}`}
                                                                 </AutocompleteItem>
                                                             ))}
                                                         </Autocomplete>
@@ -338,19 +339,19 @@ export default function CreateOrderPage() {
                                                                     })
                                                                 }
                                                             }}
-                                                            aria-label="Select a product location"
+                                                            label="Seleccione su ubicacion"
                                                             isDisabled={newCart.id === 0}
                                                         >
                                                             {newCart.productWarehouses.map((productWarehouse) => (
                                                                 <SelectItem
                                                                     key={productWarehouse.id}
                                                                     value={productWarehouse.id.toString()}
-                                                                    textValue={`${productWarehouse.row}-${productWarehouse.column}`}
+                                                                    textValue={`${String.fromCharCode(65 + (productWarehouse.row - 1))}-${productWarehouse.column} - Max Venta: ${productWarehouse.quantity}`}
                                                                     style={{
                                                                         backgroundColor: productWarehouse.color,
                                                                     }}
                                                                 >
-                                                                    {productWarehouse.name}{" "}{productWarehouse.row}-{productWarehouse.column}
+                                                                    {"Almacen: "}{productWarehouse.name}{" || "}{String.fromCharCode(65 + (productWarehouse.row - 1))}-{productWarehouse.column}{" || Max Venta: "}{productWarehouse.quantity}
                                                                 </SelectItem>
                                                             ))}
                                                         </Select>
@@ -402,7 +403,7 @@ export default function CreateOrderPage() {
                                                                         backgroundColor: dataCart.location.color,
                                                                     }}
                                                                 >
-                                                                    {dataCart.location.name}{" "}{dataCart.location.row}-{dataCart.location.column}
+                                                                    {"Almacen: "}{dataCart.location.name}{" || "}{String.fromCharCode(65 + (dataCart.location.row - 1))}-{dataCart.location.column}
                                                                 </Button>
                                                             </TableCell>
                                                             <TableCell>

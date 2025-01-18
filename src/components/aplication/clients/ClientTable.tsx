@@ -46,8 +46,11 @@ export default function ClientTable({clients, onEdit, onDelete, onView}: ClientT
         <Table aria-label="Clients table">
             <TableHeader>
                 <TableColumn>Nombre</TableColumn>
-                <TableColumn>Correo</TableColumn>
+                <TableColumn>Tipo Documento</TableColumn>
+                <TableColumn>Numero documento</TableColumn>
+                <TableColumn>Tipo Contribuyente</TableColumn>
                 <TableColumn>Celular</TableColumn>
+                <TableColumn>Direccion</TableColumn>
                 <TableColumn>Fecha de creación</TableColumn>
                 <TableColumn>Fecha de actualización</TableColumn>
                 <TableColumn>Acciones</TableColumn>
@@ -56,8 +59,11 @@ export default function ClientTable({clients, onEdit, onDelete, onView}: ClientT
                 {clients.map((client) => (
                     <TableRow key={client.id}>
                         <TableCell>{`${client.firstName} ${client.lastName}`}</TableCell>
+                        <TableCell>{client.typeDocument}</TableCell>
+                        <TableCell>{client.numberDocument}</TableCell>
                         <TableCell>{client.email}</TableCell>
                         <TableCell>{client.phone}</TableCell>
+                        <TableCell>{client.address}</TableCell>
                         <TableCell>{new Date(client.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>{new Date(client.updated_at).toLocaleDateString()}</TableCell>
                         <TableCell>{renderCell(client, 'actions')}</TableCell>

@@ -139,13 +139,7 @@ export default function Warehouses() {
                             >
                                 Agregar Almacén
                             </Button>
-                            <Button
-                                color="secondary"
-                                variant="flat"
-                                startContent={<ExportIcon />}
-                            >
-                                Exportar CSV
-                            </Button>
+
                         </div>
                     </div>
 

@@ -1,28 +1,18 @@
-"use client"
-
+'use client'
 import React, {useState, useEffect, useContext} from 'react';
 import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from '@nextui-org/modal';
 import {Button} from '@nextui-org/button';
 import {Select, SelectItem} from "@nextui-org/select";
-
 import {ProductionContext} from '@/context/ProductionContext/productionContext';
 import {UpdateProductionDto} from '@/services/Production/dto/UpdateProductionDto';
 import {CreateProductionDto} from '@/services/Production/dto/CreateProductionDto';
 import {ProductContext} from "@/context/ProductContext/productContext";
 import {ToastType} from '@/components/Toast/Toast';
-import ProductSearch from "@/components/aplication/products/ProductSearch";
 import {ProductDto} from "@/services/Dto/ProductDto";
+import {Input} from "@nextui-org/input";
 
 interface Props {
     showToast: (message: string, type: ToastType) => void;
-}
-
-interface ProductionFormData {
-    quantity?: number;
-    productId?: number;
-    status?: 'pending' | 'completed' | 'canceled';
-    user_orderId?: number;
-    user_receive_orderId?: number;
 }
 
 export default function ProductionModal({showToast}: Props) {
@@ -35,48 +25,61 @@ export default function ProductionModal({showToast}: Props) {
         updateProduction,
     } = useContext(ProductionContext)!;
 
-    const {products, getProducts} = useContext(ProductContext)!;
+    const {getProducts} = useContext(ProductContext)!;
 
-    const [formData, setFormData] = useState<ProductionFormData>({
+    const [formData, setFormData] = useState({
         quantity: 0,
         productId: 0,
-        status: 'pending'
+        status: 'completed' as const
     });
 
-    const [quantityError, setQuantityError] = useState<string>("");
+    const [quantityError, setQuantityError] = useState("");
     const [productSelected, setProductSelected] = useState<ProductDto | undefined>(undefined);
 
+    useEffect(() => {
+        // Listen for product selection from the table
+        const handleProductSelect = (event: CustomEvent) => {
+            const product = event.detail;
+            setProductSelected(product);
+            setFormData(prev => ({...prev, productId: product.id}));
+        };
+
+        window.addEventListener('selectProduct', handleProductSelect as EventListener);
+        return () => {
+            window.removeEventListener('selectProduct', handleProductSelect as EventListener);
+        };
+    }, []);
 
     useEffect(() => {
         if (selectedProduction) {
             setFormData({
-                status: selectedProduction.status as 'pending' | 'completed' | 'canceled',
-                productId: selectedProduction.product?.id,
-                quantity: selectedProduction.quantity
+                status: selectedProduction.status as 'completed',
+                productId: selectedProduction.product?.id || 0,
+                quantity: selectedProduction.quantity || 0
             });
         } else {
             setFormData({
                 quantity: 0,
                 productId: 0,
-                status: 'pending'
+                status: 'completed'
             });
         }
     }, [selectedProduction]);
 
-    const handleQuantityChange = (value: number) => {
-        if (value < 0) {
+    const handleQuantityChange = (value: string) => {
+        const numValue = parseInt(value);
+        if (isNaN(numValue) || numValue < 0) {
             setQuantityError("La cantidad debe ser mayor a 0");
         } else {
             setQuantityError("");
+            setFormData(prev => ({...prev, quantity: numValue}));
         }
-        setFormData(prev => ({...prev, quantity: value}));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (quantityError) {
-            showToast("Por favor corrija los errores de validación", ToastType.ERROR);
+        if (quantityError || !formData.productId) {
+            showToast("Por favor ingrese algun valor", ToastType.ERROR);
             return;
         }
 
@@ -86,68 +89,81 @@ export default function ProductionModal({showToast}: Props) {
             if (selectedProduction) {
                 const updateData: UpdateProductionDto = {
                     status: formData.status,
-                    user_receive_orderId: userLog?.id || formData.user_receive_orderId
+                    user_receive_orderId: userLog?.id
                 };
                 await updateProduction(selectedProduction.id, updateData);
-                await getProducts()
-                showToast("Production updated successfully", ToastType.SUCCESS);
             } else {
                 const createData: CreateProductionDto = {
-                    quantity: formData.quantity!,
-                    productId: formData.productId!,
+                    quantity: formData.quantity,
+                    productId: formData.productId,
                     user_orderId: userLog?.id,
                 };
                 await createProduction(createData);
-                showToast("Production created successfully", ToastType.SUCCESS);
             }
+
+            await getProducts();
+            showToast(
+                selectedProduction ? "Producción actualizada exitosamente" : "Producción creada exitosamente",
+                ToastType.SUCCESS
+            );
             closeModal();
         } catch (error) {
-            showToast("Error submitting production data: " + (error instanceof Error ? error.message : String(error)), ToastType.ERROR);
+            showToast(
+                "Error al procesar la producción: " + (error instanceof Error ? error.message : String(error)),
+                ToastType.ERROR
+            );
         }
     };
 
-    const boolean = false
     return (
-        <Modal
-            isOpen={isModalOpen}
-            onClose={closeModal}
-            scrollBehavior="inside"
-            size="2xl"
-        >
+        <Modal isOpen={isModalOpen} onClose={closeModal} scrollBehavior="inside" size="2xl">
             <ModalContent>
                 <form onSubmit={handleSubmit}>
                     <ModalHeader>
-                        <h2>{isViewMode ? 'Ver produccion' : selectedProduction ? 'Editar Produccion' : 'Agregar Produccion'}</h2>
+                        <h2>{isViewMode ? 'Ver producción' : selectedProduction ? 'Editar Producción' : 'Agregar Producción'}</h2>
                     </ModalHeader>
                     <ModalBody>
-                        {!selectedProduction && (
-                            <ProductSearch
-                                boolean={boolean}
-                                products={products}
-                                isViewMode={isViewMode}
-                                isProductDisabled={false}
-                                showToast={showToast}
-                                onProductSelect={(productId) => {
-                                    setProductSelected(products.find(p => p.id === productId));
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        productId
-                                    }));
-                                }}
-                                selectedProduct={productSelected}
-                                onQuantityChange={handleQuantityChange}
-                                quantity={formData.quantity || 0}
-                                quantityError={quantityError}
-                            />
+                        {productSelected && (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm font-medium">Producto:</p>
+                                        <p>{productSelected.name}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium">Código:</p>
+                                        <p>{productSelected.code}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium">Categoría:</p>
+                                        <p>{productSelected.category?.name}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium">Talla:</p>
+                                        <p>{productSelected.size?.name}</p>
+                                    </div>
+                                </div>
+
+                                <Input
+                                    type="number"
+                                    label="Cantidad"
+                                    placeholder="Ingrese la cantidad"
+                                    value={formData.quantity.toString()}
+                                    onChange={(e) => handleQuantityChange(e.target.value)}
+                                    errorMessage={quantityError}
+                                    isRequired
+                                />
+                            </div>
                         )}
+
                         {selectedProduction && (
                             <Select
-                                label="Estado de produccion"
-                                placeholder="Seleccion el estado de produccion"
+                                label="Estado de producción"
+                                placeholder="Seleccione el estado de producción"
                                 selectedKeys={formData.status ? [formData.status] : []}
                                 onChange={(e) => setFormData(prev => ({
                                     ...prev,
-                                    status: e.target.value as 'pending' | 'completed' | 'canceled'
+                                    status: e.target.value as 'completed'
                                 }))}
                                 isRequired
                                 isDisabled={isViewMode}
@@ -159,7 +175,7 @@ export default function ProductionModal({showToast}: Props) {
                     </ModalBody>
                     <ModalFooter>
                         <Button color="danger" variant="light" onPress={closeModal}>
-                            Close
+                            Cerrar
                         </Button>
                         {!isViewMode && (
                             <Button color="primary" type="submit">

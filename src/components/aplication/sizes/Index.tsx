@@ -102,9 +102,7 @@ export default function Sizes() {
         />
         <div className="flex flex-row gap-3.5 flex-wrap">
           <Button color="primary" onPress={handleAdd}>Agregar talla</Button>
-          <Button color="secondary" startContent={<ExportIcon />}>
-            Exportar en csv
-          </Button>
+
         </div>
         <div className="w-full flex flex-col gap-4">
           <SizeTable

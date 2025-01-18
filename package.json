@@ -45,7 +45,9 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18",
     "react-iconly": "^2.2.10",
-    "recharts": "^2.13.3"
+    "recharts": "^2.13.3",
+    "xlsx": "^0.18.5",
+    "xlsx-style": "^0.8.13"
   },
   "devDependencies": {
     "@types/node": "^20",

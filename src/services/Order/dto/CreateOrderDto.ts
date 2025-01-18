@@ -7,5 +7,6 @@ export interface ProductBasicCreateDto {
 export interface CreateOrderDto {
     readonly clientId: number;
     readonly userId: number;
+    readonly paymentType: string;
     readonly products: ProductBasicCreateDto[];
 }

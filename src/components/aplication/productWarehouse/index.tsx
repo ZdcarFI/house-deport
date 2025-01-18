@@ -62,11 +62,51 @@ export default function ProductWarehouses() {
   // Show loading state without blocking the UI
   if (loading) {
     return (
+<<<<<<< Updated upstream
       <div className="flex justify-center items-center h-96">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
+=======
+        <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full flex flex-col gap-4">
+            <ul className="flex">
+                <li className="flex gap-2">
+                    <HouseIcon/>
+                    <Link href={"/"}>
+                        <span>Home</span>
+                    </Link>
+                    <span> / </span>{" "}
+                </li>
+                <li className="flex gap-2">
+                    <BoxIcon/>
+                    <span>Producto en el Almacen</span>
+                    <span> / </span>{" "}
+                </li>
+                <li className="flex gap-2">
+                    <span>Lista</span>
+                </li>
+            </ul>
+            <h3 className="text-xl font-semibold">Todos los productos y su almacen</h3>
+            <div className="flex justify-between flex-wrap gap-4 items-center">
+                <Input
+                    className="w-full sm:max-w-[300px]"
+                    placeholder="Buscar producto en el almacen..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    startContent={<SearchIcon className="text-default-400" size={20}/>}
+                />
+                <div className="flex flex-row gap-3.5 flex-wrap">
+                    <Button color="primary" onPress={handleAdd}>Enviar Producto al almacen</Button>
+
+                </div>
+                <div className="w-full flex flex-col gap-4">
+                    {productWarehouses.length === 0 ? (
+                        <div>No product warehouses found.</div>
+                    ) : (
+                        <ProductWarehouseTable
+                            productWarehouses={filteredProductWarehouses}
+>>>>>>> Stashed changes
 
 
   return (

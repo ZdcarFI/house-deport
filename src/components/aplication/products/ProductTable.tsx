@@ -1,17 +1,16 @@
-'use client'
-import React, {useContext} from 'react';
+'use client';
 
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from '@nextui-org/table';
-import {Tooltip} from '@nextui-org/tooltip';
-import {Button} from '@nextui-org/button';
-import {EditIcon} from '../../icons/table/edit-icon';
-import {DeleteIcon} from '../../icons/table/delete-icon';
-import {EyeIcon} from '../../icons/table/eye-icon';
-import {PlusCircle, Warehouse} from 'lucide-react';
-import {ProductDto} from '@/services/Dto/ProductDto';
-import {ProductWarehouseContext} from '@/context/ProductWarehouseContext/productWarehouseContext';
-import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@nextui-org/dropdown";
-import {useRouter} from "next/navigation";
+import React, {useContext} from 'react';
+import {Button, Tooltip} from "@nextui-org/react";
+
+import {PlusCircle, ChevronDown, ChevronUp, Eye, Edit, Trash2} from 'lucide-react';
+import {ProductDto, ProductWarehouseBasicDto} from '@/services/Dto/ProductDto';
+import {ProductionContext} from "@/context/ProductionContext/productionContext";
+import AgregarStock from "@/components/aplication/productWarehouse/agregarStock";
+import {ProductWarehouseContext} from "@/context/ProductWarehouseContext/productWarehouseContext";
+import ConfirmDialog from "@/components/modal/ConfirmDialog";
+import {ToastType} from "@/components/Toast/Toast";
+import {ToastContext} from "@/context/ToastContext/ToastContext";
 
 interface ProductTableProps {
     products: ProductDto[];
@@ -21,107 +20,217 @@ interface ProductTableProps {
 }
 
 export default function ProductTable({products, onView, onEdit, onDelete}: ProductTableProps) {
-    const router = useRouter();
-    const {openModal: openModalProductWarehouse} = useContext(ProductWarehouseContext)!;
+    const {openModal} = useContext(ProductionContext)!;
+    const [expandedKeys, setExpandedKeys] = React.useState<Set<number>>(new Set());
+    const {productWarehouses, deleteProductWarehouse} = useContext(ProductWarehouseContext)!;
+    const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
+    const {showToast} = useContext(ToastContext)!;
+    const [selectedProductWarehouseId, setSelectedProductWarehouseId] = React.useState<number | null>(null);
 
-    const handleProductionClick = () => {
-
-        return router.push('/production');
+    const SearchProductwarehouse = (id: number) => {
+        const warehouse = productWarehouses.find(warehouse => warehouse.id === id);
+        if (!warehouse) {
+            throw new Error(`No se encontró el almacén con ID: ${id}`);
+        }
+        return warehouse;
     };
+    const handleDelete = async (id: number) => {
+        try {
+            const warehouse = SearchProductwarehouse(id);
+            if (!warehouse) {
 
-    const renderCell = (product: ProductDto, columnKey: React.Key): React.ReactNode => {
-        switch (columnKey) {
-            case 'actions':
-                return (
-                    <div className="flex items-center gap-4">
-                        <Tooltip content="Details" color="primary">
-                            <button onClick={() => onView(product)}>
-                                <EyeIcon size={20} fill="#979797"/>
-                            </button>
-                        </Tooltip>
-                        <Tooltip content="Edit product" color="secondary">
-                            <button onClick={() => onEdit(product)}>
-                                <EditIcon size={20} fill="#979797"/>
-                            </button>
-                        </Tooltip>
-                        <Tooltip content="Delete product" color="danger">
-                            <button onClick={() => onDelete(product.id)}>
-                                <DeleteIcon size={20} fill="#FF0080"/>
-                            </button>
-                        </Tooltip>
-                        <Dropdown>
-                            <DropdownTrigger>
-                                <Button className="min-w-5 bg-[rgb(244_244_245)] dark:bg-[rgb(39_39_42)]">
-                                    <span className="text-xl font-black">⋮</span>
-                                </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu aria-label="Actions">
-                                <DropdownItem
-                                    onClick={() => handleProductionClick()}
-                                    key="increment-stock"
-                                    color="success"
-                                    textValue="Increment Stock"
-                                >
-                                    <>
-                                        <PlusCircle size={20}/>
-                                        <button>Ir a produccion</button>
-                                    </>
-                                </DropdownItem>
-                                <DropdownItem
-                                    onClick={() => openModalProductWarehouse(null, false, product)}
-                                    key="send-to-warehouse"
-                                    color="warning"
-                                    textValue="Send to Warehouse"
-                                >
-                                    <>
-                                        <Warehouse size={20}/>
-                                        <button>Enviar al almacén</button>
-                                    </>
-                                </DropdownItem>
-                            </DropdownMenu>
-                        </Dropdown>
-                    </div>
-                );
-            case 'category':
-                return product.category?.name ?? "N/A";
-            case 'size':
-                return product.size?.name ?? "N/A";
-            case 'warehouse':
-                return product.productWarehouse[0]?.name ?? "N/A";
-            case 'stockInventory':
-                return product.stockInventory ?? "N/A";
-            case 'stockStore':
-                return product.stockStore ?? "N/A";
-            case 'created_at':
-                return new Date(product.created_at).toLocaleDateString();
-            case 'updated_at':
-                return new Date(product.updated_at).toLocaleDateString();
-            default:
-                return product[columnKey as keyof ProductDto]?.toString() ?? "N/A";
+                showToast("El producto ya fue eliminado del almacén", ToastType.INFO);
+                return;
+            }
+
+
+            await deleteProductWarehouse(id);
+            showToast("Producto eliminado exitosamente", ToastType.SUCCESS);
+            setIsConfirmDialogOpen(false);
+        } catch (error) {
+            showToast("Error al eliminar el producto: " + error, ToastType.ERROR);
         }
     };
 
+    const toggleExpandRow = (id: number) => {
+        setExpandedKeys((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
+
+    const numberToLetter = (num: number): string => {
+        return String.fromCharCode(64 + num);
+    };
+
+    const handleAddProduction = (product: ProductDto) => {
+        openModal(null, false);
+        const productData = {
+            id: product.id,
+            name: product.name,
+            code: product.code,
+            category: product.category,
+            size: product.size,
+            stockInventory: product.stockInventory,
+            stockStore: product.stockStore,
+        };
+        window.dispatchEvent(new CustomEvent('selectProduct', {detail: productData}));
+    };
+
+    const renderActions = (product: ProductDto) => (
+        <div className="flex items-center gap-4">
+            <Tooltip content="Details">
+                <Button isIconOnly variant="light" onPress={() => onView(product)} aria-label="View details">
+                    <Eye size={20}/>
+                </Button>
+            </Tooltip>
+            <Tooltip content="Edit product">
+                <Button isIconOnly variant="light" onPress={() => onEdit(product)} aria-label="Edit product">
+                    <Edit size={20}/>
+                </Button>
+            </Tooltip>
+            <Tooltip content="Delete product">
+                <Button isIconOnly color="danger" variant="light" onPress={() => onDelete(product.id)}
+                        aria-label="Delete product">
+                    <Trash2 size={20}/>
+                </Button>
+            </Tooltip>
+            <Tooltip content="Add Production">
+                <Button variant="light" onPress={() => handleAddProduction(product)}
+                        startContent={<PlusCircle size={20}/>}>
+                    Agregar producción
+                </Button>
+            </Tooltip>
+        </div>
+    );
+
+    const renderWarehouseDetails = (warehouses: ProductWarehouseBasicDto[]) => (
+        <div className="px-8 py-4 dark:bg-gray-800">
+            <div className="grid grid-cols-5 gap-4 font-medium text-sm text-gray-600 dark:text-gray-300 mb-2">
+
+                <div>NOMBRE ALMACEN</div>
+                <div>FILA</div>
+                <div>COLUMNA</div>
+                <div>CANTIDAD</div>
+                <div>ACCIONES</div>
+            </div>
+            {warehouses && warehouses.length > 0 ? (
+                warehouses.map((warehouse) => (
+                    <div key={warehouse.id}
+                         className="grid grid-cols-5 gap-4 py-2 border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div className="dark:text-gray-200">{warehouse.name}</div>
+                        <div className="dark:text-gray-200">{numberToLetter(warehouse.row)}</div>
+                        <div className="dark:text-gray-200">{warehouse.column}</div>
+                        <div className="dark:text-gray-200">{warehouse.quantity}</div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <Tooltip content="Agregar Stock">
+                                    <Button isIconOnly color="success" variant="light"
+                                            className="dark:hover:bg-green-800"
+                                            aria-label="Agregar Stock">
+                                        <AgregarStock productWarehouse={SearchProductwarehouse(warehouse.id)}/>
+                                    </Button>
+                                </Tooltip>
+                                {/*<Tooltip content="Eliminar Producto del almacen">*/}
+                                    {/*<Button*/}
+                                    {/*    isIconOnly*/}
+                                    {/*    color="danger"*/}
+                                    {/*    variant="light"*/}
+                                    {/*    className="dark:hover:bg-red-800"*/}
+                                    {/*    onPress={() => {*/}
+                                    {/*        setSelectedProductWarehouseId(warehouse.id);*/}
+                                    {/*        setIsConfirmDialogOpen(true);*/}
+                                    {/*    }}*/}
+                                    {/*    aria-label="Eliminar Producto"*/}
+                                    {/*>*/}
+                                    {/*    <Trash2 size={20}/>*/}
+                                    {/*</Button>*/}
+                                {/*</Tooltip>*/}
+                            </div>
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <div className="text-center italic text-gray-500 dark:text-gray-400 py-4">
+                    No hay detalles de almacén disponibles
+                </div>
+            )}
+        </div>
+    );
+
     return (
-        <Table aria-label="Products table">
-            <TableHeader>
-                <TableColumn key="name">Nombre</TableColumn>
-                <TableColumn key="code">Código</TableColumn>
-                <TableColumn key="price">Precio</TableColumn>
-                <TableColumn key="category">Categoria</TableColumn>
-                <TableColumn key="size">Talla</TableColumn>
-                <TableColumn key="stockInventory">Stock en el inventario</TableColumn>
-                <TableColumn key="stockStore">Stock en los almacenes</TableColumn>
-                <TableColumn key="created_at">Fecha de creación</TableColumn>
-                <TableColumn key="updated_at">Fecha de actualización</TableColumn>
-                <TableColumn key="actions">Acciones</TableColumn>
-            </TableHeader>
-            <TableBody>
+        <div className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+            <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr className="text-left">
+                    <th className="p-4 text-gray-700 dark:text-gray-200 font-semibold">Nombre Producto</th>
+                    <th className="p-4 text-gray-700 dark:text-gray-200 font-semibold">Codigo</th>
+                    <th className="p-4 text-gray-700 dark:text-gray-200 font-semibold">Stock Inventario</th>
+                    <th className="p-4 text-gray-700 dark:text-gray-200 font-semibold">Stock Almacen</th>
+                    <th className="p-4 text-gray-700 dark:text-gray-200 font-semibold">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
                 {products.map((product) => (
-                    <TableRow key={product.id}>
-                        {(columnKey) => <TableCell>{renderCell(product, columnKey)}</TableCell>}
-                    </TableRow>
+                    <React.Fragment key={product.id}>
+                        <tr className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <td className="p-4">
+                                <div className="flex items-center">
+                                    <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="light"
+                                        className="dark:text-gray-200 dark:hover:bg-gray-700"
+                                        onPress={() => toggleExpandRow(product.id)}
+                                        aria-label={expandedKeys.has(product.id) ? "Collapse" : "Expand"}
+                                    >
+                                        {expandedKeys.has(product.id) ? (
+                                            <ChevronUp className="w-4 h-4"/>
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4"/>
+                                        )}
+                                    </Button>
+                                    <span className="ml-2 dark:text-gray-200">{product.name}</span>
+                                </div>
+                            </td>
+                            <td className="p-4 dark:text-gray-200">{product.code}</td>
+                            <td className="p-4 dark:text-gray-200">{product.stockInventory}</td>
+                            <td className="p-4 dark:text-gray-200">{product.stockStore}</td>
+                            <td className="p-4">{renderActions(product)}</td>
+                        </tr>
+                        {expandedKeys.has(product.id) && (
+                            <tr className="dark:bg-gray-800">
+                                <td colSpan={5} className="p-0">
+                                    {renderWarehouseDetails(product.productWarehouse || [])}
+                                </td>
+                            </tr>
+                        )}
+                    </React.Fragment>
                 ))}
-            </TableBody>
-        </Table>
+                </tbody>
+            </table>
+            <ConfirmDialog
+                title="¿Estás seguro de que quitar el producto del almacen?"
+                isOpen={isConfirmDialogOpen}
+                onConfirm={() => {
+                    if (selectedProductWarehouseId) {
+                        handleDelete(selectedProductWarehouseId);
+                    }
+                }}
+                onClose={() => {
+                    setIsConfirmDialogOpen(false);
+                    setSelectedProductWarehouseId(null);
+                }}
+                onCancel={() => {
+                    setIsConfirmDialogOpen(false);
+                    setSelectedProductWarehouseId(null);
+                }}
+            />
+        </div>
     );
 }

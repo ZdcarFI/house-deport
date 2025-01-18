@@ -1,6 +1,6 @@
 import {
     // BookOpen,
-    Box, Home,
+    Home,
     Layers,
     ListOrdered,
     PlusSquare,
@@ -19,10 +19,10 @@ export const Roles = {
     Products: ['admin', 'warehouse', 'sales'],
     Users: ['admin'],
     Clients: ['admin', 'sales'],
-    Production: ['admin', 'warehouse'],
+    // Production: ['admin', 'warehouse'],
     Orders: ['admin', 'sales'],
     Warehouses: ['admin', 'warehouse'],
-    WarehouseProducts: ['admin', 'warehouse'],
+    // WarehouseProducts: ['admin', 'warehouse'],
     View: ['admin', 'user', 'warehouse', 'sales'],
     Settings: ['admin', 'user', 'warehouse', 'sales'],
     Changelog: ['admin', 'user', 'warehouse', 'sales'],
@@ -84,12 +84,12 @@ export const routes = [
             icon: <Warehouse strokeWidth={1.5} size={24}/>,
             roles: Roles.Warehouses,
         },
-            {
-                path: '/warehouseProduct',
-                title: 'Productos en Almacén',
-                icon: <Box strokeWidth={1.5} size={24}/>,
-                roles: Roles.WarehouseProducts,
-            },
+            // {
+            //     path: '/warehouseProduct',
+            //     title: 'Productos en Almacén',
+            //     icon: <Box strokeWidth={1.5} size={24}/>,
+            //     roles: Roles.WarehouseProducts,
+            // },
         ],
     },
     {
@@ -115,16 +115,17 @@ export const routes = [
 
         ],
     },
-    {
-        title: 'Gestión de Produccion',
-        routes: [{
-            path: '/production',
-            title: 'Listado de Produccion',
-            icon: <Box strokeWidth={1.5} size={24}/>,
-            roles: Roles.Clients,
-        },
-        ],
-    },
+
+    // {
+    //     title: 'Gestión de Produccion',
+    //     routes: [{
+    //         path: '/production',
+    //         title: 'Listado de Produccion',
+    //         icon: <Box strokeWidth={1.5} size={24}/>,
+    //         roles: Roles.Clients,
+    //     },
+    //     ],
+    // },
     // {
     //     title: 'Configuración',
     //     routes: [{

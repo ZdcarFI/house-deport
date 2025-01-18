@@ -1,5 +1,5 @@
-import { UserDto } from "@/services/Dto/UserDto";
-import { ClientDto } from "@/services/Dto/ClienDto";
+import {UserDto} from "@/services/Dto/UserDto";
+import {ClientDto} from "@/services/Dto/ClienDto";
 
 export interface ProductBasicDto {
     readonly id: number;
@@ -28,6 +28,7 @@ export interface OrderDto {
     readonly subtotal: number;
     readonly total: number;
     readonly details: DetailDto[];
-    readonly created_at : Date;
-    readonly updated_at : Date;
+    readonly created_at: Date;
+    readonly updated_at: Date;
+    readonly  paymentType: string;
 }

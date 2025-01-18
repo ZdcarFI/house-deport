@@ -1,15 +1,12 @@
-import {CategoryBasicDto, CategoryDto} from "./CategoryDto";
+import {CategoryBasicDto} from "./CategoryDto";
 import { SizeDto } from "./SizeDto";
 
 
-//Enums color
+
 export enum Color {
-    DEFAULT = 'default',
-    PRIMARY = 'primary',
-    SECONDARY = 'secondary',
+
     SUCCESS = 'success',
-    WARNING = 'warning',
-    DANGER = 'danger'
+
 }
 
 export interface ProductWarehouseBasicDto {

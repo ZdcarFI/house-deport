@@ -32,7 +32,29 @@ const WarehouseDetails = () => {
     const [selectedProductWarehouseSelect, setSelectedProductWarehouseSelect] = useState<ProductWarehouseDto | null | Partial<ProductWarehouseDto>>(null);
     const { getWarehouse, loading, error } = useContext(WarehouseContext)!;
 
+<<<<<<< Updated upstream
     const [matrixKey, setMatrixKey] = useState(0);
+=======
+
+    const [refreshKey, setRefreshKey] = useState(0);
+    const isRefreshing = React.useRef(false);
+
+    const refreshWarehouseData = React.useCallback(async () => {
+        if (isRefreshing.current) return;
+        isRefreshing.current = true;
+
+        try {
+            const warehouseData = await getWarehouse(Number(id));
+            setWarehouse(warehouseData);
+            setRefreshKey((prevKey) => prevKey + 1);
+        } catch (e) {
+            console.error("Error fetching warehouse:", e);
+            showToast("Error refreshing warehouse data", ToastType.ERROR);
+        } finally {
+            isRefreshing.current = false;
+        }
+    }, [id, showToast]);
+>>>>>>> Stashed changes
 
     React.useEffect(() => {
         if (!id) return;
@@ -85,11 +107,10 @@ const WarehouseDetails = () => {
             setSelectedProductWarehouseSelect(null);
         }
     };
-    const numberToLetter = (num: number) => {
-        return String.fromCharCode(65 + num - 1);
-    };
+
     const handleAddProduct = () => {
         if (warehouse && selectedCell) {
+
             openModal(null, false, {
                 warehouseId: warehouse.id,
                 row: selectedCell.row,
@@ -129,7 +150,9 @@ const WarehouseDetails = () => {
         }
     };
 
-
+    const numberToLetter = (num: number) => {
+        return String.fromCharCode(65 + num - 1);
+    };
     if (!warehouse) {
         return (
             <Card className="container mx-auto px-4 py-8">

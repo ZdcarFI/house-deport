@@ -3,7 +3,6 @@
 import React, {useContext, useState, useEffect} from 'react';
 import {Button, Input, Skeleton} from "@nextui-org/react";
 import Link from "next/link";
-import {ExportIcon} from "@/components/icons/accounts/export-icon";
 import {HouseIcon} from "@/components/icons/breadcrumb/house-icon";
 import {ProductDto} from "@/services/Dto/ProductDto";
 import ProductTable from "@/components/aplication/products/ProductTable";
@@ -19,6 +18,7 @@ import WarehouseModal from '../warehouses/WarehouseModal';
 import ProductWarehouseModal from '../productWarehouse/productWarehouseModal';
 import OrdersTableSkeleton from "@/components/skeletons/TableSkeleton";
 import ProductionModal from "@/components/aplication/production/ProductionModal";
+import ExportToExcelProducts from "@/components/aplication/products/ExportExcelProducts";
 
 export default function Products() {
     const {
@@ -74,7 +74,7 @@ export default function Products() {
 
     if (loading) {
         return (
-            <div className="my-10 px-4 lg:px-6 max-w-[95rem] mx-auto w-full flex flex-col gap-4">
+            <div className="my-10 px-4 lg:px-6 max-w-[95rem]  mx-auto w-full flex flex-col gap-4">
                 <ul className="flex">
                     <li className="flex gap-2">
                         <HouseIcon/>
@@ -148,9 +148,8 @@ export default function Products() {
                 />
                 <div className="flex flex-row gap-3.5 flex-wrap">
                     <Button color="primary" onPress={handleAdd}>Agregar Producto</Button>
-                    <Button color="primary" startContent={<ExportIcon/>}>
-                        Exportar en CSV
-                    </Button>
+                    <ExportToExcelProducts products={products}/>
+
                 </div>
                 <div className="w-full flex flex-col gap-4">
                     {loading ? (

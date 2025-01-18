@@ -35,7 +35,11 @@ export default function ProductWarehouseModal({showToast}: Props) {
         selectedProductWarehouse,
         isViewMode,
         createProductWarehouse,
+<<<<<<< Updated upstream
         updateProductWarehouse,
+=======
+
+>>>>>>> Stashed changes
         productWarehouses,
         initialData,
     } = useContext(ProductWarehouseContext)!;
@@ -56,12 +60,24 @@ export default function ProductWarehouseModal({showToast}: Props) {
         row: 0,
         column: 0,
     });
+    const initialFormState = {
+        productId: 0,
+        warehouseId: 0,
+        quantity: 0,
+        row: 0,
+        column: 0,
+    };
+
 
     const [errors, setErrors] = useState<FormErrors>({});
     const [isProductDisabled, setIsProductDisabled] = useState(false);
     const [isWarehouseDisabled, setIsWarehouseDisabled] = useState(false);
     const [productSelected, setProductSelected] = useState<ProductDto | undefined>(undefined);
-
+    const resetForm = () => {
+        setFormData(initialFormState);
+        setErrors({});
+        setProductSelected(undefined);
+    };
     useEffect(() => {
         let productDisabled = false;
         let warehouseDisabled = false;
@@ -260,6 +276,7 @@ export default function ProductWarehouseModal({showToast}: Props) {
         }
 
 
+<<<<<<< Updated upstream
         console.log('formData', formData);
         console.log('selectedProductWarehouse', selectedProductWarehouse?.id);
         /*try {
@@ -270,7 +287,18 @@ export default function ProductWarehouseModal({showToast}: Props) {
                 await createProductWarehouse(formData as CreateProductWarehouseDto);
                 showToast("Product warehouse created successfully", ToastType.SUCCESS);
             }
+=======
+        try {
+
+
+            await createProductWarehouse(formData as CreateProductWarehouseDto);
+            showToast("Product warehouse created successfully", ToastType.SUCCESS);
+>>>>>>> Stashed changes
             await getProducts();
+
+            // Reset the form after successful creation
+            resetForm();
+
             closeModal();
         } catch (error) {
             showToast("Error submitting product warehouse data: " + error, ToastType.ERROR);
@@ -282,7 +310,14 @@ export default function ProductWarehouseModal({showToast}: Props) {
         <Modal
             size='full'
             isOpen={isModalOpen}
+<<<<<<< Updated upstream
             onClose={closeModal}
+=======
+            onClose={() => {
+                closeModal();
+                resetForm(); // Reset form when modal is closed
+            }}
+>>>>>>> Stashed changes
             scrollBehavior="inside"
             classNames={{
                 base: "h-screen rounded-l-lg rounded-r-none w-2/3 m-0",
@@ -341,4 +376,3 @@ export default function ProductWarehouseModal({showToast}: Props) {
         </Modal>
     );
 }
-

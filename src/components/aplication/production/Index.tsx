@@ -89,9 +89,7 @@ export default function Productions() {
                     <Button color="primary" onPress={handleAdd}>
                         Agregar producción
                     </Button>
-                    <Button color="primary" startContent={<ExportIcon/>}>
-                        Exportar a CSV
-                    </Button>
+
                 </div>
             </div>
 

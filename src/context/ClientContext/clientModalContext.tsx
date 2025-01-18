@@ -10,6 +10,8 @@ interface ModalContextType {
     selectedClient: ClientDto | null;
 }
 
+
+
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export const ModalProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

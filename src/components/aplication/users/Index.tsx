@@ -105,9 +105,7 @@ export default function Users() {
                     <Button color="primary" onPress={handleAdd}>
                         Agregar Usuario
                     </Button>
-                    <Button color="secondary" startContent={<ExportIcon />}>
-                        Export to CSV
-                    </Button>
+
                 </div>
 
                 <div className="w-full flex flex-col gap-4">

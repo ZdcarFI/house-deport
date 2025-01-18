@@ -120,7 +120,7 @@ export default function ProductionTable({productions, onView, onEdit}: Productio
             case 'user_order':
                 return production.user_order.firstName
             case 'user_receive_order':
-                return production.user_receive_order?.firstName || ''
+                return ''
             default:
                 return null
         }
