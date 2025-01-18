@@ -328,13 +328,16 @@ export default function OrderModal({isOpen, onClose, onSubmit, order, isViewMode
 
                         <div className="space-y-4">
                             <h4 className="text-lg font-semibold">Productos</h4>
-                            <Button
-                                color="primary"
-                                startContent={<PlusIcon size={16}/>}
-                                onPress={() => setShowProductForm(true)}
-                            >
-                                Agregar Producto
-                            </Button>
+                            {!isViewMode && (
+                                <Button
+                                    color="primary"
+                                    startContent={<PlusIcon size={16}/>}
+                                    onPress={() => setShowProductForm(true)}
+                                >
+                                    Agregar Producto
+                                </Button>
+                            )}
+
                             {showProductForm && (
                                 <div className="mt-4 p-4 border rounded-md">
                                     <Select

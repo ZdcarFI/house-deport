@@ -20,10 +20,10 @@ const ExportToExcelOrders: React.FC<ExportToExcelProps> = ({orders}) => {
 
         const formattedData: any[] = [];
 
-        orders.forEach((order) => {
+        orders.forEach((order, index) => {
 
             formattedData.push({
-                "ID Orden": order.id,
+                "ID Orden": `Nro. ${index + 1}`,
                 "Número de Factura": order.numFac,
                 "Estado": order.status,
                 "Total": order.total,

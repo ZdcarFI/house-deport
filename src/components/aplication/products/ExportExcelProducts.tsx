@@ -17,11 +17,10 @@ const ExportExcelProducts: React.FC<ExportToExcelProps> = ({products}) => {
             return;
         }
         const formattedData: any[] = [];
-        products.forEach((product) => {
+        products.forEach((product, index) => {
 
             formattedData.push({
-
-                "ID": product.id,
+                "ID": `Nro. ${index + 1}`,
                 "Nombre": product.name,
                 "Codigo": product.code,
                 "Precio": product.price,
@@ -46,7 +45,7 @@ const ExportExcelProducts: React.FC<ExportToExcelProps> = ({products}) => {
                     "Stock en los almacenes": "",
                     "Creado el": "",
                     "Actualizado el": "",
-                    "Detalle": `Producto: ${location.name} , Fila: ${location.row}, Columna: ${location.column}, Cantidad: ${location.quantity}`,
+                    "Detalle": `Almacén: ${location.name} , Fila: ${String.fromCharCode(65 + (location.row - 1))}, Columna: ${location.column}, Cantidad: ${location.quantity}`,
                 })
             })
             formattedData.push({});
