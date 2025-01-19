@@ -123,12 +123,14 @@ export default function OrderModal({isOpen, onClose, onSubmit, order, isViewMode
     }
 
     const calculateTotals = () => {
+
         let newSubtotal = 0
         formData.products.forEach(product => {
             const productData = products.find(p => p.id === product.id)
+            const cantidadActual = product.quantity
             if (productData) {
-                const totalQuantity = product.quantity + (additionalQuantities[product.id] || 0)
-                newSubtotal += productData.price * totalQuantity
+                const quantity = additionalQuantities[product.id] !== undefined ? additionalQuantities[product.id] + cantidadActual : product.quantity;
+                newSubtotal += productData.price * quantity;
             }
         })
         setCalculatedSubtotal(newSubtotal)
@@ -144,21 +146,30 @@ export default function OrderModal({isOpen, onClose, onSubmit, order, isViewMode
         setTotal(newTotal)
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
         if (!formData.paymentType) {
-            console.error("Payment type is required")
-            return
+            console.error("Payment type is required");
+            return;
         }
+
+        const updatedProducts = formData.products.map(product => {
+            const newQuantity = additionalQuantities[product.id];
+            return {
+                ...product,
+                quantity: newQuantity !== undefined ? newQuantity : product.quantity
+            };
+        });
 
         const submissionData = {
             ...formData,
+            products: updatedProducts,
             subtotal: useCalculatedSubtotal ? calculatedSubtotal : formData.subtotal,
-        }
+        };
         setAdditionalQuantities({});  // Reset additional quantities
 
-        onSubmit(submissionData)
+        onSubmit(submissionData);
     }
 
     const handleAddProduct = () => {
@@ -175,44 +186,46 @@ export default function OrderModal({isOpen, onClose, onSubmit, order, isViewMode
     }
 
     const handleQuantityChange = (productId: number, change: number) => {
-        if (change > 0) {
-            setWarehouseSelectionProduct(productId)
-        } else {
-            const updatedProducts = formData.products.map(product => {
-                if (product.id === productId) {
-                    const newQuantity = product.quantity + change
-                    return newQuantity >= 0 ? {...product, quantity: newQuantity} : product
+        const updatedProducts = formData.products.map(product => {
+            if (product.id === productId) {
+                if (change < 0) {
+                    // For minus, update the current quantity
+                    const newQuantity = Math.max(0, product.quantity + change);
+                    return {...product, quantity: newQuantity};
+                } else {
+                    // For plus, set the warehouse selection
+                    setWarehouseSelectionProduct(productId);
+                    return product;
                 }
-                return product
-            })
-            setFormData({...formData, products: updatedProducts})
-            setAdditionalQuantities({...additionalQuantities, [productId]: 0})
-        }
+            }
+            return product;
+        });
+        setFormData({...formData, products: updatedProducts});
     }
 
     const handleWarehouseSelection = (productId: number, warehouseId: number, quantity: number) => {
-        const currentProduct = formData.products.find(p => p.id === productId)
-        const warehouse = products.find(p => p.id === productId)?.productWarehouse?.find(w => w.id === warehouseId)
+        const currentProduct = formData.products.find(p => p.id === productId);
+        const warehouse = products.find(p => p.id === productId)?.productWarehouse?.find(w => w.id === warehouseId);
 
         if (currentProduct && warehouse) {
             if (quantity <= warehouse.quantity) {
-                setAdditionalQuantities({...additionalQuantities, [productId]: quantity})
                 const updatedProducts = formData.products.map(product => {
                     if (product.id === productId) {
                         return {
                             ...product,
                             productWarehouseId: warehouseId,
-                            quantity: quantity
-                        }
+                            quantity: product.quantity // Keep the current quantity
+                        };
                     }
-                    return product
-                })
-                setFormData({...formData, products: updatedProducts})
+                    return product;
+                });
+                setFormData({...formData, products: updatedProducts});
+                setAdditionalQuantities({...additionalQuantities, [productId]: quantity});
             } else {
-                showToast(`La cantidad excede el stock disponible en este almacén (${warehouse.quantity})`, ToastType.ERROR)
+                showToast(`La cantidad excede el stock disponible en este almacén (${warehouse.quantity})`, ToastType.ERROR);
             }
         }
-        setWarehouseSelectionProduct(null)
+        setWarehouseSelectionProduct(null);
     }
     const getAvailableProducts = () => {
         const selectedProductIds = formData.products.map(p => p.id);

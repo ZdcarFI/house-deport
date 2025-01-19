@@ -16,6 +16,7 @@ import {useRouter} from "next/navigation";
 import {ToastType} from "@/components/Toast/Toast";
 import {ToastContext} from "@/context/ToastContext/ToastContext";
 import ExportToExcelOrders from "@/components/aplication/orders/ExportExcelOrders";
+import {ProductContext} from "@/context/ProductContext/productContext";
 
 export default function Orders() {
     const {
@@ -27,6 +28,7 @@ export default function Orders() {
         deleteOrder,
         getOrder
     } = React.useContext(OrderContext)!;
+    const {getProducts} = React.useContext(ProductContext)!;
     const [selectedOrder, setSelectedOrder] = React.useState<OrderDto | null>(null);
     const [isModalOpen, setIsModalOpen] = React.useState(false);
     const [isViewMode, setIsViewMode] = React.useState(false);
@@ -76,6 +78,7 @@ export default function Orders() {
         try {
             if (selectedOrder) {
                 await updateOrder(selectedOrder.id, formData as UpdateOrderDto);
+                await getProducts()
             } else {
                 await createOrder(formData as CreateOrderDto);
             }
@@ -125,7 +128,7 @@ export default function Orders() {
                 </div>
                 <div className="flex flex-row gap-3.5 flex-wrap">
                     <Button color="primary" onPress={() => router.push("/createOrder")}>Agregar venta</Button>
-                    <ExportToExcelOrders orders={orders} />
+                    <ExportToExcelOrders orders={orders}/>
 
                 </div>
                 <div className="w-full flex flex-col gap-4">
