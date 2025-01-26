@@ -243,7 +243,7 @@ export default function CreateOrderPage() {
                                         <div className="flex justify-between items-start">
                                             <label className="text-sm" htmlFor="">Cliente</label>
                                             <div className="flex gap-1 items-center cursor-pointer"
-                                                 style={{color: "#f31260"}} onClick={handleAdd}>
+                                                 style={{color: "rgba(243,18,96,0.99)"}} onClick={handleAdd}>
                                                 <CirclePlus color="#f31260" size="16"/>
                                                 <label className="text-sm cursor-pointer" htmlFor="">Agregar
                                                     Cliente</label>
@@ -442,9 +442,27 @@ export default function CreateOrderPage() {
                                     </Table>
                                 </div>
                                 <div className="mt-4 flex flex-col justify-end gap-2 items-end">
+                                    <div className="flex items-center gap-2">
+                                        <label>Descuento:</label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            value={orderData.discount.toString()}
+                                            onChange={(e) => {
+                                                const discountValue = parseFloat(e.target.value) || 0;
+                                                setOrderData({
+                                                    ...orderData,
+                                                    discount: discountValue
+                                                });
+                                            }}
+                                            className="w-24"
+                                        />
+                                    </div>
                                     <p>Subtotal: S/.{(total * 0.82).toFixed(2)}</p>
                                     <p>Impuesto S/.{(total * 0.18).toFixed(2)}</p>
-                                    <p>Total: S/.{total.toFixed(2)}</p>
+                                    <p>Descuento: S/.{(orderData.discount).toFixed(2)}</p>
+                                    <p>Total: S/.{(total - orderData.discount).toFixed(2)}</p>
+
                                 </div>
                                 <Button type="submit" color="primary" className="mt-4">
                                     Create Order

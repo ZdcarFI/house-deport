@@ -6,6 +6,7 @@ import {EyeIcon} from '../../icons/table/eye-icon'
 import {Chip} from "@nextui-org/chip"
 import React from "react";
 import {FilePdf} from "@/components/icons/file-pdf";
+import {DeleteIcon} from "lucide-react";
 
 interface OrderTableProps {
     orders: OrderDto[]
@@ -15,7 +16,7 @@ interface OrderTableProps {
     onViewPdf: (id: number) => void
 }
 
-export default function OrderTable({orders, onEdit, onView, onViewPdf}: OrderTableProps) {
+export default function OrderTable({orders, onEdit, onView, onViewPdf, onDelete}: OrderTableProps) {
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
             case 'pending':
@@ -39,8 +40,10 @@ export default function OrderTable({orders, onEdit, onView, onViewPdf}: OrderTab
                 return order.user ? order.user.username : 'N/A'
             case 'date':
                 return order.date ? new Date(order.date).toLocaleDateString() : 'N/A'
+            case 'dicount':
+                return order.discount ? order.discount : 'S/.0.00'
             case 'total':
-                return order.total ? `S/.${order.total.toFixed(2)}` : '$0.00'
+                return order.total ? `S/.${order.total.toFixed(2)}` : 'S/.0.00'
             case 'status':
                 return order.status ? (
                     <Chip
@@ -65,11 +68,11 @@ export default function OrderTable({orders, onEdit, onView, onViewPdf}: OrderTab
                                 <EditIcon size={20} fill="#979797"/>
                             </button>
                         </Tooltip>
-                        {/*<Tooltip content="Eliminar orden" color="danger">*/}
-                        {/*  <button onClick={() => onDelete(order.id)}>*/}
-                        {/*    <DeleteIcon size={20} fill="#FF0080" />*/}
-                        {/*  </button>*/}
-                        {/*</Tooltip>*/}
+                        <Tooltip content="Eliminar orden" color="danger">
+                            <button onClick={() => onDelete(order.id)}>
+                                <DeleteIcon size={20} fill="#FF0080"/>
+                            </button>
+                        </Tooltip>
                         <Tooltip content="Ver pdf" color="danger">
                             <button onClick={() => onViewPdf(order.id)}>
                                 <FilePdf size={20} color="#FF0080"/>
@@ -89,6 +92,7 @@ export default function OrderTable({orders, onEdit, onView, onViewPdf}: OrderTab
                 <TableColumn>Client</TableColumn>
                 <TableColumn>User</TableColumn>
                 <TableColumn>Date</TableColumn>
+                <TableColumn>Descuento</TableColumn>
                 <TableColumn>Total</TableColumn>
                 <TableColumn>Estado</TableColumn>
                 <TableColumn>Fecha de creación</TableColumn>
@@ -102,6 +106,7 @@ export default function OrderTable({orders, onEdit, onView, onViewPdf}: OrderTab
                         <TableCell>{renderCell(order, 'client')}</TableCell>
                         <TableCell>{renderCell(order, 'user')}</TableCell>
                         <TableCell>{renderCell(order, 'date')}</TableCell>
+                        <TableCell>{renderCell(order, 'discount')}</TableCell>
                         <TableCell>{renderCell(order, 'total')}</TableCell>
                         <TableCell>{renderCell(order, 'status')}</TableCell>
                         <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>

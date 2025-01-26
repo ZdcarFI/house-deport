@@ -69,9 +69,15 @@ export default function Orders() {
     };
 
     const handleDelete = async (id: number) => {
-        await deleteOrder(id);
-        setTitle("");
-        setIsConfirmDialogOpen(false);
+        try {
+            await deleteOrder(id);
+            showToast('Orden eliminado exitosamente', ToastType.SUCCESS);
+            setTitle("");
+            setIsConfirmDialogOpen(false);
+
+        } catch (error) {
+            showToast('Error:' + error, ToastType.ERROR);
+        }
     };
 
     const handleSubmit = async (formData: CreateOrderDto | UpdateOrderDto) => {
@@ -139,7 +145,7 @@ export default function Orders() {
                             const selectedOrder = orders.find(order => order.id === orderId);
                             setSelectedOrder(selectedOrder || null);
                             setIsConfirmDialogOpen(true);
-                            setTitle("Are you sure you want to delete this order?");
+                            setTitle("Estas seguro de eliminar la venta, la cantidad de los productos volveran al almacen ?");
                         }}
                         onViewPdf={(orderId: number) => window.open(`/pdf/${orderId}`, '_blank')}
                         onView={handleView}
@@ -157,6 +163,7 @@ export default function Orders() {
                         onConfirm={() => {
                             if (selectedOrder) {
                                 handleDelete(selectedOrder.id);
+
                             }
                         }}
                         onClose={() => {
