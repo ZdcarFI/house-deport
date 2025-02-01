@@ -40,8 +40,8 @@ export default function OrderTable({orders, onEdit, onView, onViewPdf, onDelete}
                 return order.user ? order.user.username : 'N/A'
             case 'date':
                 return order.date ? new Date(order.date).toLocaleDateString() : 'N/A'
-            case 'dicount':
-                return order.discount ? order.discount : 'S/.0.00'
+            case 'discount':
+                return order.discount ? `S/.${order.discount.toFixed(2)}` : 'S/.0.00'
             case 'total':
                 return order.total ? `S/.${order.total.toFixed(2)}` : 'S/.0.00'
             case 'status':
@@ -88,10 +88,10 @@ export default function OrderTable({orders, onEdit, onView, onViewPdf, onDelete}
     return (
         <Table aria-label="Orders table">
             <TableHeader>
-                <TableColumn>Invoice Number</TableColumn>
-                <TableColumn>Client</TableColumn>
-                <TableColumn>User</TableColumn>
-                <TableColumn>Date</TableColumn>
+                <TableColumn>Numero de factura</TableColumn>
+                <TableColumn>Cliente</TableColumn>
+                <TableColumn>Usuario</TableColumn>
+                <TableColumn>Fecha</TableColumn>
                 <TableColumn>Descuento</TableColumn>
                 <TableColumn>Total</TableColumn>
                 <TableColumn>Estado</TableColumn>

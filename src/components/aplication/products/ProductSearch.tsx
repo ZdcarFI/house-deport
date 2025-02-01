@@ -27,7 +27,7 @@ export default function ProductSearch({
                                           onQuantityChange,
                                           selectedProduct,
                                           quantity,
-                                          quantityError,
+
                                           boolean
                                       }: ProductSearchProps) {
 
@@ -36,7 +36,7 @@ export default function ProductSearch({
 
 
     const onSelectionChangeProduct = (id: React.Key | null) => {
-        if(id){
+        if (id) {
             onProductSelect(parseInt(id.toString()));
         }
     };
@@ -50,7 +50,8 @@ export default function ProductSearch({
                         allowsCustomValue={true}
                         defaultItems={products}
                         onSelectionChange={onSelectionChangeProduct}
-                        aria-label="Select a product"
+
+                        label="Seleccione el producto"
                         inputValue={newCart.name}
                         onInputChange={(value) => setNewCart({
                             ...newCart,

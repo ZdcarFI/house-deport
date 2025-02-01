@@ -15,7 +15,6 @@ interface Props {
     showToast: (message: string, type: ToastType) => void;
 }
 
-
 export default function ClientModal({showToast}: Props) {
     const {
         isModalOpen,
@@ -61,37 +60,48 @@ export default function ClientModal({showToast}: Props) {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {name, value} = e.target;
-
         setFormData({...formData, [name]: value})
     }
 
     const handleSelectChange = (name: string) => (value: string) => {
-        setFormData({...formData, [name]: value});
+        if (name === 'typeDocument') {
+            const documentType = value || '';
+            setFormData({
+                ...formData,
+                typeDocument: documentType,
+                numberDocument: '',
+                email: documentType === 'RUC' ? formData.email : ''
+            });
+        } else {
+            setFormData({...formData, [name]: value});
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (formData.typeDocument === 'DNI' && formData.numberDocument.length !== 8) {
-            showToast("El DNI debe tener exactamente 8 dígitos", ToastType.ERROR);
-            return;
+        if (formData.typeDocument && formData.typeDocument !== '') {
+            if (formData.typeDocument === 'DNI' && formData.numberDocument && formData.numberDocument.length !== 8) {
+                showToast("El DNI debe tener exactamente 8 dígitos", ToastType.ERROR);
+                return;
+            }
+
+            if (
+                formData.typeDocument === 'RUC' &&
+                formData.numberDocument &&
+                ![10, 20].includes(formData.numberDocument.length)
+            ) {
+                showToast("El RUC debe tener 10 o 20 dígitos", ToastType.ERROR);
+                return;
+            }
+
+            if (formData.typeDocument === 'RUC' && formData.numberDocument && !formData.email) {
+                showToast("El campo 'Tipo Contribuyente' es requerido cuando se ingresa RUC", ToastType.ERROR);
+                return;
+            }
         }
 
-        if (
-            formData.typeDocument === 'RUC' &&
-            ![10, 20].includes(formData.numberDocument.length)
-        ) {
-            showToast("El RUC debe tener 10 o 20 dígitos", ToastType.ERROR);
-            return;
-        }
 
-        if (
-            formData.typeDocument === 'RUC' &&
-            ![10, 20].includes(formData.numberDocument.length)
-        ) {
-            showToast("El RUC debe tener 10 o 20 dígitos", ToastType.ERROR);
-            return;
-        }
         if (!formData.firstName) {
             showToast("El campo de 'Nombre' no puede estar vacío, incluya un nombre como minimo", ToastType.ERROR);
             return;
@@ -100,13 +110,11 @@ export default function ClientModal({showToast}: Props) {
             showToast("El campo de 'Apellido' no puede estar vacío, incluya un apellido como minimo", ToastType.ERROR);
             return;
         }
-        if (formData.typeDocument === 'RUC' && !formData.email) {
-            showToast("El campo 'Tipo Contribuyente' no puede estar vacío", ToastType.ERROR);
-            return;
-        }
 
         const updatedFormData = {
             ...formData,
+            typeDocument: formData.typeDocument || '',
+            numberDocument: formData.numberDocument || '',
         };
 
         try {
@@ -119,10 +127,10 @@ export default function ClientModal({showToast}: Props) {
             }
             closeModal();
         } catch (error) {
-
             showToast("Error al enviar los datos del Cliente:" + error, ToastType.ERROR)
         }
     }
+
     return (
         <Modal
             isOpen={isModalOpen}
@@ -143,56 +151,6 @@ export default function ClientModal({showToast}: Props) {
                     </ModalHeader>
                     <ModalBody>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Select
-                                label="Tipo de Documento"
-                                labelPlacement="outside"
-                                name="typeDocument"
-                                placeholder="Seleccione un tipo de documento"
-                                selectedKeys={formData.typeDocument ? [formData.typeDocument] : []}
-                                onChange={(e) => handleSelectChange('typeDocument')(e.target.value)}
-                                isRequired={!isViewMode}
-                                isDisabled={isViewMode || Boolean(selectedClient)}
-                                classNames={{
-                                    label: "font-semibold",
-                                }}
-                            >
-                                <SelectItem key="DNI" value="DNI">
-                                    DNI
-                                </SelectItem>
-                                <SelectItem key="RUC" value="RUC">
-                                    RUC
-                                </SelectItem>
-                            </Select>
-                            <Input
-                                label="Número de Documento"
-                                labelPlacement="outside"
-                                name="numberDocument"
-                                value={formData.numberDocument}
-                                onChange={handleInputChange}
-                                placeholder={formData.typeDocument === 'RUC' ? "Escribe el RUC" : formData.typeDocument === 'DNI' ? "Escribe el DNI" : "Escoja el tipo de documento"}
-                                isRequired={!isViewMode}
-                                isDisabled={isViewMode}
-                                type="number"
-                                classNames={{
-                                    label: "font-semibold",
-                                }}
-                            />
-                            {formData.typeDocument === 'RUC' && (
-                                <Input
-                                    label="Tipo Contribuyente"
-                                    labelPlacement="outside"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    placeholder="Escriba el tipo de contribuyente"
-                                    isRequired={formData.typeDocument === 'RUC' && !isViewMode}
-                                    isDisabled={isViewMode}
-                                    className="col-span-2"
-                                    classNames={{
-                                        label: "font-semibold",
-                                    }}
-                                />
-                            )}
                             <Input
                                 label="Nombres"
                                 labelPlacement="outside"
@@ -220,6 +178,55 @@ export default function ClientModal({showToast}: Props) {
                                 }}
                             />
 
+                            <Select
+                                label="Tipo de Documento"
+                                labelPlacement="outside"
+                                name="typeDocument"
+                                placeholder="Seleccione un tipo de documento (opcional)"
+                                selectedKeys={formData.typeDocument ? [formData.typeDocument] : []}
+                                onChange={(e) => handleSelectChange('typeDocument')(e.target.value)}
+                                isDisabled={isViewMode || Boolean(selectedClient)}
+                                classNames={{
+                                    label: "font-semibold",
+                                }}
+                            >
+                                <SelectItem key="DNI" value="DNI">
+                                    DNI
+                                </SelectItem>
+                                <SelectItem key="RUC" value="RUC">
+                                    RUC
+                                </SelectItem>
+                            </Select>
+                            <Input
+                                label="Número de Documento"
+                                labelPlacement="outside"
+                                name="numberDocument"
+                                value={formData.numberDocument}
+                                onChange={handleInputChange}
+                                placeholder={formData.typeDocument === 'RUC' ? "Escribe el RUC" : formData.typeDocument === 'DNI' ? "Escribe el DNI" : "Escoja el tipo de documento"}
+                                isDisabled={isViewMode || !formData.typeDocument}
+                                type="number"
+                                classNames={{
+                                    label: "font-semibold",
+                                }}
+                            />
+                            {formData.typeDocument === 'RUC' && (
+                                <Input
+                                    label="Tipo Contribuyente"
+                                    labelPlacement="outside"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    placeholder="Escriba el tipo de contribuyente"
+                                    isRequired={formData.typeDocument === 'RUC' && Boolean(formData.numberDocument)}
+                                    isDisabled={isViewMode}
+                                    className="col-span-2"
+                                    classNames={{
+                                        label: "font-semibold",
+                                    }}
+                                />
+                            )}
+
                             <Input
                                 label="Celular"
                                 labelPlacement="outside"
@@ -227,9 +234,7 @@ export default function ClientModal({showToast}: Props) {
                                 value={formData.phone}
                                 onChange={handleInputChange}
                                 placeholder="Escriba el numero de celular"
-
                                 isDisabled={isViewMode}
-
                                 classNames={{
                                     label: "font-semibold",
                                 }}
@@ -241,14 +246,11 @@ export default function ClientModal({showToast}: Props) {
                                 value={formData.address}
                                 onChange={handleInputChange}
                                 placeholder="Escriba la direccion"
-
                                 isDisabled={isViewMode}
-
                                 classNames={{
                                     label: "font-semibold",
                                 }}
                             />
-
                         </div>
                     </ModalBody>
                     <ModalFooter>
@@ -257,7 +259,7 @@ export default function ClientModal({showToast}: Props) {
                         </Button>
                         {!isViewMode && (
                             <Button color="primary" type="submit">
-                                {selectedClient ? 'Update' : 'Create'}
+                                {selectedClient ? 'Actualizar' : 'Crear'}
                             </Button>
                         )}
                     </ModalFooter>
@@ -266,4 +268,3 @@ export default function ClientModal({showToast}: Props) {
         </Modal>
     )
 }
-

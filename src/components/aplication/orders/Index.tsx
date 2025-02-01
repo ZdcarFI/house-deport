@@ -127,7 +127,7 @@ export default function Orders() {
                 <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
                     <Input
                         className="w-full md:w-72"
-                        placeholder="Search orders..."
+                        placeholder="Buscar orden ..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
