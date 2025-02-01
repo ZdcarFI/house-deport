@@ -139,7 +139,7 @@ export default function OrderModal({isOpen, onClose, onSubmit, order, isViewMode
 
         const taxAmount = newSubtotal - subtotalToUse
 
-        const discountAmount = formData.discount
+        const discountAmount = formData.discount || 0
 
         const newTotal = subtotalToUse + taxAmount - discountAmount
 
@@ -503,6 +503,16 @@ export default function OrderModal({isOpen, onClose, onSubmit, order, isViewMode
                                 ))}
                             </div>
                         )}
+                        <div className='max-w-[100px]'>
+                            <Input
+                                label="Descuento"
+                                name="discount"
+                                type="number"
+                                value={formData.discount.toString()}
+                                onChange={handleInputChange}
+                            />
+
+                        </div>
 
                         <div className="mt-4">
                             <p>Total: S/.{total.toFixed(2)}</p>
@@ -514,7 +524,7 @@ export default function OrderModal({isOpen, onClose, onSubmit, order, isViewMode
                         </Button>
                         {!isViewMode && (
                             <Button color="primary" type="submit">
-                                {order ? 'Update' : 'Create'}
+                                {order ? 'Actualizar' : 'Crear'}
                             </Button>
                         )}
                     </ModalFooter>
