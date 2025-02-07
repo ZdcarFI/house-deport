@@ -5,8 +5,8 @@ import Categories from "@/components/aplication/categories/Index";
 
 export default function Page() {
     return (
-        <ProtectedRoute roles={Roles.Categories}>
-            <Categories/>
-        </ProtectedRoute>
+
+        <Categories/>
+
     );
 }

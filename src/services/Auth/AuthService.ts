@@ -14,13 +14,7 @@ export class AuthService extends Service {
         return response.data;
     }
 
-    async loginUsername(username: string, password: string): Promise<void> {
-        const response: AxiosResponse = await this.apiFetch.post('/login-username', { username, password });
-        const user = response.data;
-        
-        // Guardar el usuario en localStorage (incluyendo el rol)
-        localStorage.setItem('user', JSON.stringify(user));
-    }
+
     
 
     async logout(): Promise<boolean> {

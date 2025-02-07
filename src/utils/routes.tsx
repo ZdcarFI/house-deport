@@ -23,9 +23,9 @@ export const Roles = {
     Orders: ['admin', 'sales'],
     Warehouses: ['admin', 'warehouse'],
     // WarehouseProducts: ['admin', 'warehouse'],
-    View: ['admin', 'user', 'warehouse', 'sales'],
-    Settings: ['admin', 'user', 'warehouse', 'sales'],
-    Changelog: ['admin', 'user', 'warehouse', 'sales'],
+    // View: ['admin', 'user', 'warehouse', 'sales'],
+    // Settings: ['admin', 'user', 'warehouse', 'sales'],
+    // Changelog: ['admin', 'user', 'warehouse', 'sales'],
 };
 
 

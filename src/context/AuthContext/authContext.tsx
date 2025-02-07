@@ -17,30 +17,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const authService = new AuthService();
 
     useEffect(() => {
-        const initializeAuth = async () => {
-            try {
-                setLoading(true);
-                const savedUser = localStorage.getItem('user');
-
-                if (savedUser) {
-                    // If we have a saved user, verify the session is still valid
-                    try {
-                        const profile = await authService.profile();
-                        dispatch({type: UserActionType.ADD_USER, payload: profile});
-                    } catch (error) {
-                        handleError(error);
-                        localStorage.removeItem('user');
-                        dispatch({type: UserActionType.REMOVE_USER});
-                    }
-                }
-            } catch (error) {
-                handleError(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        initializeAuth();
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            dispatch({type: UserActionType.ADD_USER, payload: JSON.parse(savedUser)});
+        }
+        setLoading(false);
     }, []);
 
     const handleError = (e: unknown) => {
@@ -76,9 +57,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
             setLoading(true);
             const user = await authService.login(email, password);
             dispatch({type: UserActionType.ADD_USER, payload: user});
+            localStorage.setItem('user', JSON.stringify(user));
             const valueCodificate = btoa(JSON.stringify(user));
             // save cookie expiration 7 days
             document.cookie = `userSession=${valueCodificate}; max-age=604800; path=/;`;
+
         } catch (error) {
             handleError(error);
             throw error; // Rethrow to handle in the component
@@ -94,6 +77,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
             await authService.logout();
             dispatch({type: UserActionType.REMOVE_USER});
             // remove cookie
+            localStorage.removeItem('user');
             document.cookie = `userSession=; max-age=0; path=/;`;
         } catch (error) {
             handleError(error);
