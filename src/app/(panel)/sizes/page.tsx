@@ -1,10 +1,14 @@
 import Sizes from '@/components/aplication/sizes/Index';
 import React from 'react';
+import ProtectedRoute from "@/components/aplication/protectedRoute";
+import {Roles} from "@/utils/routes";
 
 export default function Page() {
     return (
 
-        <Sizes />
 
+        <ProtectedRoute roles={Roles.Sizes}>
+            <Sizes/>
+        </ProtectedRoute>
     );
 }
