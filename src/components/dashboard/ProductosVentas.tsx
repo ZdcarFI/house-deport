@@ -37,6 +37,7 @@ export const ProductSalesPercentage: React.FC = () => {
           outerRadius={80}
           fill="#8884d8"
           dataKey="value"
+          max={10}
           label={({ name, percentage }) => `${name}: ${percentage}%`}
         >
           {productSales.map((entry, index) => (
